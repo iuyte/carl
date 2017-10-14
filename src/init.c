@@ -27,18 +27,13 @@ void initialize() {
 	motorInit();
 	sensorInit();
 
-	arm = newSensor(Quad, 3, false, 4);
-
-	// lift     = newMotor(4,  false);
-	drive[0] = newMotor(2,  true);
-	drive[1] = newMotor(3,  false);
-
-	/*
-	 *   drive[0] = newMotor(3,  true);
-	 *   drive[1] = newMotor(2,  false);
-	 *   drive[2] = newMotor(10,  false);
-	 *   drive[3] = newMotor(1, true);
-	 */
+	claw        = newServo(6, false);
+	arm.left    = newMotor(9, true);
+	arm.right   = newMotor(2, false);
+	mogo.left   = newMotor(1, false);
+	mogo.right  = newMotor(10, true);
+	drive.left  = newMotor(4,  true);
+	drive.right = newMotor(7,  false);
 
 	motorLoopHandle = taskCreate(&motorLoop,
 	                             TASK_DEFAULT_STACK_SIZE,

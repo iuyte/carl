@@ -29,7 +29,7 @@ void   operatorControl() {
 	} /* drive */
 
 	void info() {
-		printf("\r| %5d     | %5d     | %5ld     | ", l, r, arm->value);
+		// printf("\r| %5d     | %5d     | %5ld     | ", l, r, arm->value);
 	} /* info */
 
 	while (isEnabled()) {
