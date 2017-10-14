@@ -22,10 +22,18 @@
 
 #include "motors.h"
 #include "sensors.h"
+#include "pid.h"
 
-// extern Motor *lift;
-extern Sensor *arm;
-extern Motor  *drive[2];
+typedef struct Motors {
+	Motor *left;
+	Motor *right;
+	int    value;
+} Motors;
+
+extern Servo *claw;
+extern Motors arm;
+extern Motors mogo;
+extern Motors drive;
 
 void driveSet(int l,
               int r);

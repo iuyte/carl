@@ -49,3 +49,13 @@ Motor* newMotor(unsigned char port, bool inverted) {
 
 	return m;
 } /* newMotor */
+
+Servo* newServo(unsigned char port, bool inverted) {
+	Servo *m = (Servo *)&motors[port - 1];
+
+	m->port     = port;
+	m->position = 0;
+	m->inverted = inverted;
+
+	return m;
+} /* newMotor */

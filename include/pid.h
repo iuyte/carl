@@ -25,10 +25,68 @@
 #include <stdarg.h>
 
 typedef void *System;
-
 System newSystem(Sensor *sensor,
-                 int     num,
                  Motor  *slaves,
                  ...);
+
+typedef struct Settings {
+	/*
+	 * Maximum value to be assigned to the controlled system
+	 */
+	int max;
+
+	/*
+	 * Minimum value to be assigned to the controlled system
+	 */
+	int min;
+
+	/*
+	 * Limit for the integral value
+	 */
+	int iLimit;
+
+	/*
+	 * Whether or not the PID loop ends
+	 */
+	bool terminates;
+
+	/*
+	 * p value
+	 */
+	float kP;
+
+	/*
+	 * i value
+	 */
+	float kI;
+
+	/*
+	 * d value
+	 */
+	float kD;
+
+	/*
+	 * Precision for waiting on pid to reach value
+	 */
+	unsigned int precision;
+
+	/*
+	 * The system the pid controls
+	 */
+	System system;
+} Settings;
+
+Settings newSettings(float        kP,
+                     float        kI,
+                     float        kD,
+                     System       system,
+                     bool         terminates,
+                     int          max,
+                     int          min,
+                     int          iLimit,
+                     unsigned int precision);
+
+void PID(long      target,
+         Settings *settings);
 
 #endif // CARL_PID_H

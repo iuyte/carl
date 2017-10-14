@@ -21,8 +21,8 @@
 #define CARL_MOTORS_HPP_
 #include "API.h"
 
-#define clipNum(in, high, low) (input > high) ? high : (input < \
-                                                        low) ? low : input
+#define clipNum(input, high, low) (input > high) ? high : (input < \
+                                                           low) ? low : input
 #define sng(input) (input > 0) ? 1 : (input < 0) ? -1 : 0
 #define deadBand(input, dead) (abs(input) > dead) ? input : 0
 
@@ -32,11 +32,19 @@ typedef struct Motor {
 	int           power;
 } Motor;
 
+typedef struct Servo {
+	unsigned char port;
+	bool          inverted;
+	int           position;
+} Servo;
+
 extern TaskHandle motorLoopHandle;
 
 void   motorInit();
 void   motorLoop(void *none);
 Motor* newMotor(unsigned char port,
+                bool          inverted);
+Servo* newServo(unsigned char port,
                 bool          inverted);
 
 #endif // CARL_MOTORS_HPP_

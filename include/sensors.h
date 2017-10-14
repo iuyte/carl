@@ -35,7 +35,9 @@ typedef enum {
 typedef struct Sensor {
 	SensorType     type;
 	long           value;
+	long           zero;
 	bool           inverted;
+	bool           reset;
 	unsigned short calibrate;
 	unsigned char  port;
 	bool           exists;

@@ -29,6 +29,7 @@ void sensorInit() {
 		Placeholder,
 		0,
 		false,
+		false,
 		0,
 		0,
 		false,
@@ -76,7 +77,13 @@ void sensorLoop(void *none) {
 				break;
 			} /* switch */
 			sensors[i].value =
-			  sensors[i].inverted ? -sensors[i].value : sensors[i].value;
+			  (sensors[i].inverted ? -sensors[i].value : sensors[i].value) -
+			  sensors[i].zero;
+
+			if (sensors[i].reset) {
+				sensors[i].zero  = sensors[i].value;
+				sensors[i].reset = false;
+			}
 		}
 		delay(5);
 	}
@@ -93,10 +100,12 @@ Sensor* newSensor(SensorType     type,
 
 	s->type      = type;
 	s->value     = 0;
+	s->zero      = 0;
 	s->port      = port;
 	s->inverted  = inverted;
 	s->exists    = true;
 	s->calibrate = calibrate;
+	s->reset     = false;
 	s->pros      = NULL;
 
 	switch (type) {
@@ -126,6 +135,9 @@ Sensor* newSensor(SensorType     type,
 	case Gyroscope:
 		s->pros = gyroInit(port, calibrate);
 		break;
+
+	default:
+		break;
 	} /* switch */
 	return s;
 } /* newSensor */
@@ -136,10 +148,12 @@ Sensor* newDigital(unsigned char port,
 
 	s->type      = Digital;
 	s->value     = 0;
+	s->zero      = 0;
 	s->port      = port;
 	s->inverted  = inverted;
 	s->exists    = true;
 	s->calibrate = 0;
+	s->reset     = false;
 	s->pros      = NULL;
 
 	pinMode(port, OUTPUT);
@@ -153,10 +167,12 @@ Sensor* newSonic(unsigned char orange,
 
 	s->type      = Sonic;
 	s->value     = 0;
+	s->zero      = 0;
 	s->port      = orange;
 	s->inverted  = inverted;
 	s->exists    = true;
 	s->calibrate = 0;
+	s->reset     = false;
 	s->pros      = ultrasonicInit(orange, yellow);
 
 	return s;
@@ -169,10 +185,12 @@ Sensor* newQuad(unsigned char top,
 
 	s->type      = Sonic;
 	s->value     = 0;
+	s->zero      = 0;
 	s->port      = top;
 	s->inverted  = false;
 	s->exists    = true;
 	s->calibrate = 0;
+	s->reset     = false;
 	s->pros      = encoderInit(top, bottom, inverted);
 
 	return s;
