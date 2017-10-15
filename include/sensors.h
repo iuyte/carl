@@ -55,5 +55,11 @@ Sensor* newSensor(SensorType     type,
                   unsigned short calibrate);
 Sensor* newDigital(unsigned char port,
                    bool          inverted);
+Sensor* newSonic(unsigned char orange,
+                 unsigned char yellow);
+Sensor* newQuad(unsigned char top,
+                unsigned char bottom,
+                bool          inverted);
+Sensor* newAnalog(unsigned char port);
 
 #endif // CARL_SENSORS_H

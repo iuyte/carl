@@ -24,17 +24,24 @@
 #include "sensors.h"
 #include "pid.h"
 
-typedef struct Motors {
-	Motor *left;
-	Motor *right;
-	int    value;
-} Motors;
+/*
+ * Motors and servos
+ */
+extern Servo  *claw;
+extern System *arm;
+extern System *mogo;
+extern System *drive[2];
 
-extern Servo *claw;
-extern Motors arm;
-extern Motors mogo;
-extern Motors drive;
+/*
+ * Sensors and the like
+ */
+extern Sensor *armCoder;
+extern Sensor *driveCoder[2];
+extern Sensor *mogoAngle;
 
+/*
+ * Stuff to set stuff
+ */
 void driveSet(int l,
               int r);
 
