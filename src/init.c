@@ -24,22 +24,39 @@ void initializeIO() {}
 void initialize() {
 	printf("\nInitializing... ");
 
+	// Clean up everything before we touch it. Otherwise, what we do next will be
+	// overwritten
 	motorInit();
 	sensorInit();
 
-	claw        = newServo(6, false);
-	arm.left    = newMotor(9, true);
-	arm.right   = newMotor(2, false);
-	mogo.left   = newMotor(1, false);
-	mogo.right  = newMotor(10, true);
-	drive.left  = newMotor(4,  true);
-	drive.right = newMotor(7,  false);
+	// Set up the sensors
+	armCoder      = newQuad(1, 2, false);
+	mogoAngle     = newAnalog(3);
+	driveCoder[0] = newQuad(4, 5, true);
+	driveCoder[1] = newQuad(6, 7, false);
 
+	// Initialize and set up all of the motors, servos, systems, etc
+	claw = newServo(6, false);
+	arm  = newSystem(armCoder,
+	                 newMotor(9,  true),
+	                 newMotor(2,  false));
+	mogo = newSystem(mogoAngle,
+	                 newMotor(1,  false),
+	                 newMotor(10, true));
+
+	drive[0] = newSystem(driveCoder[0], newMotor(4, true));
+	drive[1] = newSystem(driveCoder[1], newMotor(7, false));
+
+	// Create manager tasks to make life easy
 	motorLoopHandle = taskCreate(&motorLoop,
 	                             TASK_DEFAULT_STACK_SIZE,
 	                             NULL,
 	                             TASK_PRIORITY_DEFAULT + 1);
 	sensorLoopHandle = taskCreate(&sensorLoop,
+	                              TASK_DEFAULT_STACK_SIZE,
+	                              NULL,
+	                              TASK_PRIORITY_DEFAULT + 1);
+	systemLoopHandle = taskCreate(&systemLoop,
 	                              TASK_DEFAULT_STACK_SIZE,
 	                              NULL,
 	                              TASK_PRIORITY_DEFAULT + 1);
