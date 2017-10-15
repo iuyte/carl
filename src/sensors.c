@@ -115,7 +115,7 @@ Sensor* newSensor(SensorType     type,
 
 	case Analog:
 
-		if (!calibrate) {
+		if (calibrate) {
 			analogCalibrate(port);
 		}
 		break;
@@ -144,54 +144,20 @@ Sensor* newSensor(SensorType     type,
 
 Sensor* newDigital(unsigned char port,
                    bool          inverted) {
-	Sensor *s = &sensors[port - 1];
-
-	s->type      = Digital;
-	s->value     = 0;
-	s->zero      = 0;
-	s->port      = port;
-	s->inverted  = inverted;
-	s->exists    = true;
-	s->calibrate = 0;
-	s->reset     = false;
-	s->pros      = NULL;
-
-	pinMode(port, OUTPUT);
-	return s;
+	return newSensor(Digital, port, inverted, false);
 } /* newDigital */
 
 Sensor* newSonic(unsigned char orange,
-                 unsigned char yellow,
-                 bool          inverted) {
-	Sensor *s = &sensors[orange - 1];
-
-	s->type      = Sonic;
-	s->value     = 0;
-	s->zero      = 0;
-	s->port      = orange;
-	s->inverted  = inverted;
-	s->exists    = true;
-	s->calibrate = 0;
-	s->reset     = false;
-	s->pros      = ultrasonicInit(orange, yellow);
-
-	return s;
-} /* newDigital */
+                 unsigned char yellow) {
+	return newSensor(Sonic, orange, false, yellow);
+} /* newSonic */
 
 Sensor* newQuad(unsigned char top,
                 unsigned char bottom,
                 bool          inverted) {
-	Sensor *s = &sensors[top - 1];
+	return newSensor(Quad, top, inverted, bottom);
+} /* newQuad */
 
-	s->type      = Sonic;
-	s->value     = 0;
-	s->zero      = 0;
-	s->port      = top;
-	s->inverted  = false;
-	s->exists    = true;
-	s->calibrate = 0;
-	s->reset     = false;
-	s->pros      = encoderInit(top, bottom, inverted);
-
-	return s;
-} /* newDigital */
+Sensor* newAnalog(unsigned char port) {
+	return newSensor(Analog, port, false, true);
+}

@@ -19,15 +19,21 @@
 
 #include "../include/pid.h"
 
-typedef void *System;
-
 typedef struct Shid {
+	int     numSlaves;
 	Sensor *sensor;
 	Motor **slaves;
-	int     numSlaves;
 } Shid;
 
-System newSystem(Sensor *sensor, Motor *slaves, ...) {
+TaskHandle systemLoopHandle;
+int numSystems = 0;
+System *systems;
+
+void* memcpy(void       *destination,
+             const void *source,
+             size_t      num);
+
+System* newSystem(Sensor *sensor, Motor *slaves, ...) {
 	Shid s;
 
 	s.sensor = sensor;
@@ -53,8 +59,34 @@ System newSystem(Sensor *sensor, Motor *slaves, ...) {
 
 	Shid *sy = (Shid *)malloc(sizeof(Shid));
 	*sy = s;
-	return (System)(void *)sy;
+
+	System *tsystems = (System *)malloc(sizeof(System) * (numSystems + 1));
+	memcpy(tsystems, systems, sizeof(System) * (numSystems + 1));
+	free(systems);
+	systems = tsystems;
+	System sys = {
+		(void *)sy,
+		0,
+		0,
+	};
+	systems[numSystems] = sys;
+	return &systems[numSystems++];
 } /* newSystem */
+
+void systemLoop(void *none) {
+	int i, j;
+
+	while (true) {
+		for (i = 0; i < numSystems; i++) {
+			Shid *s = (Shid *)systems[i].internals;
+
+			for (j = 0; j < s->numSlaves; j++) {
+				s->slaves[j]->power = systems[i].power;
+			}
+		}
+		delay(5);
+	}
+} /* systemLoop */
 
 Settings newSettings(float        kP,
                      float        kI,
@@ -89,7 +121,7 @@ void PID(long target, Settings *settings) {
 	float power;
 	bool  done = false;
 	bool  success[5];
-	Shid *shid = (Shid *)settings->system;
+	Shid *shid = (Shid *)settings->system.internals;
 
 
 	shid->sensor->reset = true;

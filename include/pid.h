@@ -24,10 +24,17 @@
 #include "sensors.h"
 #include <stdarg.h>
 
-typedef void *System;
-System newSystem(Sensor *sensor,
-                 Motor  *slaves,
-                 ...);
+typedef struct System {
+	void *internals;
+	long  request;
+	int   power;
+} System;
+
+extern TaskHandle systemLoopHandle;
+void    systemLoop(void *none);
+System* newSystem(Sensor *sensor,
+                  Motor  *slaves,
+                  ...);
 
 typedef struct Settings {
 	/*
