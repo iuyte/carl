@@ -17,8 +17,8 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_MOTORS_HPP_
-#define CARL_MOTORS_HPP_
+#ifndef CARL_MOTORS_H_
+#define CARL_MOTORS_H_
 #include "API.h"
 
 #define clipNum(input, high, low) (input > high) ? high : (input < \
@@ -47,4 +47,4 @@ Motor* newMotor(unsigned char port,
 Servo* newServo(unsigned char port,
                 bool          inverted);
 
-#endif // CARL_MOTORS_HPP_
+#endif // CARL_MOTORS_H_

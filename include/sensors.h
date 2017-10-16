@@ -17,8 +17,8 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_SENSORS_H
-#define CARL_SENSORS_H
+#ifndef CARL_SENSORS_H_
+#define CARL_SENSORS_H_
 
 #include "API.h"
 
@@ -62,4 +62,4 @@ Sensor* newQuad(unsigned char top,
                 bool          inverted);
 Sensor* newAnalog(unsigned char port);
 
-#endif // CARL_SENSORS_H
+#endif // CARL_SENSORS_H_

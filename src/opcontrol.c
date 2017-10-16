@@ -22,18 +22,35 @@
 void   operatorControl() {
 	int l, r;
 
-	void drive() {
-		l = deadBand(joystickGetAnalog(1, 3), 10);
-		r = deadBand(joystickGetAnalog(1, 2), 10);
-		driveSet(l, r);
+	void moveDrive() {
+		drive[0]->power = deadBand(joystickGetAnalog(1, 3), 10);
+		drive[1]->power = deadBand(joystickGetAnalog(1, 2), 10);
 	} /* drive */
+
+    void moveMogo() {
+        mogo->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
+                      joystickGetDigital(1, 6, JOY_UP)   *  127;
+    }
+
+    void moveArm() {
+        arm->power = joystickGetDigital(2, 6, JOY_DOWN) * -127 +
+                     joystickGetDigital(2, 6, JOY_UP)   *  127;
+    }
+
+    void moveClaw() {
+        claw->position = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
+                         joystickGetDigital(2, 6, JOY_UP)   *  127;
+    }
 
 	void info() {
 		printf("\r| %5d     | %5d     | %5d     | ", l, r, arm->power);
 	} /* info */
 
 	while (isEnabled()) {
-		drive();
+		moveDrive();
+        moveMogo();
+        moveArm();
+        moveClaw();
 		info();
 		delay(20);
 	}
