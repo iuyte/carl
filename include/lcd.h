@@ -1,4 +1,4 @@
-/*
+/**
  * @file lcd.h
  * @brief Useful for interacting with LCD displays. Menus and the like
  * Copyright (C) 2017 Ethan Wells
@@ -42,7 +42,7 @@ static Menu lcdRoot;
  * Defines an LCD
  */
 typedef struct LCD {
-	PROS_FILE *port;
+	FILE *port;
 	Menu      *currentMenu;
 } LCD;
 

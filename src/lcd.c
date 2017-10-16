@@ -1,4 +1,4 @@
-/*
+/**
  * @file lcd.c
  * @brief Useful for interacting with LCD displays. Menus and the like
  * Copyright (C) 2017 Ethan Wells

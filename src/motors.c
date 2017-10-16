@@ -1,4 +1,4 @@
-/*
+/**
  * @file motors.c
  * @brief Implements the Motor type and the motor handler
  * Copyright (C) 2017 Ethan Wells

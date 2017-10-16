@@ -1,4 +1,4 @@
-/*
+/**
  * @file robot.h
  * @brief General things related to the robot
  * Copyright (C) 2017 Ethan Wells

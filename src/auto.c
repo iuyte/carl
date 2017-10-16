@@ -1,4 +1,4 @@
-/*
+/**
  * @file auto.c
  * @brief The primary source for the autonomous operation period
  * Copyright (C) 2017 Ethan Wells

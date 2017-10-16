@@ -1,4 +1,4 @@
-/*
+/**
  * @file pid.h
  * @brief A PID implementation
  * Copyright (C) 2017 Ethan Wells

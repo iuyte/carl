@@ -1,5 +1,5 @@
-/*
- * @file sensors.h
+/**
+ * @file sensors.c
  * @brief Implementation of hardware abstraction for sensors
  * Copyright (C) 2017 Ethan Wells
  *
