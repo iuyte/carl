@@ -141,7 +141,7 @@ void PID(long target, Settings *settings) {
 			}
 
 			if ((success[4]) && settings->terminates) {
-				return;
+				done = true;
 			}
 			continue;
 		} else {
@@ -162,7 +162,7 @@ void PID(long target, Settings *settings) {
 		                settings->min);
 
 		for (int m = 0; m < shid->numSlaves; m++) {
-			shid->slaves[m]->power = power;
+			shid->slaves[m]->power = (int)power;
 		}
 	} while (!done);
 } /* PID */

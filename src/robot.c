@@ -1,6 +1,6 @@
 #include "../include/robot.h"
 
-Servo *claw;
+Servo  *claw;
 System *arm;
 System *mogo;
 System *drive[2];

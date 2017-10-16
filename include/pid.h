@@ -24,18 +24,35 @@
 #include "sensors.h"
 #include <stdarg.h>
 
+/*
+ * A structure defining a group of motors and a sensor
+ */
 typedef struct System {
 	void *internals;
 	long  request;
 	int   power;
 } System;
 
+/*
+ * A TaskHandle for the systemLoop
+ */
 extern TaskHandle systemLoopHandle;
+
+/*
+ * Loops and manages the systems;
+ */
 void    systemLoop(void *none);
+
+/*
+ * Create a new System from the Sensor and the motors used in it
+ */
 System* newSystem(Sensor *sensor,
                   Motor  *slaves,
                   ...);
 
+/*
+ * The settings for PID
+ */
 typedef struct Settings {
 	/*
 	 * Maximum value to be assigned to the controlled system
@@ -83,6 +100,9 @@ typedef struct Settings {
 	System system;
 } Settings;
 
+/*
+ * Create new settings based on the values provided
+ */
 Settings newSettings(float        kP,
                      float        kI,
                      float        kD,
@@ -93,6 +113,9 @@ Settings newSettings(float        kP,
                      int          iLimit,
                      unsigned int precision);
 
+/*
+ * Use the Settings to achieve the target
+ */
 void PID(long      target,
          Settings *settings);
 

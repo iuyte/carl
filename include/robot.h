@@ -24,24 +24,60 @@
 #include "sensors.h"
 #include "pid.h"
 
+// Motors and servos
+
 /*
- * Motors and servos
+ * The claw, a servo
  */
-extern Servo  *claw;
+extern Servo *claw;
+
+/*
+ * The arm, containing:
+ *  left  motor @ port    9
+ *  right motor @ port    2
+ *  encoder     @ digital 1, 2
+ */
 extern System *arm;
+
+/*
+ * The mogo manipulator, consisting of:
+ *  left  motor   @ port   1
+ *  right motor   @ port   10
+ *  potentiometer @ analog 3
+ */
 extern System *mogo;
+
+/*
+ * The two Systems of the drive:
+ *  left  @ index 0:
+ *    power expander @ port    4
+ *    encoder        @ digital 4, 5
+ *  right @ index 1:
+ *    power expander @ port    7
+ *    encoder        @ digital 6, 7
+ */
 extern System *drive[2];
 
-/*
- * Sensors and the like
- */
-extern Sensor *armCoder;
-extern Sensor *driveCoder[2];
-extern Sensor *mogoAngle;
+// Sensors and the like
 
 /*
- * Stuff to set stuff
+ * Quadrature encoder in digital 1, 2
  */
+extern Sensor *armCoder;
+
+/*
+ * Drive encoders:
+ *  left  @ index 0 in digital 4, 5
+ *  right @ index 1 in digital 6, 7
+ */
+extern Sensor *driveCoder[2];
+
+/*
+ * Potentiometer on the mogo manipulator in analog 3
+ */
+extern Sensor *mogoAngle;
+
+// Stuff to set stuff
 void driveSet(int l,
               int r);
 
