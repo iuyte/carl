@@ -22,6 +22,9 @@
 
 #include "API.h"
 
+/*
+ * The different types of sensors
+ */
 typedef enum {
 	Analog,
 	AnalogPrecise,
@@ -32,6 +35,9 @@ typedef enum {
 	Placeholder,
 } SensorType;
 
+/*
+ * A struct representing a Sensor of a given type
+ */
 typedef struct Sensor {
 	SensorType     type;
 	long           value;
@@ -44,22 +50,53 @@ typedef struct Sensor {
 	void          *pros;
 } Sensor;
 
+/*
+ * The handle for the sensor loop
+ */
 extern TaskHandle sensorLoopHandle;
 
+/*
+ * Initialize and clean up the sensors for the manager. Must be used before
+ **creating any new sensors
+ */
 void    sensorInit();
+
+/*
+ * A task that handles the values of the sensors
+ */
 void    sensorLoop(void *none);
 
+/*
+ * Create a new Sensor based on the type, port, inverted, and calibration
+ */
 Sensor* newSensor(SensorType     type,
                   unsigned char  port,
                   bool           inverted,
                   unsigned short calibrate);
+
+/*
+ * Create a new digital sensor from it's port and inverted
+ */
 Sensor* newDigital(unsigned char port,
                    bool          inverted);
+
+/*
+ * Make a brand new ultrasonic sensor from the two ports
+ */
 Sensor* newSonic(unsigned char orange,
                  unsigned char yellow);
+
+/*
+ * Uses the given values for the ports and inverted to create a new and usable
+ **quadrature encoder
+ */
 Sensor* newQuad(unsigned char top,
                 unsigned char bottom,
                 bool          inverted);
+
+/*
+ * A new analog sensor
+ */
 Sensor* newAnalog(unsigned char port);
 
 #endif // CARL_SENSORS_H_

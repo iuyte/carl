@@ -20,37 +20,38 @@
 #include "../include/robot.h"
 
 void   operatorControl() {
-	int l, r;
-
 	void moveDrive() {
 		drive[0]->power = deadBand(joystickGetAnalog(1, 3), 10);
 		drive[1]->power = deadBand(joystickGetAnalog(1, 2), 10);
 	} /* drive */
 
-    void moveMogo() {
-        mogo->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
-                      joystickGetDigital(1, 6, JOY_UP)   *  127;
-    }
+	void moveMogo() {
+		mogo->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
+		                 joystickGetDigital(1, 6, JOY_UP)   *  127;
+	} /* moveMogo */
 
-    void moveArm() {
-        arm->power = joystickGetDigital(2, 6, JOY_DOWN) * -127 +
-                     joystickGetDigital(2, 6, JOY_UP)   *  127;
-    }
+	void moveArm() {
+		arm->power = joystickGetDigital(2, 6, JOY_DOWN) * -127 +
+		                 joystickGetDigital(2, 6, JOY_UP)   *  127;
+	} /* moveArm */
 
-    void moveClaw() {
-        claw->position = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
-                         joystickGetDigital(2, 6, JOY_UP)   *  127;
-    }
+	void moveClaw() {
+		claw->position = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
+		                 joystickGetDigital(2, 6, JOY_UP)   *  127;
+	} /* moveClaw */
 
 	void info() {
-		printf("\r| %5d     | %5d     | %5d     | ", l, r, arm->power);
+		printf("\r| %5d     | %5d     | %5d     | ",
+		       drive[0]->power,
+		       drive[1]->power,
+		       arm->power);
 	} /* info */
 
 	while (isEnabled()) {
 		moveDrive();
-        moveMogo();
-        moveArm();
-        moveClaw();
+		moveMogo();
+		moveArm();
+		moveClaw();
 		info();
 		delay(20);
 	}

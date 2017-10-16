@@ -42,10 +42,14 @@ void sensorInit() {
 } /* sensorInit */
 
 void sensorLoop(void *none) {
-	while (true) {
-		int i;
+	int i;
 
+	while (true) {
 		for (i = 0; i < 24; i++) {
+			if (!sensors[i].exists) {
+				continue;
+			}
+
 			switch (sensors[i].type) {
 			case Digital:
 				sensors[i].value = digitalRead(sensors[i].port);
@@ -160,4 +164,4 @@ Sensor* newQuad(unsigned char top,
 
 Sensor* newAnalog(unsigned char port) {
 	return newSensor(Analog, port, false, true);
-}
+} /* newAnalog */
