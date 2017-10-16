@@ -149,6 +149,7 @@ anaconda-mode/
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries
+.idea
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/
@@ -233,3 +234,4 @@ tags
 
 # End of https://www.gitignore.io/api/c,git,vim,c++,cmake,nanoc,emacs,intellij
 
+CMakeLists.txt
