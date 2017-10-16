@@ -20,7 +20,9 @@ MCUPREPARE=$(OBJCOPY) $(OUT) -O binary $(BINDIR)/$(OUTBIN)
 # Advanced sizing flags
 SIZEFLAGS=
 # Uploads program using java
-UPLOAD=@pros flash
+UPLOAD=@java -jar firmware/uniflash.jar vex $(BINDIR)/$(OUTBIN)
+# Flashes program using the PROS CLI flash command
+FLASH=pros flash -f $(BINDIR)/$(OUTBIN)
 
 # Advanced options
 ASMEXT=s
@@ -35,7 +37,7 @@ OUTNAME=output.elf
 AFLAGS:=$(MCUAFLAGS)
 ARFLAGS:=$(MCUCFLAGS)
 CCFLAGS:=-c -Wall $(MCUCFLAGS) -Os -ffunction-sections -fsigned-char -fomit-frame-pointer -fsingle-precision-constant
-CFLAGS:=$(CCFLAGS) -std=gnu11 -Werror=implicit-function-declaration
+CFLAGS:=$(CCFLAGS) -std=gnu99 -Werror=implicit-function-declaration
 CPPFLAGS:=$(CCFLAGS) -fno-exceptions -fno-rtti -felide-constructors
 LDFLAGS:=-Wall $(MCUCFLAGS) $(MCULFLAGS) -Wl,--gc-sections
 

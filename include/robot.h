@@ -17,8 +17,8 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_ROBOT_HPP_
-#define CARL_ROBOT_HPP_
+#ifndef CARL_ROBOT_H_
+#define CARL_ROBOT_H_
 
 #include "motors.h"
 #include "sensors.h"
@@ -45,4 +45,4 @@ extern Sensor *mogoAngle;
 void driveSet(int l,
               int r);
 
-#endif // CARL_ROBOT_HPP_
+#endif // CARL_ROBOT_H_

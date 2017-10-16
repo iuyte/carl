@@ -17,8 +17,8 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_PID_H
-#define CARL_PID_H
+#ifndef CARL_PID_H_
+#define CARL_PID_H_
 
 #include "motors.h"
 #include "sensors.h"
@@ -96,4 +96,4 @@ Settings newSettings(float        kP,
 void PID(long      target,
          Settings *settings);
 
-#endif // CARL_PID_H
+#endif // CARL_PID_H_

@@ -1,5 +1,5 @@
 /*
- * @file pid.h
+ * @file pid.c
  * @brief A PID implementation
  * Copyright (C) 2017 Ethan Wells
  *
@@ -133,7 +133,10 @@ void PID(long target, Settings *settings) {
 
 		if ((unsigned int)abs((int)error) <= settings->precision) {
 			for (int i = 0; i < 5; i++) {
-				if (success[i]) continue; success[i] = true;
+				if (success[i]) {
+					continue;
+				}
+				success[i] = true;
 				break;
 			}
 
