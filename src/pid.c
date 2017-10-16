@@ -1,4 +1,4 @@
-/*
+/**
  * @file pid.c
  * @brief A PID implementation
  * Copyright (C) 2017 Ethan Wells
@@ -122,8 +122,6 @@ void PID(long target, Settings *settings) {
 	bool  done = false;
 	bool  success[5];
 	Shid *shid = (Shid *)settings->system.internals;
-
-
 	shid->sensor->reset = true;
 
 	do {

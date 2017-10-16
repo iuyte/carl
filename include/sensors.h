@@ -1,4 +1,4 @@
-/*
+/**
  * @file sensors.h
  * @brief Hardware abstraction for sensors
  * Copyright (C) 2017 Ethan Wells
@@ -88,7 +88,7 @@ Sensor* newSonic(unsigned char orange,
 
 /*
  * Uses the given values for the ports and inverted to create a new and usable
- **quadrature encoder
+ * quadrature encoder
  */
 Sensor* newQuad(unsigned char top,
                 unsigned char bottom,

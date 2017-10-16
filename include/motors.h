@@ -1,4 +1,4 @@
-/*
+/**
  * @file motors.h
  * @brief Motor structure and a motor handler
  * Copyright (C) 2017 Ethan Wells

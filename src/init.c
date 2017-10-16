@@ -1,4 +1,4 @@
-/*
+/**
  * @file init.c
  * @brief Perform initialization and start handler tasks
  * Copyright (C) 2017 Ethan Wells

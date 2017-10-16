@@ -1,4 +1,4 @@
-/*
+/**
  * @file opcontrol.c
  * @brief Controls what happens in operator control
  * Copyright (C) 2017 Ethan Wells
@@ -27,12 +27,12 @@ void   operatorControl() {
 
 	void moveMogo() {
 		mogo->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
-		                 joystickGetDigital(1, 6, JOY_UP)   *  127;
+		                 joystickGetDigital(1, 6, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
 		arm->power = joystickGetDigital(2, 6, JOY_DOWN) * -127 +
-		                 joystickGetDigital(2, 6, JOY_UP)   *  127;
+		                 joystickGetDigital(2, 6, JOY_UP) * 127;
 	} /* moveArm */
 
 	void moveClaw() {
