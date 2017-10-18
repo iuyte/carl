@@ -27,22 +27,30 @@
 // Motors and servos
 
 /*
- * The claw, a servo
+ * The claw, a servo @ port 5
  */
 extern Servo *claw;
 
 /*
+ * The linear lift, of:
+ *  left  motor @ port    3
+ *  right motor @ port    8
+ *  encoder     @ digital 8, 9
+ */
+extern System *lift;
+
+/*
  * The arm, containing:
- *  left  motor @ port    9
- *  right motor @ port    2
+ *  left  motor @ port    1
+ *  right motor @ port    10
  *  encoder     @ digital 1, 2
  */
 extern System *arm;
 
 /*
  * The mogo manipulator, consisting of:
- *  left  motor   @ port   1
- *  right motor   @ port   10
+ *  left  motor   @ port   4
+ *  right motor   @ port   7
  *  potentiometer @ analog 3
  */
 extern System *mogo;
@@ -50,10 +58,10 @@ extern System *mogo;
 /*
  * The two Systems of the drive:
  *  left  @ index 0:
- *    power expander @ port    4
+ *    power expander @ port    2
  *    encoder        @ digital 4, 5
  *  right @ index 1:
- *    power expander @ port    7
+ *    power expander @ port    9
  *    encoder        @ digital 6, 7
  */
 extern System *drive[2];
@@ -66,6 +74,11 @@ extern System *drive[2];
 extern Sensor *armCoder;
 
 /*
+ * Quadrature encoder in digital 8, 9
+ */
+extern Sensor *liftCoder;
+
+/*
  * Drive encoders:
  *  left  @ index 0 in digital 4, 5
  *  right @ index 1 in digital 6, 7
@@ -73,7 +86,7 @@ extern Sensor *armCoder;
 extern Sensor *driveCoder[2];
 
 /*
- * Potentiometer on the mogo manipulator in analog 3
+ * Potentiometer on the mogo manipulator in analog 1
  */
 extern Sensor *mogoAngle;
 

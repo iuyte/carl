@@ -30,22 +30,27 @@ void initialize() {
 	sensorInit();
 
 	// Set up the sensors
+	mogoAngle     = newAnalog(1);
+
 	armCoder      = newQuad(1, 2, false);
-	mogoAngle     = newAnalog(3);
 	driveCoder[0] = newQuad(4, 5, true);
 	driveCoder[1] = newQuad(6, 7, false);
+	liftCoder     = newQuad(8, 9, false);
 
 	// Initialize and set up all of the motors, servos, systems, etc
-	claw = newServo(6, false);
+	claw = newServo(5, false);
 	arm  = newSystem(armCoder,
-	                 newMotor(9,  true),
-	                 newMotor(2,  false));
+	                 newMotor(1,  true),
+	                 newMotor(10,  false));
+	lift  = newSystem(liftCoder,
+					 newMotor(3,  true),
+					 newMotor(8,  false));
 	mogo = newSystem(mogoAngle,
-	                 newMotor(1,  false),
-	                 newMotor(10, true));
+	                 newMotor(4,  false),
+	                 newMotor(7, true));
 
-	drive[0] = newSystem(driveCoder[0], newMotor(4, true));
-	drive[1] = newSystem(driveCoder[1], newMotor(7, false));
+	drive[0] = newSystem(driveCoder[0], newMotor(2, true));
+	drive[1] = newSystem(driveCoder[1], newMotor(9, false));
 
 	// Create manager tasks to make life easy
 	motorLoopHandle = taskCreate(&motorLoop,
