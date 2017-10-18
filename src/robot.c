@@ -21,10 +21,12 @@
 
 Servo  *claw;
 System *arm;
+System *lift;
 System *mogo;
 System *drive[2];
 
 Sensor *armCoder;
+Sensor *liftCoder;
 Sensor *driveCoder[2];
 Sensor *mogoAngle;
 
