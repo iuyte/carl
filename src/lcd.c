@@ -19,6 +19,4 @@
 
 #include "../include/lcd.h"
 
-TaskHandle lcdManagerHandle;
-
-void lcdManager(void *lcd) {}
+void lcdManager() {}

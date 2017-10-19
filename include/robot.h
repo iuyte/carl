@@ -24,14 +24,25 @@
 #include "sensors.h"
 #include "pid.h"
 
+#define GO(name, command, args ...) void name(void *none) { \
+		command(args);                                          \
+};                                                          \
+  taskCreate(&name,                                         \
+             TASK_DEFAULT_STACK_SIZE,                       \
+             NULL,                                          \
+             TASK_PRIORITY_DEFAULT)
+
+static const float inch = 90 * 3.1415926535897932384626433832795028841917;
+
+
 // Motors and servos
 
-/*
+/**
  * The claw, a servo @ port 5
  */
 extern Servo *claw;
 
-/*
+/**
  * The linear lift, of:
  *  left  motor @ port    3
  *  right motor @ port    8
@@ -39,7 +50,7 @@ extern Servo *claw;
  */
 extern System *lift;
 
-/*
+/**
  * The arm, containing:
  *  left  motor @ port    1
  *  right motor @ port    10
@@ -47,7 +58,7 @@ extern System *lift;
  */
 extern System *arm;
 
-/*
+/**
  * The mogo manipulator, consisting of:
  *  left  motor   @ port   4
  *  right motor   @ port   7
@@ -55,7 +66,7 @@ extern System *arm;
  */
 extern System *mogo;
 
-/*
+/**
  * The two Systems of the drive:
  *  left  @ index 0:
  *    power expander @ port    2
@@ -68,30 +79,47 @@ extern System *drive[2];
 
 // Sensors and the like
 
-/*
+/**
  * Quadrature encoder in digital 1, 2
  */
 extern Sensor *armCoder;
 
-/*
+/**
  * Quadrature encoder in digital 8, 9
  */
 extern Sensor *liftCoder;
 
-/*
+/**
  * Drive encoders:
  *  left  @ index 0 in digital 4, 5
  *  right @ index 1 in digital 6, 7
  */
 extern Sensor *driveCoder[2];
 
-/*
+/**
  * Potentiometer on the mogo manipulator in analog 1
  */
 extern Sensor *mogoAngle;
 
+/**
+ * Gyroscopes to measure the robot's rotation:
+ *  left  @ index 0 in analog 2
+ *  right @ index 1 in analog 3
+ */
+extern Sensor *gyro[2];
+
 // Stuff to set stuff
 void driveSet(int l,
               int r);
+
+/**
+ * A TaskHandle for the manager task
+ */
+extern TaskHandle managerHandle;
+
+/**
+ * Runs the various functions to manage everything
+ */
+void manager(void *none);
 
 #endif // CARL_ROBOT_H_

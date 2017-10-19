@@ -20,7 +20,6 @@
 #include "../include/motors.h"
 
 Motor motors[10];
-TaskHandle motorLoopHandle;
 
 void motorInit() {
 	for (int i = 0; i < 10; i++) {
@@ -30,13 +29,10 @@ void motorInit() {
 	}
 } /* motorPreLoop */
 
-void motorLoop(void *init) {
-	while (true) {
-		for (int i = 0; i < 10; i++) {
-			motorSet(motors[i].port,
-			         motors[i].inverted ? motors[i].power : -motors[i].power);
-		}
-		delay(5);
+void motorLoop() {
+	for (int i = 0; i < 10; i++) {
+		motorSet(motors[i].port,
+		         motors[i].inverted ? motors[i].power : -motors[i].power);
 	}
 } /* motorLoop */
 

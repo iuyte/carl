@@ -22,7 +22,7 @@
 
 #include "API.h"
 
-/*
+/**
  * A struct defining an LCD Menu
  */
 typedef struct Menu {
@@ -33,23 +33,22 @@ typedef struct Menu {
 	struct Menu *(*onSelect)();
 } Menu;
 
-/*
+/**
  * The root menu for LCDs
  */
 static Menu lcdRoot;
 
-/*
+/**
  * Defines an LCD
  */
 typedef struct LCD {
 	FILE *port;
-	Menu      *currentMenu;
+	Menu *currentMenu;
 } LCD;
 
-/*
- * Handles the lcdManager
+/**
+ * A step in the manager to handle the lcds
  */
-extern TaskHandle lcdManagerHandle;
-void lcdManager(void *none);
+void lcdManager();
 
 #endif // CARL_LCD_H_

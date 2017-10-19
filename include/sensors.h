@@ -22,7 +22,7 @@
 
 #include "API.h"
 
-/*
+/**
  * The different types of sensors
  */
 typedef enum {
@@ -35,7 +35,7 @@ typedef enum {
 	Placeholder,
 } SensorType;
 
-/*
+/**
  * A struct representing a Sensor of a given type
  */
 typedef struct Sensor {
@@ -50,53 +50,83 @@ typedef struct Sensor {
 	void          *pros;
 } Sensor;
 
-/*
- * The handle for the sensor loop
- */
-extern TaskHandle sensorLoopHandle;
-
-/*
+/**
  * Initialize and clean up the sensors for the manager. Must be used before
- **creating any new sensors
+ * creating any new sensors
  */
 void    sensorInit();
 
-/*
- * A task that handles the values of the sensors
+/**
+ * A step in the management loop to handle sensors
  */
-void    sensorLoop(void *none);
+void    sensorLoop();
 
-/*
- * Create a new Sensor based on the type, port, inverted, and calibration
+/**
+ * Create a new Sensor
+ *
+ * @param type      the type of SensorType, either a Digital, Analog, AnalogPrecise, Quad, Sonic, or Gyroscope
+ * @param port      the port in which the sensor in in
+ * @param inverted  whether or not to invert the value
+ * @param calibrate the calibration value in some cases, or anything but 0 to calibrate the Sensor
+ *
+ * @return a pointer to the configured Sensor
  */
 Sensor* newSensor(SensorType     type,
                   unsigned char  port,
                   bool           inverted,
                   unsigned short calibrate);
 
-/*
- * Create a new digital sensor from it's port and inverted
+/**
+ * Create a new digital Sensor
+ *
+ * @param port     the port that the digital Sensor is in
+ * @param inverted whether or not to invert the value
+ *
+ * @return a pointer to a configured Sensor of SensorType Digital
  */
 Sensor* newDigital(unsigned char port,
                    bool          inverted);
 
-/*
- * Make a brand new ultrasonic sensor from the two ports
+/**
+ * Make a brand new Sonic (aka ultrasonic) Sensor
+ *
+ * @param orange the port that the orange cable is in
+ * @param yellow the port that the yellow cable is in
+ *
+ * @return a pointer to a configured Sensor of type Sonic
  */
 Sensor* newSonic(unsigned char orange,
                  unsigned char yellow);
 
-/*
- * Uses the given values for the ports and inverted to create a new and usable
- * quadrature encoder
+/**
+ * Create and initialize a quadrature encoder (the red ones)
+ *
+ * @param top      the port that the top wire on the encoder is in
+ * @param bottom   the port that the bottom wire on the encoder is in
+ * @param inverted whether or not the Sensor's value should be inverted
+ *
+ * @return a pointer to a configured Sensor of type Quad
  */
 Sensor* newQuad(unsigned char top,
                 unsigned char bottom,
                 bool          inverted);
 
-/*
- * A new analog sensor
+/**
+ * Create and configure a new analog sensor
+ *
+ * @param port the port that the sensor is in
+ *
+ * @return a pointer to the configured Sensor of type Analog
  */
 Sensor* newAnalog(unsigned char port);
+
+/**
+ * Make a new gyroscope sensor
+ *
+ * @param port        the analog port that the gyro is plugged into
+ * @param calibration the calibration of the Sensor
+ */
+Sensor* newGyro(unsigned char port,
+                int           calibration);
 
 #endif // CARL_SENSORS_H_
