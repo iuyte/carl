@@ -25,7 +25,6 @@ typedef struct Shid {
 	Motor **slaves;
 } Shid;
 
-TaskHandle systemLoopHandle;
 int numSystems = 0;
 System *systems;
 
@@ -73,30 +72,26 @@ System* newSystem(Sensor *sensor, Motor *slaves, ...) {
 	return &systems[numSystems++];
 } /* newSystem */
 
-void systemLoop(void *none) {
-	int i, j;
-
-	while (true) {
-		for (i = 0; i < numSystems; i++) {
+void systemLoop() {
+		for (int j, i = 0; i < numSystems; i++) {
 			Shid *s = (Shid *)systems[i].internals;
 
 			for (j = 0; j < s->numSlaves; j++) {
 				s->slaves[j]->power = systems[i].power;
 			}
 		}
-		delay(5);
-	}
 } /* systemLoop */
 
 Settings newSettings(float        kP,
                      float        kI,
                      float        kD,
-                     System       system,
+                     System      *system,
                      bool         terminates,
                      int          max,
                      int          min,
                      int          iLimit,
-                     unsigned int precision) {
+                     unsigned int precision,
+										 unsigned int tolerance) {
 	Settings s;
 
 	s.kP         = kP;
@@ -108,6 +103,8 @@ Settings newSettings(float        kP,
 	s.min        = min;
 	s.iLimit     = iLimit;
 	s.precision  = precision;
+	s.tolerance  = tolerance;
+	s.done       = false;
 
 	return s;
 } /* newSettings */
@@ -119,10 +116,10 @@ void PID(long target, Settings *settings) {
 	float integral  = 0;
 	float derivative;
 	float power;
-	bool  done = false;
 	bool  success[5];
-	Shid *shid = (Shid *)settings->system.internals;
+	Shid *shid = (Shid *)settings->system->internals;
 	shid->sensor->reset = true;
+	settings->done = false;
 
 	do {
 		delay(25);
@@ -139,7 +136,7 @@ void PID(long target, Settings *settings) {
 			}
 
 			if ((success[4]) && settings->terminates) {
-				done = true;
+				settings->done = true;
 			}
 			continue;
 		} else {
@@ -162,5 +159,5 @@ void PID(long target, Settings *settings) {
 		for (int m = 0; m < shid->numSlaves; m++) {
 			shid->slaves[m]->power = (int)power;
 		}
-	} while (!done);
+	} while (!settings->done);
 } /* PID */

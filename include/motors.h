@@ -26,24 +26,53 @@
 #define sng(input) (input > 0) ? 1 : (input < 0) ? -1 : 0
 #define deadBand(input, dead) (abs(input) > dead) ? input : 0
 
+/**
+ * A motor structure, containing a motor's port, invertation, and power
+ */
 typedef struct Motor {
 	unsigned char port;
 	bool          inverted;
 	int           power;
 } Motor;
 
+/**
+ * Similar to a Motor, but it has a position instead of power
+ */
 typedef struct Servo {
 	unsigned char port;
 	bool          inverted;
 	int           position;
 } Servo;
 
-extern TaskHandle motorLoopHandle;
-
+/**
+ * Initialize the motor arrays
+ */
 void   motorInit();
-void   motorLoop(void *none);
+
+/**
+ * A step in the management loop
+ */
+void   motorLoop();
+
+/**
+ * Create a new Motor
+ *
+ * @param port     the port that the motor is in
+ * @param inverted whether or not the motor is inverted
+ *
+ * @return A pointer to the Motor in memory
+ */
 Motor* newMotor(unsigned char port,
                 bool          inverted);
+
+/**
+ * Create a new Servo
+ *
+ * @param port     the port that the servo is in
+ * @param inverted whether or not the servo is inverted
+ *
+ * @return A pointer to the Servo in memory
+ */
 Servo* newServo(unsigned char port,
                 bool          inverted);
 

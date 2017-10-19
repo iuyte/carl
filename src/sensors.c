@@ -19,7 +19,6 @@
 
 #include "../include/sensors.h"
 
-TaskHandle sensorLoopHandle;
 Sensor    *sensors;
 
 void sensorInit() {
@@ -27,6 +26,7 @@ void sensorInit() {
 
 	Sensor s = {
 		Placeholder,
+		0,
 		0,
 		false,
 		false,
@@ -41,11 +41,8 @@ void sensorInit() {
 	}
 } /* sensorInit */
 
-void sensorLoop(void *none) {
-	int i;
-
-	while (true) {
-		for (i = 0; i < 24; i++) {
+void sensorLoop() {
+		for (int i = 0; i < 24; i++) {
 			if (!sensors[i].exists) {
 				continue;
 			}
@@ -89,8 +86,6 @@ void sensorLoop(void *none) {
 				sensors[i].reset = false;
 			}
 		}
-		delay(5);
-	}
 } /* sensorLoop */
 
 Sensor* newSensor(SensorType     type,
@@ -165,3 +160,7 @@ Sensor* newQuad(unsigned char top,
 Sensor* newAnalog(unsigned char port) {
 	return newSensor(Analog, port, false, true);
 } /* newAnalog */
+
+Sensor* newGyro(unsigned char port, int calibration) {
+	return newSensor(Gyroscope, port, false, calibration);
+} /* newGyro */

@@ -21,17 +21,13 @@
 
 void initializeIO() {}
 
-void initialize() {
+void init() {
 	printf("\nInitializing... ");
 
-	// Clean up everything before we touch it. Otherwise, what we do next will be
-	// overwritten
-	motorInit();
-	sensorInit();
+	// Set up the analog sensors
+	mogoAngle = newAnalog(1);
 
-	// Set up the sensors
-	mogoAngle     = newAnalog(1);
-
+	// Set up the digital sensors
 	armCoder      = newQuad(1, 2, false);
 	driveCoder[0] = newQuad(4, 5, true);
 	driveCoder[1] = newQuad(6, 7, false);
@@ -41,29 +37,15 @@ void initialize() {
 	claw = newServo(5, false);
 	arm  = newSystem(armCoder,
 	                 newMotor(1,  true),
-	                 newMotor(10,  false));
-	lift  = newSystem(liftCoder,
-					 newMotor(3,  true),
-					 newMotor(8,  false));
+	                 newMotor(10, false));
+	lift = newSystem(liftCoder,
+	                 newMotor(3,  true),
+	                 newMotor(8,  false));
 	mogo = newSystem(mogoAngle,
 	                 newMotor(4,  false),
-	                 newMotor(7, true));
+	                 newMotor(7,  true));
 
 	drive[0] = newSystem(driveCoder[0], newMotor(2, true));
 	drive[1] = newSystem(driveCoder[1], newMotor(9, false));
-
-	// Create manager tasks to make life easy
-	motorLoopHandle = taskCreate(&motorLoop,
-	                             TASK_DEFAULT_STACK_SIZE,
-	                             NULL,
-	                             TASK_PRIORITY_DEFAULT + 1);
-	sensorLoopHandle = taskCreate(&sensorLoop,
-	                              TASK_DEFAULT_STACK_SIZE,
-	                              NULL,
-	                              TASK_PRIORITY_DEFAULT + 1);
-	systemLoopHandle = taskCreate(&systemLoop,
-	                              TASK_DEFAULT_STACK_SIZE,
-	                              NULL,
-	                              TASK_PRIORITY_DEFAULT + 1);
 	printf("done!\n\n");
-} /* initialize */
+} /* init */

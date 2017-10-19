@@ -24,7 +24,7 @@
 #include "sensors.h"
 #include <stdarg.h>
 
-/*
+/**
  * A structure defining a group of motors and a sensor
  */
 typedef struct System {
@@ -33,88 +33,119 @@ typedef struct System {
 	int   power;
 } System;
 
-/*
- * A TaskHandle for the systemLoop
+/**
+ * A step in the manager that manages systems;
  */
-extern TaskHandle systemLoopHandle;
+void    systemLoop();
 
-/*
- * Loops and manages the systems;
- */
-void    systemLoop(void *none);
-
-/*
- * Create a new System from the Sensor and the motors used in it
+/**
+ * Create and configure a new System
+ *
+ * @param sensor a pointer to the Sensor of the System
+ * @param slaves variadic args of the motors in the System
+ *
+ * @return a pointer to the configured system
  */
 System* newSystem(Sensor *sensor,
                   Motor  *slaves,
                   ...);
 
-/*
+/**
  * The settings for PID
  */
 typedef struct Settings {
-	/*
+	/**
 	 * Maximum value to be assigned to the controlled system
 	 */
 	int max;
 
-	/*
+	/**
 	 * Minimum value to be assigned to the controlled system
 	 */
 	int min;
 
-	/*
+	/**
 	 * Limit for the integral value
 	 */
 	int iLimit;
 
-	/*
+	/**
 	 * Whether or not the PID loop ends
 	 */
 	bool terminates;
 
-	/*
+	/**
 	 * p value
 	 */
 	float kP;
 
-	/*
+	/**
 	 * i value
 	 */
 	float kI;
 
-	/*
+	/**
 	 * d value
 	 */
 	float kD;
 
-	/*
+	/**
 	 * Precision for waiting on pid to reach value
 	 */
 	unsigned int precision;
 
-	/*
+	/**
+	 * How many loop iterations to wait before breaking - only used if terminates
+	 * is set to true
+	 */
+	unsigned int tolerance;
+
+	/**
 	 * The system the pid controls
 	 */
-	System system;
+	System *system;
+
+	/**
+	 * True when finished
+	 */
+	bool done;
 } Settings;
 
-/*
+/**
  * Create new settings based on the values provided
+ *
+ * @param            kP the P value for the PID
+ * @param            kI the I value for the PID
+ * @param            kD the D value for the PID
+ * @param system     a pointer to the system that the PID will control
+ * @param terminates whether or not the PID loop terminates
+ * @param max        the maximum value at which it will set the motors in the
+ * system
+ * @param min        the minimum value at which it will set the motors in the
+ * system
+ * @param iLimit     the maximum kI value
+ * @param precision  the amount of precision to consider when finishing
+ * @param tolerance  how many iterations of the loop before the PID loop will
+ * finish - only used if terminates is true
+ *
+ * @returns the configured System
  */
 Settings newSettings(float        kP,
                      float        kI,
                      float        kD,
-                     System       system,
+                     System      *system,
                      bool         terminates,
                      int          max,
                      int          min,
                      int          iLimit,
-                     unsigned int precision);
+                     unsigned int precision,
+                     unsigned int tolerance);
 
-/*
+/**
  * Use the Settings to achieve the target
+ *
+ * @param target   the target value
+ * @param settings a pointer to the settings to be used
  */
 void PID(long      target,
          Settings *settings);

@@ -29,8 +29,39 @@ Sensor *armCoder;
 Sensor *liftCoder;
 Sensor *driveCoder[2];
 Sensor *mogoAngle;
+Sensor *gyro[2];
+
+TaskHandle managerHandle;
+
+void init();
 
 void driveSet(int l, int r) {
 	drive[0]->power = l;
 	drive[1]->power = r;
 } /* driveSet */
+
+void initialize() {
+	// Clean up everything before we touch it. Otherwise, what we do next will be
+	// overwritten
+	sensorInit();
+	motorInit();
+
+	// Call the init function to do more stuff
+	init();
+
+	// Start the manager that manages everything basiccally
+	managerHandle = taskCreate(&manager,
+	                           TASK_DEFAULT_STACK_SIZE,
+	                           NULL,
+	                           TASK_PRIORITY_DEFAULT + 1);
+} /* initialize */
+
+void manager(void *none) {
+	while (true) {
+		motorLoop();
+		sensorLoop();
+		systemLoop();
+		delay(5);
+	}
+	(void)none;
+} /* manager */
