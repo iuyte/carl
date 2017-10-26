@@ -24,12 +24,10 @@
 #include "sensors.h"
 #include "pid.h"
 
-#define GO(name, command, args ...) void name(void *none) { \
-		command(args);                                          \
-};                                                          \
-  taskCreate(&name,                                         \
-             TASK_DEFAULT_STACK_SIZE,                       \
-             NULL,                                          \
+#define GO(task, arg)                 \
+  taskCreate(&task,                   \
+             TASK_DEFAULT_STACK_SIZE, \
+             (void *)arg,             \
              TASK_PRIORITY_DEFAULT)
 
 static const double inch = 360 /* degrees in a circle */ *

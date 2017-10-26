@@ -22,7 +22,6 @@
 
 #include "motors.h"
 #include "sensors.h"
-#include <stdarg.h>
 
 /**
  * A structure defining a group of motors and a sensor
@@ -43,16 +42,17 @@ typedef struct System {
  * @param num    the number of motors in the System
  * @param slaves variadic args of the motors in the System
  */
-void confSystem(System *system,
-                Sensor *sensor,
-                int     num,
-                Motor  *slaves,
-                ...);
+void confSystem(System *system, Sensor *sensor, int num, Motor **slaves);
 
 /**
  * The settings for PID
  */
 typedef struct Settings {
+	/**
+	 * The ideal position, or goal value
+	 */
+	long target;
+
 	/**
 	 * Maximum value to be assigned to the controlled system
 	 */
@@ -113,9 +113,10 @@ typedef struct Settings {
 /**
  * Create new settings based on the values provided
  *
- * @param            kP the P value for the PID
- * @param            kI the I value for the PID
- * @param            kD the D value for the PID
+ * @param target     the destination value
+ * @param kP         the P value for the PID
+ * @param kI         the I value for the PID
+ * @param kD         the D value for the PID
  * @param system     a pointer to the system that the PID will control
  * @param terminates whether or not the PID loop terminates
  * @param max        the maximum value at which it will set the motors in the
@@ -129,7 +130,8 @@ typedef struct Settings {
  *
  * @returns the configured System
  */
-Settings newSettings(float        kP,
+Settings newSettings(long         target,
+										 float        kP,
                      float        kI,
                      float        kD,
                      System      *system,
@@ -146,7 +148,6 @@ Settings newSettings(float        kP,
  * @param target   the target value
  * @param settings a pointer to the settings to be used
  */
-void PID(long      target,
-         Settings *settings);
+void PID(void *conf);
 
 #endif // CARL_PID_H_

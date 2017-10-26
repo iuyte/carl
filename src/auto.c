@@ -21,7 +21,8 @@
 
 void autonomous() {
 	Settings drivePID[2] = {
-		newSettings(1,
+		newSettings(12 *inch,
+								1,
 		            1,
 		            1,
 		            &Drive[0],
@@ -31,7 +32,8 @@ void autonomous() {
 		            10,
 		            8,
 		            5),
-		newSettings(1,
+		newSettings(12 *inch,
+								1,
 		            1,
 		            1,
 		            &Drive[1],
@@ -43,8 +45,8 @@ void autonomous() {
 		            5)
 	};
 
-	GO(leftPID1,  PID, 18 * inch, &drivePID[0]);
-	GO(rightPID1, PID, 18 * inch, &drivePID[1]);
+	GO(PID, &drivePID[0]);
+	GO(PID, &drivePID[1]);
 
 	while (!drivePID[0].done || !drivePID[1].done) {
 		delay(25);

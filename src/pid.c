@@ -19,28 +19,20 @@
 
 #include "../include/pid.h"
 
-void confSystem(System *system, Sensor *sensor, int num, Motor *slaves, ...) {
+void confSystem(System *system, Sensor *sensor, int num, Motor **slaves) {
 	System s = {
 		0,
 		0,
 		num,
 		sensor,
+		slaves,
 	};
-
-	va_list motors;
-
-	va_start(motors, slaves);
-	va_start(motors, slaves);
-	s.slaves = (Motor **)malloc(sizeof(Motor *) * num);
-
-	for (int i = 0; i < num; i++) {
-		s.slaves[i] = va_arg(motors, Motor *);
-	}
 
 	*system = s;
 } /* newSystem */
 
-Settings newSettings(float        kP,
+Settings newSettings(long         target,
+                     float        kP,
                      float        kI,
                      float        kD,
                      System      *system,
@@ -52,6 +44,7 @@ Settings newSettings(float        kP,
                      unsigned int tolerance) {
 	Settings s;
 
+	s.target     = target;
 	s.kP         = kP;
 	s.kI         = kI;
 	s.kD         = kD;
@@ -67,21 +60,22 @@ Settings newSettings(float        kP,
 	return s;
 } /* newSettings */
 
-void PID(long target, Settings *settings) {
-	float current;
-	float error;
-	float lastError = 0;
-	float integral  = 0;
-	float derivative;
-	float power;
-	bool  success[5];
+void PID(void *conf) {
+	Settings *settings = (Settings *)conf;
+	float     current;
+	float     error;
+	float     lastError = 0;
+	float     integral  = 0;
+	float     derivative;
+	float     power;
+	bool      success[5];
 
 	settings->done = false;
 
 	do {
 		delay(25);
 		current = settings->system->sensor->value;
-		error   = target - current;
+		error   = settings->target - current;
 
 		if ((unsigned int)abs((int)error) <= settings->precision) {
 			for (int i = 0; i < 5; i++) {
@@ -107,8 +101,8 @@ void PID(long target, Settings *settings) {
 		derivative = error - lastError;
 		lastError  = error;
 		power      =
-		  (settings->kP *
-		   error) + (settings->kI * integral) + (settings->kD * derivative);
+		  (settings->kP * error) +
+		  (settings->kI * integral) + (settings->kD * derivative);
 		power = clipNum(power /* 8.1f / powerLevelMain() */,
 		                settings->max,
 		                settings->min);
