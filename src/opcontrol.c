@@ -20,6 +20,21 @@
 #include "../include/robot.h"
 
 void operatorControl() {
+	lcdSetText(uart1, 1, "Battery:");
+	Settings armSettings = newSettings(armCoder->value,
+	                                   .8,
+	                                   .15,
+	                                   .2,
+	                                   &Arm,
+	                                   false,
+	                                   127,
+	                                   -127,
+	                                   2,
+	                                   8,
+	                                   5);
+
+	GO(PID, &armSettings);
+
 	gyro[0]->reset = true;
 	gyro[1]->reset = true;
 
@@ -30,23 +45,25 @@ void operatorControl() {
 
 	void moveMogo() {
 		mogo[0]->power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
-		                 joystickGetDigital(1, 5, JOY_UP) * 127;
+		                      joystickGetDigital(1, 5, JOY_UP) * 127;
 		mogo[1]->power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
-		                 joystickGetDigital(1, 5, JOY_UP) * 127;
+		                      joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
-		arm[0]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
-		                 joystickGetDigital(1, 6, JOY_UP) * 127;
-		arm[1]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
-		                 joystickGetDigital(1, 6, JOY_UP) * 127;
+		// arm[0]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
+		//                 joystickGetDigital(1, 6, JOY_UP) * 127;
+		// arm[1]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
+		//                 joystickGetDigital(1, 6, JOY_UP) * 127;
+		armSettings.target += joystickGetDigital(1, 6, JOY_DOWN) * -2 +
+		                      joystickGetDigital(1, 6, JOY_UP) * 2;
 	} /* moveArm */
 
 	void moveClaw() {
 		// claw->power = clipNum(claw->power + (joystickGetDigital(1, 7, JOY_DOWN) ?
 		// -3 : (joystickGetDigital(1, 7, JOY_UP) ? 2 : 0)), 100, 0);
-		claw->power = joystickGetDigital(1, 7, JOY_DOWN) * -100 +
-		                 joystickGetDigital(1, 7, JOY_UP) * 100;
+		claw->power = joystickGetDigital(1, 8, JOY_DOWN) * -127 +
+		                      joystickGetDigital(1, 8, JOY_UP) * 127;
 	} /* moveClaw */
 
 	void info() {
@@ -59,6 +76,7 @@ void operatorControl() {
 		  claw->power,
 		  gyros(),
 		  sonic->value);
+		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
 	} /* info */
 
 	while (isEnabled()) {

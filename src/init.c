@@ -36,7 +36,7 @@ void init() {
 		lcdSetText(uart1, 2, buffer);
 	} /* notice */
 
-	print("\nInitializing..., ");
+	print("\nInitializing... ");
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
@@ -79,10 +79,21 @@ void init() {
 	notice("right drive motors, ");
 
 	// Configure Systems
-	confSystem(&Drive[0], driveCoder[0], 1, drive[0]);
-	confSystem(&Drive[1], driveCoder[1], 1, drive[1]);
-	confSystem(&Arm, armCoder, 2, arm[0], arm[1]);
-	confSystem(&Mogo, mogoAngle, 2, mogo[0], mogo[1]);
+	Motor **drives[2] = {(Motor **)malloc(sizeof(Motor *)), (Motor **)malloc(sizeof(Motor *))};
+	Motor **arms = (Motor **)malloc(sizeof(Motor *) * 2);
+	Motor **mogos = (Motor **)malloc(sizeof(Motor *) * 2);
+
+	drives[0][0] = drive[0];
+	drives[1][0] = drive[1];
+	arms[0] = arm[0];
+	arms[1] = arm[1];
+	mogos[0] = mogo[0];
+	mogos[1] = mogo[1];
+
+	confSystem(&Drive[0], driveCoder[0], 1, drives[0]);
+	confSystem(&Drive[1], driveCoder[1], 1, drives[1]);
+	confSystem(&Arm,      armCoder,      2, arms);
+	confSystem(&Mogo,     mogoAngle,     2, mogos);
 	notice("Systems, ");
 
 	notice("done!");
