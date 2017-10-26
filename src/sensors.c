@@ -19,11 +19,9 @@
 
 #include "../include/sensors.h"
 
-Sensor    *sensors;
+Sensor    sensors[24];
 
 void sensorInit() {
-	sensors = (Sensor *)malloc(sizeof(Sensor) * 24);
-
 	Sensor s = {
 		Placeholder,
 		0,
@@ -43,7 +41,7 @@ void sensorInit() {
 
 void sensorLoop() {
 		for (int i = 0; i < 24; i++) {
-			if (!sensors[i].exists) {
+			if (!sensors[i].exists){
 				continue;
 			}
 

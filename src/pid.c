@@ -19,36 +19,17 @@
 
 #include "../include/pid.h"
 
-typedef struct Shid {
-	int     numSlaves;
-	Sensor *sensor;
-	Motor **slaves;
-} Shid;
-
-int numSystems = 0;
-System *systems;
-
-void* memcpy(void       *destination,
-             const void *source,
-             size_t      num);
-
-System* newSystem(Sensor *sensor, Motor *slaves, ...) {
-	Shid s;
-
-	s.sensor = sensor;
+void confSystem(System *system, Sensor *sensor, int num, Motor *slaves, ...) {
+	System s = {
+		0,
+		0,
+		num,
+		sensor,
+	};
 
 	va_list motors;
+
 	va_start(motors, slaves);
-
-	int num = 0;
-
-	for (; slaves; slaves--) {
-		va_arg(motors, Motor *);
-		num++;
-	}
-
-	va_end(motors);
-	s.numSlaves = num;
 	va_start(motors, slaves);
 	s.slaves = (Motor **)malloc(sizeof(Motor *) * num);
 
@@ -56,31 +37,8 @@ System* newSystem(Sensor *sensor, Motor *slaves, ...) {
 		s.slaves[i] = va_arg(motors, Motor *);
 	}
 
-	Shid *sy = (Shid *)malloc(sizeof(Shid));
-	*sy = s;
-
-	System *tsystems = (System *)malloc(sizeof(System) * (numSystems + 1));
-	memcpy(tsystems, systems, sizeof(System) * (numSystems + 1));
-	free(systems);
-	systems = tsystems;
-	System sys = {
-		(void *)sy,
-		0,
-		0,
-	};
-	systems[numSystems] = sys;
-	return &systems[numSystems++];
+	*system = s;
 } /* newSystem */
-
-void systemLoop() {
-		for (int j, i = 0; i < numSystems; i++) {
-			Shid *s = (Shid *)systems[i].internals;
-
-			for (j = 0; j < s->numSlaves; j++) {
-				s->slaves[j]->power = systems[i].power;
-			}
-		}
-} /* systemLoop */
 
 Settings newSettings(float        kP,
                      float        kI,
@@ -91,7 +49,7 @@ Settings newSettings(float        kP,
                      int          min,
                      int          iLimit,
                      unsigned int precision,
-										 unsigned int tolerance) {
+                     unsigned int tolerance) {
 	Settings s;
 
 	s.kP         = kP;
@@ -117,13 +75,12 @@ void PID(long target, Settings *settings) {
 	float derivative;
 	float power;
 	bool  success[5];
-	Shid *shid = (Shid *)settings->system->internals;
-	shid->sensor->reset = true;
+
 	settings->done = false;
 
 	do {
 		delay(25);
-		current = shid->sensor->value;
+		current = settings->system->sensor->value;
 		error   = target - current;
 
 		if ((unsigned int)abs((int)error) <= settings->precision) {
@@ -156,8 +113,8 @@ void PID(long target, Settings *settings) {
 		                settings->max,
 		                settings->min);
 
-		for (int m = 0; m < shid->numSlaves; m++) {
-			shid->slaves[m]->power = (int)power;
+		for (int m = 0; m < settings->system->numSlaves; m++) {
+			settings->system->slaves[m]->power = (int)power;
 		}
 	} while (!settings->done);
 } /* PID */

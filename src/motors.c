@@ -23,35 +23,33 @@ Motor motors[10];
 
 void motorInit() {
 	for (int i = 0; i < 10; i++) {
-		motors[i].power    = 0;
-		motors[i].port     = 1;
-		motors[i].inverted = false;
+		motors[i].power      = 0;
+		motors[i].port       = 1;
+		motors[i].isInverted = false;
 	}
 } /* motorPreLoop */
 
 void motorLoop() {
 	for (int i = 0; i < 10; i++) {
-		motorSet(motors[i].port,
-		         motors[i].inverted ? motors[i].power : -motors[i].power);
+		if (motors[i].port == 0) {
+			continue;
+		}
+
+		if (motors[i].last != motors[i].power) {
+			motorSet(motors[i].port,
+			         motors[i].isInverted ? motors[i].power : -motors[i].power);
+		}
+		motors[i].last = motors[i].power;
 	}
 } /* motorLoop */
 
-Motor* newMotor(unsigned char port, bool inverted) {
+Motor* newMotor(unsigned char port, bool isInverted) {
 	Motor *m = &motors[port - 1];
 
-	m->port     = port;
-	m->power    = 0;
-	m->inverted = inverted;
-
-	return m;
-} /* newMotor */
-
-Servo* newServo(unsigned char port, bool inverted) {
-	Servo *m = (Servo *)&motors[port - 1];
-
-	m->port     = port;
-	m->position = 0;
-	m->inverted = inverted;
+	m->port       = port;
+	m->power      = 0;
+	m->last       = 0;
+	m->isInverted = isInverted;
 
 	return m;
 } /* newMotor */

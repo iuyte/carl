@@ -19,17 +19,21 @@
 
 #include "../include/robot.h"
 
-Servo  *claw;
-System *arm;
-System *lift;
-System *mogo;
-System *drive[2];
+Motor *claw;
+Motor *drive[2];
+Motor *arm[2];
+Motor *mogo[2];
 
 Sensor *armCoder;
 Sensor *liftCoder;
 Sensor *driveCoder[2];
 Sensor *mogoAngle;
 Sensor *gyro[2];
+Sensor *sonic;
+
+System Drive[2];
+System Arm;
+System Mogo;
 
 TaskHandle managerHandle;
 
@@ -54,14 +58,21 @@ void initialize() {
 	                           TASK_DEFAULT_STACK_SIZE,
 	                           NULL,
 	                           TASK_PRIORITY_DEFAULT + 1);
+
+	while (!isAutonomous() && !isEnabled()) {
+		delay(15);
+	}
 } /* initialize */
 
 void manager(void *none) {
 	while (true) {
 		motorLoop();
 		sensorLoop();
-		systemLoop();
 		delay(5);
 	}
 	(void)none;
 } /* manager */
+
+long gyros() {
+	return (gyro[0]->value + gyro[1]->value) / 2;
+} /* gyros */
