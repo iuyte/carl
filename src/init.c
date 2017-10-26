@@ -22,30 +22,69 @@
 void initializeIO() {}
 
 void init() {
-	printf("\nInitializing... ");
+	// LCD initialization
+	lcdInit(uart1);
+	lcdSetBacklight(uart1, true);
+
+	/**
+	 * Notify both through the terminal and an lcd
+	 *
+	 * @param buffer the text to display
+	 */
+	void notice(const char *buffer) {
+		print(buffer);
+		lcdSetText(uart1, 2, buffer);
+	} /* notice */
+
+	print("\nInitializing..., ");
+	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
 	mogoAngle = newAnalog(1);
+	notice("mobile goal angle, ");
+
+	gyro[0] = newGyro(2, 0);
+	gyro[1] = newGyro(3, 0);
+	notice("gyroscopes, ");
 
 	// Set up the digital sensors
-	armCoder      = newQuad(1, 2, false);
+	armCoder = newQuad(1, 2, false);
+	notice("arm quad, ");
+
 	driveCoder[0] = newQuad(4, 5, true);
+	notice("left drive quad, ");
+
 	driveCoder[1] = newQuad(6, 7, false);
-	liftCoder     = newQuad(8, 9, false);
+	notice("right drive quad, ");
+
+	sonic = newSonic(3, 10);
+	notice("ultrasonic sensor, ");
 
 	// Initialize and set up all of the motors, servos, systems, etc
-	claw = newServo(5, false);
-	arm  = newSystem(armCoder,
-	                 newMotor(1,  true),
-	                 newMotor(10, false));
-	lift = newSystem(liftCoder,
-	                 newMotor(3,  true),
-	                 newMotor(8,  false));
-	mogo = newSystem(mogoAngle,
-	                 newMotor(4,  false),
-	                 newMotor(7,  true));
+	claw = newMotor(5, false);
+	notice("claw servo, ");
 
-	drive[0] = newSystem(driveCoder[0], newMotor(2, true));
-	drive[1] = newSystem(driveCoder[1], newMotor(9, false));
-	printf("done!\n\n");
+	arm[0] = newMotor(1, true);
+	arm[1] = newMotor(10, false);
+	notice("arm motors, ");
+
+	mogo[0] = newMotor(4, false);
+	mogo[1] = newMotor(7, true);
+	notice("mobile goal motors, ");
+
+	drive[0] = newMotor(2, true);
+	notice("left drive motors, ");
+
+	drive[1] = newMotor(9, false);
+	notice("right drive motors, ");
+
+	// Configure Systems
+	confSystem(&Drive[0], driveCoder[0], 1, drive[0]);
+	confSystem(&Drive[1], driveCoder[1], 1, drive[1]);
+	confSystem(&Arm, armCoder, 2, arm[0], arm[1]);
+	confSystem(&Mogo, mogoAngle, 2, mogo[0], mogo[1]);
+	notice("Systems, ");
+
+	notice("done!");
+	print("\n\n");
 } /* init */

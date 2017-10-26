@@ -32,50 +32,10 @@
              NULL,                                          \
              TASK_PRIORITY_DEFAULT)
 
-static const float inch = 90 * 3.1415926535897932384626433832795028841917;
-
-
-// Motors and servos
-
-/**
- * The claw, a servo @ port 5
- */
-extern Servo *claw;
-
-/**
- * The linear lift, of:
- *  left  motor @ port    3
- *  right motor @ port    8
- *  encoder     @ digital 8, 9
- */
-extern System *lift;
-
-/**
- * The arm, containing:
- *  left  motor @ port    1
- *  right motor @ port    10
- *  encoder     @ digital 1, 2
- */
-extern System *arm;
-
-/**
- * The mogo manipulator, consisting of:
- *  left  motor   @ port   4
- *  right motor   @ port   7
- *  potentiometer @ analog 3
- */
-extern System *mogo;
-
-/**
- * The two Systems of the drive:
- *  left  @ index 0:
- *    power expander @ port    2
- *    encoder        @ digital 4, 5
- *  right @ index 1:
- *    power expander @ port    9
- *    encoder        @ digital 6, 7
- */
-extern System *drive[2];
+static const double inch = 360 /* degrees in a circle */ *
+                           3.1415926535897932384626433832795028841917
+                           / 4 /* The diameter of our wheels */ *
+                           8 / 5 /* which is the gear ratio on the encoders */;
 
 // Sensors and the like
 
@@ -108,6 +68,45 @@ extern Sensor *mogoAngle;
  */
 extern Sensor *gyro[2];
 
+/**
+ * The ultrasonic sensor on the robot
+ * echo, orange wire, in digital 3
+ * ping, yellow wire, in digital 10
+ */
+extern Sensor *sonic;
+
+// Motors and servos
+
+/**
+ * The claw, a servo @ port 5
+ */
+extern Motor *claw;
+
+/**
+ * The two sides of the drive:
+ *  left  @ index 0 in power expander @ port 2
+ *  right @ index 1 in power expander @ port 9
+ */
+extern Motor *drive[2];
+
+/**
+ * The arm, containing:
+ *  left  motor @ port    1
+ *  right motor @ port    10
+ */
+extern Motor *arm[2];
+
+/**
+ * The mogo manipulator, consisting of:
+ *  left  motor   @ port   4
+ *  right motor   @ port   7
+ */
+extern Motor *mogo[2];
+
+extern System Drive[2];
+extern System Arm;
+extern System Mogo;
+
 // Stuff to set stuff
 void driveSet(int l,
               int r);
@@ -121,5 +120,12 @@ extern TaskHandle managerHandle;
  * Runs the various functions to manage everything
  */
 void manager(void *none);
+
+/**
+ * Get the averaged value between gyros
+ *
+ * @return the sum of both gyro values / 2
+ */
+long gyros();
 
 #endif // CARL_ROBOT_H_

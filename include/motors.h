@@ -31,18 +31,10 @@
  */
 typedef struct Motor {
 	unsigned char port;
-	bool          inverted;
+	bool          isInverted;
 	int           power;
+	int           last;
 } Motor;
-
-/**
- * Similar to a Motor, but it has a position instead of power
- */
-typedef struct Servo {
-	unsigned char port;
-	bool          inverted;
-	int           position;
-} Servo;
 
 /**
  * Initialize the motor arrays
@@ -58,22 +50,11 @@ void   motorLoop();
  * Create a new Motor
  *
  * @param port     the port that the motor is in
- * @param inverted whether or not the motor is inverted
+ * @param isInverted whether or not the motor is isInverted
  *
  * @return A pointer to the Motor in memory
  */
 Motor* newMotor(unsigned char port,
-                bool          inverted);
-
-/**
- * Create a new Servo
- *
- * @param port     the port that the servo is in
- * @param inverted whether or not the servo is inverted
- *
- * @return A pointer to the Servo in memory
- */
-Servo* newServo(unsigned char port,
-                bool          inverted);
+                bool          isInverted);
 
 #endif // CARL_MOTORS_H_

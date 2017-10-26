@@ -28,27 +28,26 @@
  * A structure defining a group of motors and a sensor
  */
 typedef struct System {
-	void *internals;
-	long  request;
-	int   power;
+	long    request;
+	int     power;
+	int     numSlaves;
+	Sensor *sensor;
+	Motor **slaves;
 } System;
 
 /**
- * A step in the manager that manages systems;
- */
-void    systemLoop();
-
-/**
- * Create and configure a new System
+ * Create and configure a new System.
  *
+ * @param system a pointer to the System to configure
  * @param sensor a pointer to the Sensor of the System
+ * @param num    the number of motors in the System
  * @param slaves variadic args of the motors in the System
- *
- * @return a pointer to the configured system
  */
-System* newSystem(Sensor *sensor,
-                  Motor  *slaves,
-                  ...);
+void confSystem(System *system,
+                Sensor *sensor,
+                int     num,
+                Motor  *slaves,
+                ...);
 
 /**
  * The settings for PID

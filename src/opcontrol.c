@@ -19,32 +19,46 @@
 
 #include "../include/robot.h"
 
-void   operatorControl() {
+void operatorControl() {
+	gyro[0]->reset = true;
+	gyro[1]->reset = true;
+
 	void moveDrive() {
-		drive[0]->power = deadBand(joystickGetAnalog(1, 3), 10);
-		drive[1]->power = deadBand(joystickGetAnalog(1, 2), 10);
+		drive[0]->power = joystickGetAnalog(1, 3);
+		drive[1]->power = joystickGetAnalog(1, 2);
 	} /* drive */
 
 	void moveMogo() {
-		mogo->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
-		                 joystickGetDigital(1, 6, JOY_UP) * 127;
+		mogo[0]->power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
+		                 joystickGetDigital(1, 5, JOY_UP) * 127;
+		mogo[1]->power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
+		                 joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
-		arm->power = joystickGetDigital(2, 6, JOY_DOWN) * -127 +
-		                 joystickGetDigital(2, 6, JOY_UP) * 127;
+		arm[0]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
+		                 joystickGetDigital(1, 6, JOY_UP) * 127;
+		arm[1]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
+		                 joystickGetDigital(1, 6, JOY_UP) * 127;
 	} /* moveArm */
 
 	void moveClaw() {
-		claw->position = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
-		                 joystickGetDigital(2, 6, JOY_UP)   *  127;
+		// claw->power = clipNum(claw->power + (joystickGetDigital(1, 7, JOY_DOWN) ?
+		// -3 : (joystickGetDigital(1, 7, JOY_UP) ? 2 : 0)), 100, 0);
+		claw->power = joystickGetDigital(1, 7, JOY_DOWN) * -100 +
+		                 joystickGetDigital(1, 7, JOY_UP) * 100;
 	} /* moveClaw */
 
 	void info() {
-		printf("\r| %5d     | %5d     | %5d     | ",
-		       drive[0]->power,
-		       drive[1]->power,
-		       arm->power);
+		printf(
+		  "\r| %5ld     | %5ld     | %5ld     | %5ld     | %5d     | %5ld     | %5ld     | ",
+		  driveCoder[0]->value,
+		  driveCoder[1]->value,
+		  armCoder->value,
+		  mogoAngle->value,
+		  claw->power,
+		  gyros(),
+		  sonic->value);
 	} /* info */
 
 	while (isEnabled()) {
