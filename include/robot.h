@@ -23,6 +23,7 @@
 #include "motors.h"
 #include "sensors.h"
 #include "pid.h"
+#include "rush.h"
 
 #define GO(task, arg)                 \
   taskCreate(&task,                   \

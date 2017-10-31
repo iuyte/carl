@@ -35,6 +35,7 @@ void motorLoop() {
 			continue;
 		}
 
+		// motors[i].power = deadBand(motors[i].power, 10);
 		if (motors[i].last != motors[i].power) {
 			motorSet(motors[i].port,
 			         motors[i].isInverted ? motors[i].power : -motors[i].power);

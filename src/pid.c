@@ -22,7 +22,6 @@
 void confSystem(System *system, Sensor *sensor, int num, Motor **slaves) {
 	System s = {
 		0,
-		0,
 		num,
 		sensor,
 		slaves,
@@ -31,7 +30,7 @@ void confSystem(System *system, Sensor *sensor, int num, Motor **slaves) {
 	*system = s;
 } /* newSystem */
 
-Settings newSettings(long         target,
+Settings newSettings(float        target,
                      float        kP,
                      float        kI,
                      float        kD,
@@ -55,7 +54,8 @@ Settings newSettings(long         target,
 	s.iLimit     = iLimit;
 	s.precision  = precision;
 	s.tolerance  = tolerance;
-	s.done       = false;
+	s.isDone     = false;
+	s.isActive   = true;
 
 	return s;
 } /* newSettings */
@@ -69,11 +69,13 @@ void PID(void *conf) {
 	float     derivative;
 	float     power;
 	bool      success[5];
+	Motor   **slaves = settings->system->slaves;
 
-	settings->done = false;
+	settings->isDone = false;
 
 	do {
 		delay(25);
+
 		current = settings->system->sensor->value;
 		error   = settings->target - current;
 
@@ -87,7 +89,7 @@ void PID(void *conf) {
 			}
 
 			if ((success[4]) && settings->terminates) {
-				settings->done = true;
+				settings->isDone = true;
 			}
 			continue;
 		} else {
@@ -107,8 +109,12 @@ void PID(void *conf) {
 		                settings->max,
 		                settings->min);
 
-		for (int m = 0; m < settings->system->numSlaves; m++) {
-			settings->system->slaves[m]->power = (int)power;
+		if (settings->isActive) {
+			settings->system->power = (int)power;
 		}
-	} while (!settings->done);
+
+		for (int m = 0; m < settings->system->num; m++) {
+			slaves[m]->power = settings->system->power;
+		}
+	} while (!settings->isDone);
 } /* PID */

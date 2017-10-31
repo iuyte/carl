@@ -38,6 +38,22 @@ System Mogo;
 TaskHandle managerHandle;
 
 void init();
+void initLoop();
+void info() {
+	printf(
+	  "\r| %4ld      %4ld    | %4ld    | %4ld    | %4d    | %4ld    | %4ld    | %4u mv | ",
+	  driveCoder[0]->value,
+	  driveCoder[1]->value,
+	  armCoder->value,
+	  mogoAngle->value,
+	  claw->power,
+	  gyros(),
+	  sonic->value,
+	  powerLevelMain());
+	lcdPrint(uart1, 2, "%u mV", powerLevelMain());
+} /* info */
+
+bool initialized = false;
 
 void driveSet(int l, int r) {
 	drive[0]->power = l;
@@ -48,17 +64,23 @@ void initialize() {
 	// Clean up everything before we touch it. Otherwise, what we do next will be
 	// overwritten
 	sensorInit();
-	motorInit();
+
+	// motorInit();
 
 	// Call the init function to do more stuff
-	init();
+	if (!initialized) {
+		init();
+	}
+	initLoop();
 
-	// Start the manager that manages everything basiccally
-	managerHandle = taskCreate(&manager,
-	                           TASK_DEFAULT_STACK_SIZE,
-	                           NULL,
-	                           TASK_PRIORITY_DEFAULT + 1);
-
+	/* Start the manager that manages everything basiccally
+	 *   managerHandle = taskCreate(&manager,
+	 *                           TASK_DEFAULT_STACK_SIZE,
+	 *                           NULL,
+	 *                           TASK_PRIORITY_DEFAULT + 1);
+	 *
+	 *   // Wait for initialization to end
+	 *   // */
 	while (!isAutonomous() && !isEnabled()) {
 		delay(15);
 	}
@@ -68,9 +90,9 @@ void manager(void *none) {
 	while (true) {
 		motorLoop();
 		sensorLoop();
-		delay(5);
+		info();
+		delay(10);
 	}
-	(void)none;
 } /* manager */
 
 long gyros() {

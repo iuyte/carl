@@ -19,10 +19,12 @@
 
 #include "../include/sensors.h"
 
-Sensor    sensors[24];
+Sensor sensors[35];
+Mutex  smutexes[35];
 
 void sensorInit() {
 	Sensor s = {
+		NULL,
 		Placeholder,
 		0,
 		0,
@@ -34,56 +36,59 @@ void sensorInit() {
 		NULL,
 	};
 
-	for (int i = 0; i < 24; i++) {
-		sensors[i] = s;
+	for (int i = 0; i < 35; i++) {
+		sensors[i]  = s;
+		smutexes[i] = mutexCreate();
 	}
 } /* sensorInit */
 
 void sensorLoop() {
-		for (int i = 0; i < 24; i++) {
-			if (!sensors[i].exists){
-				continue;
-			}
-
-			switch (sensors[i].type) {
-			case Digital:
-				sensors[i].value = digitalRead(sensors[i].port);
-				break;
-
-			case Analog:
-				sensors[i].value = (!sensors[i].calibrate) ?
-				                   analogReadCalibrated(sensors[i].port) :
-				                   analogRead(sensors[i].port);
-				break;
-
-			case AnalogPrecise:
-				sensors[i].value = analogReadCalibratedHR(sensors[i].port);
-				break;
-
-			case Sonic:
-				sensors[i].value = ultrasonicGet(sensors[i].pros);
-				break;
-
-			case Quad:
-				sensors[i].value = encoderGet(sensors[i].pros);
-				break;
-
-			case Gyroscope:
-				sensors[i].value = gyroGet(sensors[i].pros);
-				break;
-
-			default:
-				break;
-			} /* switch */
-			sensors[i].value =
-			  (sensors[i].inverted ? -sensors[i].value : sensors[i].value) -
-			  sensors[i].zero;
-
-			if (sensors[i].reset) {
-				sensors[i].zero  = sensors[i].value;
-				sensors[i].reset = false;
-			}
+	for (int i = 0; i < 35; i++) {
+		if (!sensors[i].exists || !mutexTake(smutexes[i], 5)) {
+			continue;
 		}
+
+		switch (sensors[i].type) {
+		case Digital:
+			sensors[i].value = digitalRead(sensors[i].port);
+			break;
+
+		case Analog:
+			sensors[i].value = (!sensors[i].calibrate) ?
+			                   analogReadCalibrated(sensors[i].port) :
+			                   analogRead(sensors[i].port);
+			break;
+
+		case AnalogPrecise:
+			sensors[i].value = analogReadCalibratedHR(sensors[i].port);
+			break;
+
+		case Sonic:
+			sensors[i].value = ultrasonicGet(sensors[i].pros);
+			break;
+
+		case Quad:
+			sensors[i].value = encoderGet(sensors[i].pros);
+			break;
+
+		case Gyroscope:
+			sensors[i].value = gyroGet(sensors[i].pros);
+			break;
+
+		default:
+			break;
+		} /* switch */
+		sensors[i].value =
+		  (sensors[i].inverted ? -sensors[i].value : sensors[i].value) -
+		  sensors[i].zero;
+
+		if (sensors[i].reset) {
+			sensors[i].zero  = sensors[i].value;
+			sensors[i].reset = false;
+		}
+
+		mutexGive(smutexes[i]);
+	}
 } /* sensorLoop */
 
 Sensor* newSensor(SensorType     type,
@@ -93,7 +98,15 @@ Sensor* newSensor(SensorType     type,
 	if (port < 1) {
 		port = 1;
 	}
-	Sensor *s = &sensors[port - 1];
+	int index;
+
+	if ((type == Digital) || (type == Sonic) || (type == Quad)) {
+		index = port - 1;
+	} else {
+		index = port + BOARD_NR_GPIO_PINS - 1;
+	}
+	mutexTake(smutexes[index], -1);
+	Sensor *s = &sensors[index];
 
 	s->type      = type;
 	s->value     = 0;
@@ -136,6 +149,8 @@ Sensor* newSensor(SensorType     type,
 	default:
 		break;
 	} /* switch */
+
+	mutexGive(smutexes[index]);
 	return s;
 } /* newSensor */
 
@@ -159,6 +174,27 @@ Sensor* newAnalog(unsigned char port) {
 	return newSensor(Analog, port, false, true);
 } /* newAnalog */
 
+Sensor* newAnalogUnprecise(unsigned char port) {
+	return newSensor(Analog, port, false, false);
+} /* newAnalogUnprecise */
+
 Sensor* newGyro(unsigned char port, int calibration) {
 	return newSensor(Gyroscope, port, false, calibration);
 } /* newGyro */
+
+bool sensorTake(Sensor *sensor, unsigned int block) {
+	return sensorTake(smutexes[(sensor->type == Digital || sensor->type ==
+	                            Quad ||
+	                            sensor->type == Sonic) ? (sensor->port -
+	                                                      1) : (sensor->port +
+	                                                            BOARD_NR_GPIO_PINS
+	                                                            - 1)], block);
+} /* sensorTake */
+
+void sensorGive(Sensor *sensor) {
+	mutexGive(smutexes[(sensor->type == Digital || sensor->type == Quad ||
+	                    sensor->type == Sonic) ? (sensor->port -
+	                                              1) : (sensor->port +
+	                                                    BOARD_NR_GPIO_PINS
+	                                                    - 1)]);
+} /* sensorGive */
