@@ -19,24 +19,38 @@
 
 #include "../include/robot.h"
 
+Settings armSettings;
+
+int digital(unsigned char joyNum,
+            unsigned char channel,
+            unsigned char b1,
+            unsigned char b2) {
+	return joystickGetDigital(joyNum, channel, b2) * -1 +
+	       joystickGetDigital(joyNum, channel, b1) * 1;
+} /* digital */
+
 void operatorControl() {
-	lcdSetText(uart1, 1, "Battery:");
-	Settings armSettings = newSettings(armCoder->value,
-	                                   .8,
-	                                   .15,
-	                                   .2,
-	                                   &Arm,
-	                                   false,
-	                                   127,
-	                                   -127,
-	                                   2,
-	                                   8,
-	                                   5);
-
+	armCoder->reset = true;
+	armSettings     = newSettings(0,
+	                              .5,
+	                              0,
+	                              0,
+	                              &Arm,
+	                              false,
+	                              127,
+	                              -127,
+	                              2,
+	                              8,
+	                              5);
 	GO(PID, &armSettings);
+	armSettings.isActive = false;
 
+	sensorTake(gyro[0], -1);
+	sensorTake(gyro[1], -1);
 	gyro[0]->reset = true;
 	gyro[1]->reset = true;
+	sensorGive(gyro[0]);
+	sensorGive(gyro[1]);
 
 	void moveDrive() {
 		drive[0]->power = joystickGetAnalog(1, 3);
@@ -45,46 +59,50 @@ void operatorControl() {
 
 	void moveMogo() {
 		mogo[0]->power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
-		                      joystickGetDigital(1, 5, JOY_UP) * 127;
+		                 joystickGetDigital(1, 5, JOY_UP) * 127;
 		mogo[1]->power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
-		                      joystickGetDigital(1, 5, JOY_UP) * 127;
+		                 joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
-		// arm[0]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
-		//                 joystickGetDigital(1, 6, JOY_UP) * 127;
-		// arm[1]->power = joystickGetDigital(1, 6, JOY_DOWN) * -127 +
-		//                 joystickGetDigital(1, 6, JOY_UP) * 127;
-		armSettings.target += joystickGetDigital(1, 6, JOY_DOWN) * -2 +
-		                      joystickGetDigital(1, 6, JOY_UP) * 2;
+		static int power = 0;
+
+		// armSettings.target += .5 * digital(1, 6, JOY_UP, JOY_DOWN);
+		power = 127 * digital(1, 6, JOY_UP, JOY_DOWN);
+
+		if (power) {
+			armSettings.isActive = false;
+			armSettings.target   = armCoder->value;
+			Arm.power            = power;
+			arm[0]->power        = power;
+			arm[1]->power        = power;
+		} else {
+			armSettings.isActive = true;
+		}
+
+		/*
+		 *   if (digital(1, 6, JOY_UP, JOY_DOWN) == power) {
+		 *        armSettings.isActive = true;
+		 *   } else {
+		 *        armSettings.isActive = false;
+		 *        power                = 127 * digital(1, 6, JOY_UP, JOY_DOWN);
+		 *        armSettings.target   = armSettings.system->sensor->value;
+		 *        Arm.power            = power;
+		 *   }
+		 */
 	} /* moveArm */
 
 	void moveClaw() {
 		// claw->power = clipNum(claw->power + (joystickGetDigital(1, 7, JOY_DOWN) ?
 		// -3 : (joystickGetDigital(1, 7, JOY_UP) ? 2 : 0)), 100, 0);
-		claw->power = joystickGetDigital(1, 8, JOY_DOWN) * -127 +
-		                      joystickGetDigital(1, 8, JOY_UP) * 127;
+		claw->power = joystickGetDigital(1, 8, JOY_DOWN) * 50;
 	} /* moveClaw */
 
-	void info() {
-		printf(
-		  "\r| %5ld     | %5ld     | %5ld     | %5ld     | %5d     | %5ld     | %5ld     | ",
-		  driveCoder[0]->value,
-		  driveCoder[1]->value,
-		  armCoder->value,
-		  mogoAngle->value,
-		  claw->power,
-		  gyros(),
-		  sonic->value);
-		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
-	} /* info */
-
-	while (isEnabled()) {
+	while (true) {
 		moveDrive();
 		moveMogo();
 		moveArm();
 		moveClaw();
-		info();
 		delay(20);
 	}
 } /* operatorControl */

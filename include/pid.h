@@ -27,9 +27,8 @@
  * A structure defining a group of motors and a sensor
  */
 typedef struct System {
-	long    request;
 	int     power;
-	int     numSlaves;
+	int     num;
 	Sensor *sensor;
 	Motor **slaves;
 } System;
@@ -42,7 +41,10 @@ typedef struct System {
  * @param num    the number of motors in the System
  * @param slaves variadic args of the motors in the System
  */
-void confSystem(System *system, Sensor *sensor, int num, Motor **slaves);
+void confSystem(System *system,
+                Sensor *sensor,
+                int     num,
+                Motor **slaves);
 
 /**
  * The settings for PID
@@ -51,7 +53,7 @@ typedef struct Settings {
 	/**
 	 * The ideal position, or goal value
 	 */
-	long target;
+	float target;
 
 	/**
 	 * Maximum value to be assigned to the controlled system
@@ -107,7 +109,12 @@ typedef struct Settings {
 	/**
 	 * True when finished
 	 */
-	bool done;
+	bool isDone;
+
+	/*
+	 * Whether or not it is active
+	 */
+	bool isActive;
 } Settings;
 
 /**
@@ -130,8 +137,8 @@ typedef struct Settings {
  *
  * @returns the configured System
  */
-Settings newSettings(long         target,
-										 float        kP,
+Settings newSettings(float        target,
+                     float        kP,
                      float        kI,
                      float        kD,
                      System      *system,

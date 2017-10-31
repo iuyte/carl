@@ -20,35 +20,4 @@
 #include "../include/robot.h"
 
 void autonomous() {
-	Settings drivePID[2] = {
-		newSettings(12 *inch,
-								1,
-		            1,
-		            1,
-		            &Drive[0],
-		            true,
-		            127,
-		            -127,
-		            10,
-		            8,
-		            5),
-		newSettings(12 *inch,
-								1,
-		            1,
-		            1,
-		            &Drive[1],
-		            true,
-		            127,
-		            -127,
-		            10,
-		            8,
-		            5)
-	};
-
-	GO(PID, &drivePID[0]);
-	GO(PID, &drivePID[1]);
-
-	while (!drivePID[0].done || !drivePID[1].done) {
-		delay(25);
-	}
 } /* autonomous */

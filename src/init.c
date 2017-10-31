@@ -40,12 +40,16 @@ void init() {
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
-	mogoAngle = newAnalog(1);
+	gyro[0] = newGyro(1, 198);
+	gyro[1] = newGyro(2, 197);
+	notice("gyroscopes, ");
+
+	mogoAngle             = newAnalogUnprecise(3);
+	mogoAngle->redundancy = newAnalogUnprecise(4);
 	notice("mobile goal angle, ");
 
-	gyro[0] = newGyro(2, 0);
-	gyro[1] = newGyro(3, 0);
-	notice("gyroscopes, ");
+	clawAngle = newAnalog(5);
+	notice("claw angle, ");
 
 	// Set up the digital sensors
 	armCoder = newQuad(1, 2, false);
@@ -64,8 +68,8 @@ void init() {
 	claw = newMotor(5, false);
 	notice("claw servo, ");
 
-	arm[0] = newMotor(1, true);
-	arm[1] = newMotor(10, false);
+	arm[0] = newMotor(1, false);
+	arm[1] = newMotor(10, true);
 	notice("arm motors, ");
 
 	mogo[0] = newMotor(4, false);
@@ -79,16 +83,20 @@ void init() {
 	notice("right drive motors, ");
 
 	// Configure Systems
-	Motor **drives[2] = {(Motor **)malloc(sizeof(Motor *)), (Motor **)malloc(sizeof(Motor *))};
-	Motor **arms = (Motor **)malloc(sizeof(Motor *) * 2);
+	Motor **drives[2] = {
+		(Motor **)malloc(sizeof(Motor *)),
+		(Motor **)malloc(sizeof(Motor *))
+	};
+
+	Motor **arms  = (Motor **)malloc(sizeof(Motor *) * 2);
 	Motor **mogos = (Motor **)malloc(sizeof(Motor *) * 2);
 
 	drives[0][0] = drive[0];
 	drives[1][0] = drive[1];
-	arms[0] = arm[0];
-	arms[1] = arm[1];
-	mogos[0] = mogo[0];
-	mogos[1] = mogo[1];
+	arms[0]      = arm[0];
+	arms[1]      = arm[1];
+	mogos[0]     = mogo[0];
+	mogos[1]     = mogo[1];
 
 	confSystem(&Drive[0], driveCoder[0], 1, drives[0]);
 	confSystem(&Drive[1], driveCoder[1], 1, drives[1]);
@@ -98,4 +106,16 @@ void init() {
 
 	notice("done!");
 	print("\n\n");
+	lcdSetText(uart1, 1, "Battery:");
 } /* init */
+
+void initLoop() {
+	gyro[0]->reset               = true;
+	gyro[1]->reset               = true;
+	mogoAngle->reset             = true;
+	mogoAngle->redundancy->reset = true;
+	driveCoder[0]->reset         = true;
+	driveCoder[1]->reset         = true;
+	armCoder->reset              = true;
+	clawAngle->reset             = true;
+} /* initLoop */

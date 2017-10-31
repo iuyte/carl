@@ -24,7 +24,7 @@
 #define clipNum(input, high, low) (input > high) ? high : (input < \
                                                            low) ? low : input
 #define sng(input) (input > 0) ? 1 : (input < 0) ? -1 : 0
-#define deadBand(input, dead) (abs(input) > dead) ? input : 0
+#define deadBand(input, dead) (abs(input) > dead) ? input : input
 
 /**
  * A motor structure, containing a motor's port, invertation, and power
@@ -56,5 +56,10 @@ void   motorLoop();
  */
 Motor* newMotor(unsigned char port,
                 bool          isInverted);
+
+/*
+ * An array of Mutex that protects each port
+ */
+extern Mutex mmutexes[10];
 
 #endif // CARL_MOTORS_H_

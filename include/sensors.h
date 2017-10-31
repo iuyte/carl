@@ -39,6 +39,7 @@ typedef enum {
  * A struct representing a Sensor of a given type
  */
 typedef struct Sensor {
+	struct Sensor *redundancy;
 	SensorType     type;
 	long           value;
 	long           zero;
@@ -64,10 +65,12 @@ void    sensorLoop();
 /**
  * Create a new Sensor
  *
- * @param type      the type of SensorType, either a Digital, Analog, AnalogPrecise, Quad, Sonic, or Gyroscope
+ * @param type      the type of SensorType, either a Digital, Analog,
+ **AnalogPrecise, Quad, Sonic, or Gyroscope
  * @param port      the port in which the sensor in in
  * @param inverted  whether or not to invert the value
- * @param calibrate the calibration value in some cases, or anything but 0 to calibrate the Sensor
+ * @param calibrate the calibration value in some cases, or anything but 0 to
+ **calibrate the Sensor
  *
  * @return a pointer to the configured Sensor
  */
@@ -121,6 +124,15 @@ Sensor* newQuad(unsigned char top,
 Sensor* newAnalog(unsigned char port);
 
 /**
+ * Create and configure a new analog sensor
+ *
+ * @param port the port that the sensor is in
+ *
+ * @return a pointer to the configured Sensor of type Analog
+ */
+Sensor* newAnalogUnprecise(unsigned char port);
+
+/**
  * Make a new gyroscope sensor
  *
  * @param port        the analog port that the gyro is plugged into
@@ -128,5 +140,27 @@ Sensor* newAnalog(unsigned char port);
  */
 Sensor* newGyro(unsigned char port,
                 int           calibration);
+
+/*
+ * Take a Sensor's Mutex
+ *
+ * @param sensor the sensor from which to take the Mutex
+ * @param block  the amount of milliseconds willing to wait for the Mutex to be
+ * freed. -1 for indefinitely
+ */
+bool sensorTake(Sensor      *sensor,
+                unsigned int block);
+
+/*
+ * Free a Sensor's mutex
+ *
+ * @param sensor the Sensor of which the mutex will be freed
+ */
+void sensorGive(Sensor *sensor);
+
+/*
+ * An array of Mutex guarding the sensors
+ */
+extern Mutex smutexes[35];
 
 #endif // CARL_SENSORS_H_
