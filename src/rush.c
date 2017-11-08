@@ -22,8 +22,8 @@
 Sensor *clawAngle;
 
 void driveSetR(int l, int r) {
-	motorSet(2, -l);
-	motorSet(9, r);
+	motorSet(2, l);
+	motorSet(9, -r);
 } /* driveSet */
 
 void armSet(int p) {
@@ -32,22 +32,51 @@ void armSet(int p) {
 } /* armSet */
 
 void mogoSet(int p) {
-	motorSet(4, p);
-	motorSet(7, -p);
+	motorSet(4, -p);
+	motorSet(7, p);
 } /* mogoSet */
 
 void mogoSet2(int l, int r) {
-	motorSet(4, l);
-	motorSet(7, -r);
+	motorSet(4, -l);
+	motorSet(7, r);
 } /* mogoSet */
+
+void mogoLockStop(void *time) {
+	delay((unsigned long)time);
+	  motorSet(6, 0);
+} /* mogoLockStop */
+
+void mogoLockSet(bool isLocked) {
+	if (isLocked) {
+		motorSet(6, 127);
+		GO(mogoLockStop, 400);
+	} else {
+		motorSet(6, -127);
+		GO(mogoLockStop, 50);
+	}
+} /* mogoLockSet */
 
 void clawSet(int p) {
 	motorSet(5, p);
 } /* clawSet */
 
+void hold() {
+	if (armGet(0).position < 600) {
+		armSet(15);
+		return;
+	}
+
+	if (armGet(0).position > 700) {
+		armSet(-15);
+		return;
+	}
+
+	  armSet(0);
+} /* hold */
+
 Get driveGet(bool isLeft) {
 	Get g = {
-		motorGet(isLeft ? 2 : 9) * isLeft ? -1 : 1,
+		motorGet(isLeft ? 2 : 9) * (isLeft ? -1 : 1),
 		driveCoder[isLeft]->value,
 	};
 
@@ -62,6 +91,17 @@ Get armGet(bool isLeft) {
 
 	return g;
 } /* armGet */
+
+Task clawPT(void *position) {
+	int *goal = (int *)position;
+	int  err;
+
+	do {
+		err = *goal - clawAngle->value;
+		clawSet(-err * .3);
+		delay(10);
+	} while (isEnabled());
+} /* clawPT */
 
 Get mogoGet(bool isLeft) {
 	Get g = {
@@ -88,10 +128,11 @@ void driveSetP(long  positionL,
 	long error[2];
 
 	do {
-		error[0] = positionL - driveGet(0).position;
-		error[1] = positionR - driveGet(1).position;
-		driveSet(error[0] * kP, error[1] * kP);
-	} while (error[0] > tolerance && error[1] > tolerance);
+		error[0] = positionL - driveCoder[0]->value;
+		error[1] = positionR - driveCoder[1]->value;
+		driveSetR((int)((float)error[0] * kP), (int)((float)error[1] * kP));
+	} while (abs(error[0]) > tolerance && abs(error[1]) > tolerance);
+	  driveSetR(0,                           0);
 } /* driveSetP */
 
 void armSetP(long  position,
@@ -102,7 +143,7 @@ void armSetP(long  position,
 	do {
 		error = position - armGet(0).position;
 		armSet(error * kP);
-	} while (error > tolerance);
+	} while (abs(error) > tolerance);
 } /* armSetP */
 
 void mogoSetP(long  position,
@@ -114,7 +155,7 @@ void mogoSetP(long  position,
 		error[0] = position - mogoGet(0).position;
 		error[1] = position - mogoGet(1).position;
 		mogoSet2(error[0] * kP, error[1] * kP);
-	} while (error[0] > tolerance && error[1] > tolerance);
+	} while (abs(error[0]) > tolerance && abs(error[1]) > tolerance);
 } /* mogoSetp */
 
 void clawSetP(long  position,
@@ -125,5 +166,41 @@ void clawSetP(long  position,
 	do {
 		error = position - clawGet().position;
 		clawSet(error * kP);
-	} while (error > tolerance);
+	} while (abs(error) > tolerance);
 } /* clawSetP */
+
+bool armLimit() {
+	return !digitalRead(11);
+} /* armLimit */
+
+Task driveSetPT(void *settings) {
+	pSettings s = *(pSettings *)settings;
+
+	delay(s.delay);
+	driveSetP(s.position, s.positionR, s.kP, s.tolerance);
+} /* driveSetPT */
+
+Task armSetPT(void *settings) {
+	pSettings s = *(pSettings *)settings;
+
+	delay(s.delay);
+	armSetP(s.position, s.kP, s.tolerance);
+} /* armSetPT */
+
+Task mogoSetPT(void *settings) {
+	pSettings s = *(pSettings *)settings;
+
+	delay(s.delay);
+	mogoSetP(s.position, s.kP, s.tolerance);
+} /* mogoSetPT */
+
+Task clawSetPT(void *settings) {
+	pSettings s = *(pSettings *)settings;
+
+	delay(s.delay);
+	clawSetP(s.position, s.kP, s.tolerance);
+} /* clawSetPT */
+
+Task mogoLockSetT(void *isLocked) {
+	mogoLockSet((bool)isLocked);
+} /* mogoLockSetT */

@@ -47,45 +47,47 @@ void sensorLoop() {
 		if (!sensors[i].exists || !mutexTake(smutexes[i], 5)) {
 			continue;
 		}
+		long val = 0;
 
 		switch (sensors[i].type) {
 		case Digital:
-			sensors[i].value = digitalRead(sensors[i].port);
+			val = digitalRead(sensors[i].port);
 			break;
 
 		case Analog:
-			sensors[i].value = (!sensors[i].calibrate) ?
+			val = (!sensors[i].calibrate) ?
 			                   analogReadCalibrated(sensors[i].port) :
 			                   analogRead(sensors[i].port);
 			break;
 
 		case AnalogPrecise:
-			sensors[i].value = analogReadCalibratedHR(sensors[i].port);
+			val = analogReadCalibratedHR(sensors[i].port);
 			break;
 
 		case Sonic:
-			sensors[i].value = ultrasonicGet(sensors[i].pros);
+			val = ultrasonicGet(sensors[i].pros);
 			break;
 
 		case Quad:
-			sensors[i].value = encoderGet(sensors[i].pros);
+			val = encoderGet(sensors[i].pros);
 			break;
 
 		case Gyroscope:
-			sensors[i].value = gyroGet(sensors[i].pros);
+			val = gyroGet(sensors[i].pros);
 			break;
 
 		default:
 			break;
 		} /* switch */
-		sensors[i].value =
-		  (sensors[i].inverted ? -sensors[i].value : sensors[i].value) -
-		  sensors[i].zero;
 
 		if (sensors[i].reset) {
-			sensors[i].zero  = sensors[i].value;
+			sensors[i].zero  = val;
 			sensors[i].reset = false;
 		}
+
+		sensors[i].value =
+		  (sensors[i].inverted ? -val : val) -
+		  sensors[i].zero;
 
 		mutexGive(smutexes[i]);
 	}

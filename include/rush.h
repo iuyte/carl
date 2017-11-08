@@ -27,6 +27,8 @@
  */
 extern Sensor *clawAngle;
 
+typedef void Task;
+
 typedef struct Get {
 	int  power;
 	long position;
@@ -36,7 +38,9 @@ void driveSetR(int l,
                int r);
 void armSet(int p);
 void mogoSet(int p);
+void mogoLockSet(bool isLocked);
 void clawSet(int p);
+void hold();
 
 void driveSetP(long  positionL,
                long  positionR,
@@ -52,9 +56,26 @@ void clawSetP(long  position,
               float kP,
               long  tolerance);
 
-Get driveGet(bool isLeft);
-Get armGet(bool isLeft);
-Get mogoGet(bool isLeft);
-Get clawGet();
+Get  driveGet(bool isLeft);
+Get  armGet(bool isLeft);
+Get  mogoGet(bool isLeft);
+Get  clawGet();
+
+bool armLimit();
+
+typedef struct pSettings {
+	long          position;
+	float         kP;
+	long          tolerance;
+	unsigned long delay;
+	long          positionR;
+} pSettings;
+
+Task driveSetPT(void *settings);
+Task armSetPT(void *settings);
+Task mogoSetPT(void *settings);
+Task clawSetPT(void *settings);
+Task mogoLockSetT(void *isLocked);
+Task clawPT(void *position);
 
 #endif // CARL_RUSH_H

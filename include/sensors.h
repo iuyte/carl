@@ -66,11 +66,11 @@ void    sensorLoop();
  * Create a new Sensor
  *
  * @param type      the type of SensorType, either a Digital, Analog,
- **AnalogPrecise, Quad, Sonic, or Gyroscope
+ ***AnalogPrecise, Quad, Sonic, or Gyroscope
  * @param port      the port in which the sensor in in
  * @param inverted  whether or not to invert the value
  * @param calibrate the calibration value in some cases, or anything but 0 to
- **calibrate the Sensor
+ ***calibrate the Sensor
  *
  * @return a pointer to the configured Sensor
  */
