@@ -55,53 +55,53 @@ void init() {
 	armCoder = newQuad(1, 2, false);
 	notice("arm quad, ");
 
-	driveCoder[0] = newQuad(4, 5, true);
+	driveCoder[0] = newQuad(4, 5, false);
 	notice("left drive quad, ");
 
-	driveCoder[1] = newQuad(6, 7, false);
+	driveCoder[1] = newQuad(6, 7, true);
 	notice("right drive quad, ");
 
 	sonic = newSonic(3, 10);
 	notice("ultrasonic sensor, ");
 
 	// Initialize and set up all of the motors, servos, systems, etc
-	claw = newMotor(5, false);
+	// claw = newMotor(5, false);
 	notice("claw servo, ");
 
-	arm[0] = newMotor(1, false);
-	arm[1] = newMotor(10, true);
+	// arm[0] = newMotor(1, false);
+	// arm[1] = newMotor(10, true);
 	notice("arm motors, ");
 
-	mogo[0] = newMotor(4, false);
-	mogo[1] = newMotor(7, true);
+	// mogo[0] = newMotor(4, false);
+	// mogo[1] = newMotor(7, true);
 	notice("mobile goal motors, ");
 
-	drive[0] = newMotor(2, true);
+	// drive[0] = newMotor(2, true);
 	notice("left drive motors, ");
 
-	drive[1] = newMotor(9, false);
+	// drive[1] = newMotor(9, false);
 	notice("right drive motors, ");
 
 	// Configure Systems
-	Motor **drives[2] = {
-		(Motor **)malloc(sizeof(Motor *)),
-		(Motor **)malloc(sizeof(Motor *))
-	};
+	// Motor **drives[2] = {
+	//  (Motor **)malloc(sizeof(Motor *)),
+	//  (Motor **)malloc(sizeof(Motor *))
+	// };
 
-	Motor **arms  = (Motor **)malloc(sizeof(Motor *) * 2);
-	Motor **mogos = (Motor **)malloc(sizeof(Motor *) * 2);
+	// Motor **arms  = (Motor **)malloc(sizeof(Motor *) * 2);
+	// Motor **mogos = (Motor **)malloc(sizeof(Motor *) * 2);
 
-	drives[0][0] = drive[0];
-	drives[1][0] = drive[1];
-	arms[0]      = arm[0];
-	arms[1]      = arm[1];
-	mogos[0]     = mogo[0];
-	mogos[1]     = mogo[1];
+	// drives[0][0] = drive[0];
+	// drives[1][0] = drive[1];
+	// arms[0]      = arm[0];
+	// arms[1]      = arm[1];
+	// mogos[0]     = mogo[0];
+	// mogos[1]     = mogo[1];
 
-	confSystem(&Drive[0], driveCoder[0], 1, drives[0]);
-	confSystem(&Drive[1], driveCoder[1], 1, drives[1]);
-	confSystem(&Arm,      armCoder,      2, arms);
-	confSystem(&Mogo,     mogoAngle,     2, mogos);
+	// confSystem(&Drive[0], driveCoder[0], 1, drives[0]);
+	// confSystem(&Drive[1], driveCoder[1], 1, drives[1]);
+	// confSystem(&Arm,      armCoder,      2, arms);
+	// confSystem(&Mogo,     mogoAngle,     2, mogos);
 	notice("Systems, ");
 
 	notice("done!");

@@ -31,10 +31,12 @@
              (void *)arg,             \
              TASK_PRIORITY_DEFAULT)
 
-static const double inch = 360 /* degrees in a circle */ *
-                           3.1415926535897932384626433832795028841917
-                           / 4 /* The diameter of our wheels */ *
-                           8 / 5 /* which is the gear ratio on the encoders */;
+static const double inch =
+  (1 /
+   (3.141592653589793238462643383279502884197169399375105820974944 * 4 / 360 *
+    5 /
+    8))
+  * 11 / 12;
 
 // Sensors and the like
 
