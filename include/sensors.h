@@ -1,6 +1,6 @@
 /**
- * @file sensors.h
- * @brief Hardware abstraction for sensors
+ * @file Sensors.h
+ * @brief Hardware abstraction for Sensors
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -23,11 +23,11 @@
 #include "API.h"
 
 /**
- * The different types of sensors
+ * The different types of Sensors
  */
 typedef enum {
 	Analog,
-	AnalogPrecise,
+	AnalogHR,
 	Digital,
 	Quad,
 	Sonic,
@@ -49,118 +49,94 @@ typedef struct Sensor {
 	unsigned char  port;
 	bool           exists;
 	void          *pros;
+	Mutex          mutex;
 } Sensor;
 
 /**
- * Initialize and clean up the sensors for the manager. Must be used before
- * creating any new sensors
+ * Initialize and clean up the Sensors for the manager. Must be used before
+ * creating any new Sensors
  */
-void    sensorInit();
+void sensorInit();
 
 /**
- * A step in the management loop to handle sensors
+ * A step in the management loop to handle Sensors
  */
-void    sensorLoop();
+void sensorLoop();
 
 /**
- * Create a new Sensor
+ * Configure a new Sensor
  *
  * @param type      the type of SensorType, either a Digital, Analog,
- ***AnalogPrecise, Quad, Sonic, or Gyroscope
- * @param port      the port in which the sensor in in
+ * AnalogHR, Quad, Sonic, or Gyroscope
+ * @param port      the port in which the Sensor in in
  * @param inverted  whether or not to invert the value
  * @param calibrate the calibration value in some cases, or anything but 0 to
- ***calibrate the Sensor
- *
- * @return a pointer to the configured Sensor
+ * calibrate the Sensor
  */
-Sensor* newSensor(SensorType     type,
-                  unsigned char  port,
-                  bool           inverted,
-                  unsigned short calibrate);
+void sensorConf(Sensor        *s,
+                SensorType     type,
+                unsigned char  port,
+                bool           inverted,
+                unsigned short calibrate);
 
 /**
- * Create a new digital Sensor
+ * Configure a new digital Sensor
  *
+ * @param s        the Sensor to configure
  * @param port     the port that the digital Sensor is in
  * @param inverted whether or not to invert the value
- *
- * @return a pointer to a configured Sensor of SensorType Digital
  */
-Sensor* newDigital(unsigned char port,
+void digitalConf(Sensor *s,
+		unsigned char port,
                    bool          inverted);
 
 /**
- * Make a brand new Sonic (aka ultrasonic) Sensor
+ * Configure a Sonic (aka ultrasonic) Sensor
  *
+ * @param s      the Sensor to configure
  * @param orange the port that the orange cable is in
  * @param yellow the port that the yellow cable is in
- *
- * @return a pointer to a configured Sensor of type Sonic
  */
-Sensor* newSonic(unsigned char orange,
+void sonicConf(Sensor *s, unsigned char orange,
                  unsigned char yellow);
 
 /**
- * Create and initialize a quadrature encoder (the red ones)
+ * Configure and initialize a quadrature encoder (the red ones)
  *
+ * @param s        the Sensor to configure
  * @param top      the port that the top wire on the encoder is in
  * @param bottom   the port that the bottom wire on the encoder is in
  * @param inverted whether or not the Sensor's value should be inverted
- *
- * @return a pointer to a configured Sensor of type Quad
  */
-Sensor* newQuad(unsigned char top,
+void quadConf(Sensor *s, unsigned char top,
                 unsigned char bottom,
                 bool          inverted);
 
 /**
- * Create and configure a new analog sensor
+ * Configure a new analog Sensor
  *
- * @param port the port that the sensor is in
- *
- * @return a pointer to the configured Sensor of type Analog
+ * @param s         the Sensor to configure
+ * @param port      the port that the Sensor is in
+ * @param calibrate whether or not to calibrate the sensor
  */
-Sensor* newAnalog(unsigned char port);
+void analogConf(Sensor *s, unsigned char port, bool calibrate);
 
 /**
- * Create and configure a new analog sensor
+ * Configure a new analog HR sensor
  *
- * @param port the port that the sensor is in
- *
- * @return a pointer to the configured Sensor of type Analog
+ * @param s    the Sensor to configure
+ * @param port the port that the Sensor is in
  */
-Sensor* newAnalogUnprecise(unsigned char port);
+void analogHRConf(Sensor *s, unsigned char port);
 
 /**
- * Make a new gyroscope sensor
+ * Configure a gyroscope Sensor
  *
+ * @param s           the Sensor to configure
  * @param port        the analog port that the gyro is plugged into
+ * @param inverted    whether or not the gyroscope is inverted
  * @param calibration the calibration of the Sensor
  */
-Sensor* newGyro(unsigned char port,
-                int           calibration);
-
-/*
- * Take a Sensor's Mutex
- *
- * @param sensor the sensor from which to take the Mutex
- * @param block  the amount of milliseconds willing to wait for the Mutex to be
- * freed. -1 for indefinitely
- */
-bool sensorTake(Sensor      *sensor,
-                unsigned int block);
-
-/*
- * Free a Sensor's mutex
- *
- * @param sensor the Sensor of which the mutex will be freed
- */
-void sensorGive(Sensor *sensor);
-
-/*
- * An array of Mutex guarding the sensors
- */
-extern Mutex smutexes[35];
+void gyroConf(Sensor *s, unsigned char port, bool inverted, int calibration);
 
 #endif // CARL_SENSORS_H_

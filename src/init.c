@@ -40,40 +40,39 @@ void init() {
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
-	gyro[0] = newGyro(1, 198);
-	gyro[1] = newGyro(2, 197);
+	gyroConf(&gyro, 1, false, 198);
 	notice("gyroscopes, ");
 
-	mogoAngle             = newAnalogUnprecise(3);
-	mogoAngle->redundancy = newAnalogUnprecise(4);
+	analogConf(&mogoAngle,           3, false);
+	analogConf(mogoAngle.redundancy, 4, false);
 	notice("mobile goal angle, ");
 
-	clawAngle = newAnalog(5);
+	analogConf(&clawAngle, 5, true);
 	notice("claw angle, ");
 
 	// Set up the digital sensors
-	armCoder = newQuad(1, 2, false);
+	quadConf(&armCoder, 1, 2, false);
 	notice("arm quad, ");
 
-	driveCoder[0] = newQuad(4, 5, false);
+	quadConf(&driveCoder[0], 4, 5, false);
 	notice("left drive quad, ");
 
-	driveCoder[1] = newQuad(6, 7, true);
+	quadConf(&driveCoder[0], 6, 7, true);
 	notice("right drive quad, ");
 
-	sonic = newSonic(3, 10);
+	sonicConf(&sonic, 3, 10);
 	notice("ultrasonic sensor, ");
 
 	// Initialize and set up all of the motors, servos, systems, etc
-	// claw = newMotor(5, false);
+	motorConf(&claw, 5, false);
 	notice("claw servo, ");
 
-	// arm[0] = newMotor(1, false);
-	// arm[1] = newMotor(10, true);
+	motorConf(&arm[0], 1,  false);
+	motorConf(&arm[1], 10, true);
 	notice("arm motors, ");
 
-	// mogo[0] = newMotor(4, false);
-	// mogo[1] = newMotor(7, true);
+	motorConf(&mogo[0], 4, false);
+	motorConf(&mogo[1], 7, true);
 	notice("mobile goal motors, ");
 
 	// drive[0] = newMotor(2, true);
@@ -83,25 +82,25 @@ void init() {
 	notice("right drive motors, ");
 
 	// Configure Systems
-	// Motor **drives[2] = {
-	//  (Motor **)malloc(sizeof(Motor *)),
-	//  (Motor **)malloc(sizeof(Motor *))
-	// };
+	Motor **drives[2] = {
+		(Motor **)malloc(sizeof(Motor *)),
+		(Motor **)malloc(sizeof(Motor *))
+	};
 
-	// Motor **arms  = (Motor **)malloc(sizeof(Motor *) * 2);
-	// Motor **mogos = (Motor **)malloc(sizeof(Motor *) * 2);
+	Motor **arms  = (Motor **)malloc(sizeof(Motor *) * 2);
+	Motor **mogos = (Motor **)malloc(sizeof(Motor *) * 2);
 
-	// drives[0][0] = drive[0];
-	// drives[1][0] = drive[1];
-	// arms[0]      = arm[0];
-	// arms[1]      = arm[1];
-	// mogos[0]     = mogo[0];
-	// mogos[1]     = mogo[1];
+	drives[0][0] = &drive[0];
+	drives[1][0] = &drive[1];
+	arms[0]      = &arm[0];
+	arms[1]      = &arm[1];
+	mogos[0]     = &mogo[0];
+	mogos[1]     = &mogo[1];
 
-	// confSystem(&Drive[0], driveCoder[0], 1, drives[0]);
-	// confSystem(&Drive[1], driveCoder[1], 1, drives[1]);
-	// confSystem(&Arm,      armCoder,      2, arms);
-	// confSystem(&Mogo,     mogoAngle,     2, mogos);
+	confSystem(&Drive[0], &driveCoder[0], 1, drives[0]);
+	confSystem(&Drive[1], &driveCoder[1], 1, drives[1]);
+	confSystem(&Arm,      &armCoder,      2, arms);
+	confSystem(&Mogo,     &mogoAngle,     2, mogos);
 	notice("Systems, ");
 
 	notice("done!");
@@ -110,12 +109,11 @@ void init() {
 } /* init */
 
 void initLoop() {
-	gyro[0]->reset               = true;
-	gyro[1]->reset               = true;
-	mogoAngle->reset             = true;
-	mogoAngle->redundancy->reset = true;
-	driveCoder[0]->reset         = true;
-	driveCoder[1]->reset         = true;
-	armCoder->reset              = true;
-	clawAngle->reset             = true;
+	gyro.reset                  = true;
+	mogoAngle.reset             = true;
+	mogoAngle.redundancy->reset = true;
+	driveCoder[0].reset         = true;
+	driveCoder[1].reset         = true;
+	armCoder.reset              = true;
+	clawAngle.reset             = true;
 } /* initLoop */

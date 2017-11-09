@@ -27,17 +27,18 @@
 #define CYAN    "\x1b[36m"
 #define RESET   "\x1b[0m"
 
-Motor *claw;
-Motor *drive[2];
-Motor *arm[2];
-Motor *mogo[2];
+Motor claw;
+Motor drive[2];
+Motor arm[2];
+Motor mogo[2];
 
-Sensor *armCoder;
-Sensor *liftCoder;
-Sensor *driveCoder[2];
-Sensor *mogoAngle;
-Sensor *gyro[2];
-Sensor *sonic;
+Sensor armCoder;
+Sensor liftCoder;
+Sensor driveCoder[2];
+Sensor mogoAngle;
+Sensor clawAngle;
+Sensor gyro;
+Sensor sonic;
 
 System Drive[2];
 System Arm;
@@ -48,30 +49,17 @@ TaskHandle managerHandle;
 void init();
 void initLoop();
 void info() {
-//	printf(
-//	  RED " |  %4ld     | " GREEN "%4ld    | " YELLOW "%4ld    | " \
-//		BLUE "%4ld    | " CYAN "%4ld    | " RED "%3ld    | " GREEN " %4ld    | " \
-//		YELLOW "%4u mv | " RESET "\n",
-//	  (long)(driveCoder[0]->value / inch),
-//	  (long)(driveCoder[1]->value / inch),
-//	  armCoder->value,
-//	  mogoAngle->value,
-//	  clawAngle->value,
-//	  gyros(),
-//	  sonic->value,
-//	  powerLevelMain());
-//	lcdPrint(uart1, 2, "%u mV", powerLevelMain());
 	printf(
-	  GREEN " |  %4ld     | " "%4ld    | " "%4ld    | " \
-		"%4ld    | " "%4ld    | " "%3ld    | " " %4ld    | " \
-		"%4u mv | " "\n",
-	  (long)(driveCoder[0]->value / inch),
-	  (long)(driveCoder[1]->value / inch),
-	  armCoder->value,
-	  mogoAngle->value,
-	  clawAngle->value,
-	  gyros(),
-	  sonic->value,
+	  RED " |  %4f     | " GREEN "%4f    | " YELLOW "%4ld    | "               \
+	  BLUE "%4ld    | " CYAN "%4ld    | " RED "%3ld    | " GREEN " %4ld    | " \
+	  YELLOW "%4u mv | " RESET "\n",
+	  (float)(driveCoder[0].value / inch),
+	  (float)(driveCoder[1].value / inch),
+	  armCoder.value,
+	  mogoAngle.value,
+	  clawAngle.value,
+	  gyro.value,
+	  sonic.value,
 	  powerLevelMain());
 	lcdPrint(uart1, 2, "%u mV", powerLevelMain());
 } /* info */
@@ -79,65 +67,25 @@ void info() {
 bool initialized = false;
 
 void driveSet(int l, int r) {
-	drive[0]->power = l;
-	drive[1]->power = r;
+	if (!mutexTake(drive[0].mutex, 5)) {
+		return;
+	} else if (!mutexTake(drive[1].mutex, 5)) {
+		mutexGive(drive[0].mutex);
+		return;
+	}
+	drive[0].power = l;
+	drive[1].power = r;
+	  mutexGive(drive[0].mutex);
+	  mutexGive(drive[1].mutex);
 } /* driveSet */
 
 void initialize() {
 	// Clean up everything before we touch it. Otherwise, what we do next will be
 	// overwritten
 	sensorInit();
+	motorInit();
 
-	print(
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNds/:ohNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmy+:/oys+:-/ydMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNhs/+shmMMMmmmdyo/:ohNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmyooydNMMMMMho+smmmmmdhs++sdMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNhyshmMMMMMMMMMMy/:ommmmmmmmmmdyoshNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMmdddNMMMMMMMMMMMMMMMMmmmmmmmmmmmmmmmmdhydmMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMNyyyhhhhhmMMMMMMMMMMMMMMmmmmmmmmmmmmmmdssssssosNMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMd/::::::/yhhhhhhhhhhhhhyyyyyyyyyyyyys:------:dMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMNo::::::::::::::::::::--------------------+NMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMhso+oosyyhddddddddddyyyyyyyyyyysso++/+oyMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmhmhs/::::/sMMMMMMdymmmmmmo::---:+shymMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmdshNNmy+::oMMMMMMmhmmmmmm+--:ohmmyodhMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMh+::yh+dMMN/:oMMMMMMNdmmmmmmo--hmmh+yh:-:yNMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMNy/:::::om+omMh:oMMMMMMdymmmmmmo-smdo/do-----:omMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMms:::::::::/dy:yNssMMMMMMNdmmmmmmo/ds:od/---------+hMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMN+:::::::::::::sd//hyMMMMMMdymmmmmmss/:hy-------------/mMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMms:::::::::::::+mo:omMMMMMdymmmmmd+-/d+------------:smMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMNy/:::::::::::/hy::yNMMMdymmmms:-sh:-----------/yNMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMd+:::::::::::sd/:/dMMdymmh/-:ds-----------+dMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMms::::::::::+do::oNdydo--+d/---------:omMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNy/:::::::::hh::/so:-:yh:--------:yNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMh+::::::::om+://-/do--------+hMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmo:::::::/ds:-od/-------omMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNy/::::::ydhy------:sNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMh+:::::++-----/hMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMdo::::----odMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNs/:-:sNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNhhNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MN.........--:+smMMMMMMMMMM/.........-:/oyNMMMMMMMMMMMMMMNho/-....:/sdMMMMMMMMMMMMMMMdo/-.``.-:+sdMM\n" \
-"MN               -dMMMMMMMM-               /NMMMMMMMMMMh:             `+mMMMMMMMMMMh.             `m\n" \
-"MN     :ssss+.    `mMMMMMMM-    .sssss/`    .NMMMMMMMN/      -+oo/.     `sMMMMMMMMm     .syso/.   hM\n" \
-"MN     oMMMMMN.    sMMMMMMM-    -MMMMMMm     hMMMMMMM:     +mMMMMMMd-     sMMMMMMMh     -hNMMMMNhdMM\n" \
-"MN     oMMMMMN`    sMMMMMMM-    -MMMMMMm     hMMMMMMh     +MMMMMMMMMM.    `MMMMMMMM-       `-/shNMMM\n" \
-"MN     :ssso/`    .NMMMMMMM-    .sssso:     :MMMMMMMs     hMMMMMMMMMM/     mMMMMMMMMy/`          /mM\n" \
-"MN               /NMMMMMMMM-              `oMMMMMMMMd     :MMMMMMMMMm`    .MMMMMMMMNMMMNdyo/.     `m\n" \
-"MN     .:::::/ohNMMMMMMMMMM-    `::::     dMMMMMMMMMM+     -hMMMMMNs`     hMMMMMMMd`-odMMMMMM+     s\n" \
-"MN     oMMMMMMMMMMMMMMMMMMM-    -MMMMo     sMMMMMMMMMMs`     `-::-      .dMMMMMMMd`     .://:     `N\n" \
-"MN     oMMMMMMMMMMMMMMMMMMM-    -MMMMMs     /NMMMMMMMMMNo.            :yMMMMMMMMMNs:`            /mM\n" \
-"MM+++++hMMMMMMMMMMMMMMMMMMMs++++oMMMMMMy+++++sMMMMMMMMMMMMmho+////+shNMMMMMMMMMMMMMMMmyo+////+shNMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n" \
-"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
-
-	// motorInit();
-
-	// Call the init function to do more stuff
+	// Call the init function to perform actions in init.c
 	if (!initialized) {
 		init();
 	}
@@ -157,13 +105,9 @@ void initialize() {
 
 void manager(void *none) {
 	while (true) {
-		// motorLoop();
+		motorLoop();
 		sensorLoop();
 		info();
 		delay(10);
 	}
 } /* manager */
-
-long gyros() {
-	return (gyro[0]->value + gyro[1]->value) / 2;
-} /* gyros */

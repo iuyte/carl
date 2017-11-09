@@ -68,7 +68,7 @@ void PID(void *conf) {
 	float     integral  = 0;
 	float     derivative;
 	float     power;
-	bool      success[5];
+	bool      success[settings->tolerance];
 	Motor   **slaves = settings->system->slaves;
 
 	settings->isDone = false;
@@ -80,15 +80,14 @@ void PID(void *conf) {
 		error   = settings->target - current;
 
 		if ((unsigned int)abs((int)error) <= settings->precision) {
-			for (int i = 0; i < 5; i++) {
-				if (success[i]) {
-					continue;
+			for (int i = 0; i < settings->tolerance; i++) {
+				if (!success[i]) {
+					success[i] = true;
+					break;
 				}
-				success[i] = true;
-				break;
 			}
 
-			if ((success[4]) && settings->terminates) {
+			if ((success[settings->tolerance - 1]) && settings->terminates) {
 				settings->isDone = true;
 			}
 			continue;

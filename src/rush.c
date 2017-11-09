@@ -19,8 +19,6 @@
 
 #include "../include/rush.h"
 
-Sensor *clawAngle;
-
 void driveSetR(int l, int r) {
 	motorSet(2, l);
 	motorSet(9, -r);
@@ -77,7 +75,7 @@ void hold() {
 Get driveGet(bool isLeft) {
 	Get g = {
 		motorGet(isLeft ? 2 : 9) * (isLeft ? -1 : 1),
-		driveCoder[isLeft]->value,
+		driveCoder[isLeft].value,
 	};
 
 	return g;
@@ -86,7 +84,7 @@ Get driveGet(bool isLeft) {
 Get armGet(bool isLeft) {
 	Get g = {
 		motorGet(isLeft ? 1 : 10)  * isLeft ? 1 : -1,
-		armCoder->value,
+		armCoder.value,
 	};
 
 	return g;
@@ -97,7 +95,7 @@ Task clawPT(void *position) {
 	int  err;
 
 	do {
-		err = *goal - clawAngle->value;
+		err = *goal - clawAngle.value;
 		clawSet(-err * .3);
 		delay(10);
 	} while (isEnabled());
@@ -106,7 +104,7 @@ Task clawPT(void *position) {
 Get mogoGet(bool isLeft) {
 	Get g = {
 		motorGet(isLeft ? 4 : 7)  * isLeft ? 1 : -1,
-		isLeft ? mogoAngle->value : mogoAngle->redundancy->value,
+		isLeft ? mogoAngle.value : mogoAngle.redundancy->value,
 	};
 
 	return g;
@@ -115,7 +113,7 @@ Get mogoGet(bool isLeft) {
 Get clawGet() {
 	Get g = {
 		motorGet(5),
-		clawAngle->value,
+		clawAngle.value,
 	};
 
 	return g;
@@ -128,8 +126,8 @@ void driveSetP(long  positionL,
 	long error[2];
 
 	do {
-		error[0] = positionL - driveCoder[0]->value;
-		error[1] = positionR - driveCoder[1]->value;
+		error[0] = positionL - driveCoder[0].value;
+		error[1] = positionR - driveCoder[1].value;
 		driveSetR((int)((float)error[0] * kP), (int)((float)error[1] * kP));
 	} while (abs(error[0]) > tolerance && abs(error[1]) > tolerance);
 	  driveSetR(0,                           0);

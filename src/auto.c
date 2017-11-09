@@ -34,35 +34,6 @@ void autonomous() {
 		return;
 	}
 
-	// switch (false) {
-	// case true:
-	// printf("\nStage %d", stage++);
-	// armSetP(550, .7, 15);
-	// hold();
-	//
-	//    printf("\nStage %d", stage++);
-	//    driveSetP(-3.15 * 12 * inch, -3.15 * 12 * inch, .5, 10);
-	//    driveSet(17, 17);
-	//    delay(500);
-	//    armSetP(800, .7, 15);
-	//
-	//    printf("\nStage %d", stage++);
-	//    clawSet(-127);
-	//    delay(500);
-	//    clawSet(0);
-
-// 	printf("\nStage %d", stage++);
-	// armSetP(500, .7, 15);
-// 	delay(500);
-// 
-// 	printf("\nStage %d", stage++);
-// 	armSetP(0, 1, 100);
-// 	driveSetP(-12 * inch, -12 * inch, .8, 100);
-
-	// break;
-
-	// default:
-
 	printf("\nStage %d", stage++);
 	clawSet(127);
 	delay(500);
@@ -81,8 +52,4 @@ void autonomous() {
 	delay(500);
 	clawSet(0);
 	delay(500);
-
-	// break;
-
-	// } /* switch */
 } /* autonomous */

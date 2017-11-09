@@ -43,66 +43,71 @@ static const double inch =
 /**
  * Quadrature encoder in digital 1, 2
  */
-extern Sensor *armCoder;
+extern Sensor armCoder;
 
 /**
  * Quadrature encoder in digital 8, 9
  */
-extern Sensor *liftCoder;
+extern Sensor liftCoder;
 
 /**
  * Drive encoders:
  *  left  @ index 0 in digital 4, 5
  *  right @ index 1 in digital 6, 7
  */
-extern Sensor *driveCoder[2];
+extern Sensor driveCoder[2];
 
 /**
  * Potentiometer on the mogo manipulator in analog 1
  */
-extern Sensor *mogoAngle;
+extern Sensor mogoAngle;
 
 /**
  * Gyroscopes to measure the robot's rotation:
- *  left  @ index 0 in analog 2
- *  right @ index 1 in analog 3
+ *  normal     @ index 0 in analog 2
+ *  redundancy @ index 1 in analog 3
  */
-extern Sensor *gyro[2];
+extern Sensor gyro;
 
 /**
  * The ultrasonic sensor on the robot
  * echo, orange wire, in digital 3
  * ping, yellow wire, in digital 10
  */
-extern Sensor *sonic;
+extern Sensor sonic;
+
+/**
+ * The angle sensor on the claw @ analog 5
+ */
+extern Sensor clawAngle;
 
 // Motors and servos
 
 /**
  * The claw, a servo @ port 5
  */
-extern Motor *claw;
+extern Motor claw;
 
 /**
  * The two sides of the drive:
  *  left  @ index 0 in power expander @ port 2
  *  right @ index 1 in power expander @ port 9
  */
-extern Motor *drive[2];
+extern Motor drive[2];
 
 /**
  * The arm, containing:
  *  left  motor @ port    1
  *  right motor @ port    10
  */
-extern Motor *arm[2];
+extern Motor arm[2];
 
 /**
  * The mogo manipulator, consisting of:
  *  left  motor   @ port   4
  *  right motor   @ port   7
  */
-extern Motor *mogo[2];
+extern Motor mogo[2];
 
 extern System Drive[2];
 extern System Arm;
@@ -121,12 +126,5 @@ extern TaskHandle managerHandle;
  * Runs the various functions to manage everything
  */
 void manager(void *none);
-
-/**
- * Get the averaged value between gyros
- *
- * @return the sum of both gyro values / 2
- */
-long gyros();
 
 #endif // CARL_ROBOT_H_

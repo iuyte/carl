@@ -47,13 +47,13 @@ void   operatorControl() {
 		int power = -100 * digital(2, 6, JOY_UP, JOY_DOWN);
 
 		if (armLimit()) {
-			armCoder->reset = true;
-			power           = clipNum(power, 127, 0);
+			armCoder.reset = true;
+			power          = clipNum(power, 127, 0);
 		}
 
 		if (power) {
 			armSet(power);
-		} else if (armCoder->value >= 50) {
+		} else if (armCoder.value >= 50) {
 			hold();
 		} else {
 			armSet(0);
@@ -67,6 +67,7 @@ void   operatorControl() {
 		  joystickGetDigital(2, 5, JOY_DOWN) * 100 +
 		  joystickGetDigital(2, 5, JOY_UP) * -100 +
 		  lastClose * 15);
+
 		if (joystickGetDigital(2, 5, JOY_UP)) {
 			lastClose = true;
 		} else if  (joystickGetDigital(2, 5, JOY_DOWN)) {
@@ -101,8 +102,8 @@ void   operatorControl() {
 		moveArm();
 		moveClaw();
 
-		if (joystickGetDigital(1, 7,
-		                       JOY_LEFT) && joystickGetDigital(2, 7, JOY_LEFT)) {
+		if (joystickGetDigital(1, 7, JOY_LEFT) &&
+		    joystickGetDigital(2, 7, JOY_LEFT)) {
 			reset();
 		}
 		delay(20);
