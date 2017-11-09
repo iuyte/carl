@@ -22,11 +22,6 @@
 
 #include "robot.h"
 
-/**
- * The angle sensor on the claw @ analog 5
- */
-extern Sensor *clawAngle;
-
 typedef void Task;
 
 typedef struct Get {

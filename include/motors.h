@@ -34,32 +34,28 @@ typedef struct Motor {
 	bool          isInverted;
 	int           power;
 	int           last;
+	Mutex         mutex;
 } Motor;
 
 /**
  * Initialize the motor arrays
  */
-void   motorInit();
+void motorInit();
 
 /**
  * A step in the management loop
  */
-void   motorLoop();
+void motorLoop();
 
 /**
- * Create a new Motor
+ * Configure a Motor
  *
- * @param port     the port that the motor is in
+ * @param m          the Motor to configure
+ * @param port       the port that the motor is in
  * @param isInverted whether or not the motor is isInverted
- *
- * @return A pointer to the Motor in memory
  */
-Motor* newMotor(unsigned char port,
-                bool          isInverted);
-
-/*
- * An array of Mutex that protects each port
- */
-extern Mutex mmutexes[10];
+void motorConf(Motor        *m,
+               unsigned char port,
+               bool          isInverted);
 
 #endif // CARL_MOTORS_H_
