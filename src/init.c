@@ -63,6 +63,9 @@ void init() {
 	sonicConf(&sonic, 3, 10);
 	notice("ultrasonic sensor, ");
 
+	digitalConf(&armLimit, 11, true);
+	notice("arm limit switch, ");
+
 	// Initialize and set up all of the motors, servos, systems, etc
 	motorConf(&claw, 5, false);
 	notice("claw servo, ");

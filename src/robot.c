@@ -39,6 +39,7 @@ Sensor mogoAngle;
 Sensor clawAngle;
 Sensor gyro;
 Sensor sonic;
+Sensor armLimit;
 
 System Drive[2];
 System Arm;

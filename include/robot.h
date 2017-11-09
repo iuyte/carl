@@ -23,7 +23,6 @@
 #include "motors.h"
 #include "sensors.h"
 #include "pid.h"
-#include "rush.h"
 
 #define GO(task, arg)                 \
   taskCreate(&task,                   \
@@ -37,6 +36,11 @@ static const double inch =
     5 /
     8))
   * 11 / 12;
+
+/**
+ * A convienence to distinguish tasks from regular functions
+ */
+typedef void Task;
 
 // Sensors and the like
 
@@ -80,6 +84,11 @@ extern Sensor sonic;
  * The angle sensor on the claw @ analog 5
  */
 extern Sensor clawAngle;
+
+/**
+ * The limit switch on the arm
+ */
+extern Sensor armLimit;
 
 // Motors and servos
 

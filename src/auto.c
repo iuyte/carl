@@ -35,21 +35,7 @@ void autonomous() {
 	}
 
 	printf("\nStage %d", stage++);
-	clawSet(127);
+	claw.power = 127;
 	delay(500);
-	clawSet(50);
-
-	printf("\nStage %d", stage++);
-	armSetP(800, .7, 15);
-	armSet(-11);
-
-	printf("\nStage %d", stage++);
-	driveSetP(-13 * inch, -13 * inch, .5, 10);
-	delay(500);
-
-	printf("\nStage %d", stage++);
-	clawSet(-127);
-	delay(500);
-	clawSet(0);
-	delay(500);
+	claw.power = 0;
 } /* autonomous */

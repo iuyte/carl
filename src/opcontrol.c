@@ -35,38 +35,46 @@ void   operatorControl() {
 	initLoop();
 
 	void moveDrive() {
-		driveSetR(joystickGetAnalog(1, 3), joystickGetAnalog(1, 2));
+		drive[0].power = joystickGetAnalog(1, 3);
+		drive[1].power = joystickGetAnalog(1, 2);
 	} /* drive */
 
 	void moveMogo() {
-		mogoSet(joystickGetDigital(1, 5, JOY_DOWN) * -127 +
-		        joystickGetDigital(1, 5, JOY_UP) * 127);
+		mogo[0].power = joystickGetDigital(1, 5, JOY_DOWN);
+		mogo[1].power = joystickGetDigital(1, 5, JOY_UP);
 	} /* moveMogo */
 
 	void moveArm() {
 		int power = -100 * digital(2, 6, JOY_UP, JOY_DOWN);
 
-		if (armLimit()) {
+		if (armLimit.value) {
 			armCoder.reset = true;
 			power          = clipNum(power, 127, 0);
 		}
 
 		if (power) {
-			armSet(power);
-		} else if (armCoder.value >= 50) {
-			hold();
+			arm[0].power = 127;
+			arm[1].power = 127;
 		} else {
-			armSet(0);
+			if ((armCoder.value < 500) && (armCoder.value >= 50)) {
+				arm[0].power = -11;
+				arm[1].power = -11;
+			} else if (armCoder.value > 600) {
+				arm[0].power = 11;
+				arm[1].power = 11;
+			} else {
+				arm[0].power = 0;
+				arm[1].power = 0;
+			}
 		}
 	} /* moveArm */
 
 	void moveClaw() {
 		static bool lastClose = false;
 
-		clawSet(
-		  joystickGetDigital(2, 5, JOY_DOWN) * 100 +
-		  joystickGetDigital(2, 5, JOY_UP) * -100 +
-		  lastClose * 15);
+		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * 100 +
+		             joystickGetDigital(2, 5, JOY_UP) * -100 +
+		             lastClose * 15;
 
 		if (joystickGetDigital(2, 5, JOY_UP)) {
 			lastClose = true;
@@ -76,22 +84,21 @@ void   operatorControl() {
 	} /* moveClaw */
 
 	void moveLock() {
-		static bool last = false;
+		int power =
+		             joystickGetDigital(1, 6, JOY_UP) * 127 +
+		             joystickGetDigital(1, 6, JOY_DOWN) * -127;
 
-		if (joystickGetDigital(1, 6, JOY_UP) && !last) {
-			last = true;
-			GO(mogoLockSetT, true);
-		} else if (joystickGetDigital(1, 6, JOY_DOWN) && last) {
-			last = false;
-			GO(mogoLockSetT, false);
-		}
+		mogo[0].power = power;
+		mogo[1].power = power;
 	} /* moveLock */
 
 	void reset() {
 		motorStopAll();
-		armSet(-50);
+		arm[0].power = -50;
+		arm[1].power = -50;
 		delay(25);
-		armSet(0);
+		arm[0].power = 0;
+		arm[1].power = 0;
 		initLoop();
 	} /* reset */
 
