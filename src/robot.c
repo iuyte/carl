@@ -27,20 +27,20 @@
 #define CYAN    "\x1b[36m"
 #define RESET   "\x1b[0m"
 
-Motor claw;
-Motor drive[2];
-Motor arm[2];
-Motor mogo[2];
-
 Sensor armCoder;
 Sensor liftCoder;
 Sensor driveCoder[2];
 Sensor mogoAngle;
-Sensor clawAngle;
 Sensor gyro;
 Sensor sonic;
+Sensor clawAngle;
 Sensor armLimit;
 
+// Motors and servos
+Motor claw;
+Motor drive[2];
+Motor arm[2];
+Motor mogo[2];
 System Drive[2];
 System Arm;
 System Mogo;
@@ -84,7 +84,6 @@ void initialize() {
 	// Clean up everything before we touch it. Otherwise, what we do next will be
 	// overwritten
 	sensorInit();
-	motorInit();
 
 	// Call the init function to perform actions in init.c
 	if (!initialized) {
@@ -106,7 +105,6 @@ void initialize() {
 
 void manager(void *none) {
 	while (true) {
-		motorLoop();
 		sensorLoop();
 		info();
 		delay(10);

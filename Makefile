@@ -26,6 +26,9 @@ OUT:=$(BINDIR)/$(OUTNAME)
 # By default, compile program
 all: $(BINDIR) $(OUT)
 
+# Runs before a commit
+pre-commit: clean all
+
 # Remove all intermediate object files (remove the binary directory)
 clean:
 	-rm -f $(OUT)

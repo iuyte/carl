@@ -38,24 +38,19 @@ typedef struct Motor {
 } Motor;
 
 /**
- * Initialize the motor arrays
- */
-void motorInit();
-
-/**
- * A step in the management loop
- */
-void motorLoop();
-
-/**
  * Configure a Motor
  *
- * @param m          the Motor to configure
  * @param port       the port that the motor is in
  * @param isInverted whether or not the motor is isInverted
  */
-void motorConf(Motor        *m,
-               unsigned char port,
-               bool          isInverted);
+Motor motorCreate(unsigned char port,
+                bool          isInverted);
+
+/**
+ * Update and set a motor
+ *
+ * @param m the Motor to update
+ */
+void motorUpdate(Motor *m);
 
 #endif // CARL_MOTORS_H_

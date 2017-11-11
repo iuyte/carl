@@ -19,8 +19,6 @@
 
 #include "../include/robot.h"
 
-Settings armSettings;
-
 int digital(unsigned char joyNum,
             unsigned char channel,
             unsigned char b1,
@@ -112,6 +110,14 @@ void   operatorControl() {
 		if (joystickGetDigital(1, 7, JOY_LEFT) &&
 		    joystickGetDigital(2, 7, JOY_LEFT)) {
 			reset();
+		}
+
+		  motorUpdate(&claw);
+
+		for (size_t i = 0; i < 2; i++) {
+			motorUpdate(&drive[i]);
+			motorUpdate(&arm[i]);
+			motorUpdate(&mogo[i]);
 		}
 		delay(20);
 	}
