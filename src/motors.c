@@ -19,39 +19,31 @@
 
 #include "../include/motors.h"
 
-Motor *motors[10];
+Motor motorCreate(unsigned char port, bool isInverted) {
+	Motor s = {
+		clipNum(port, 10, 1),
+		isInverted,
+		0,
+		0,
+		mutexCreate(),
+	};
+	return s;
+} /* motorCreate */
 
-void motorInit() {
-	for (int i = 0; i < 10; i++) {
-		motors[i] = NULL;
+void motorUpdate(Motor *m) {
+	if (m == NULL) {
+		return;
 	}
-} /* motorPreLoop */
 
-void motorLoop() {
-	for (int i = 0; i < 10; i++) {
-		if (motors[i] == NULL) {
-			continue;
-		}
-
-		if (!mutexTake(motors[i]->mutex, 5)) {
-			continue;
-		}
-
-		if (motors[i]->last != motors[i]->power) {
-			motors[i]->power = deadBand(motors[i]->power, 10);
-			motorSet(motors[i]->port,
-			         motors[i]->isInverted ? motors[i]->power : -motors[i]->power);
-		}
-		motors[i]->last = motors[i]->power;
-
-		mutexGive(motors[i]->mutex);
+	if (!mutexTake(m->mutex, 5)) {
+		return;
 	}
-} /* motorLoop */
 
-void motorConf(Motor *m, unsigned char port, bool isInverted) {
-	m->port       = port;
-	m->power      = 0;
-	m->last       = 0;
-	m->isInverted = isInverted;
-	m->mutex      = mutexCreate();
-} /* motorConf */
+	if (m->last != m->power) {
+		m->power = deadBand(m->power, 10);
+		motorSet(m->port,
+		         m->isInverted ? m->power : -m->power);
+	}
+	m->last = m->power;
+	mutexGive(m->mutex);
+} /* motorUpdate */

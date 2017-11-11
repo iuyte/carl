@@ -20,35 +20,16 @@
 #ifndef CARL_LCD_H_
 #define CARL_LCD_H_
 
-#include "API.h"
+#include "sensors.h"
 
-/**
- * A struct defining an LCD Menu
- */
-typedef struct Menu {
-	char        *text[2];
-	struct Menu *parent;
-	struct Menu *prev;
-	struct Menu *next;
-	struct Menu *(*onSelect)();
-} Menu;
+typedef struct LCDMenu {
+	Sensor         *sensor;
+	char           *name;
+	struct LCDMenu *prev;
+	struct LCDMenu *next;
+} LCDMenu;
 
-/**
- * The root menu for LCDs
- */
-static Menu lcdRoot;
-
-/**
- * Defines an LCD
- */
-typedef struct LCD {
-	FILE *port;
-	Menu *currentMenu;
-} LCD;
-
-/**
- * A step in the manager to handle the lcds
- */
-void lcdManager();
+void displayMenu(PROS_FILE *port,
+                 LCDMenu    menu);
 
 #endif // CARL_LCD_H_

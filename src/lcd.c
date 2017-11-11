@@ -19,4 +19,7 @@
 
 #include "../include/lcd.h"
 
-void lcdManager() {}
+void displayMenu(PROS_FILE *port, LCDMenu menu) {
+	lcdPrint(port, 1, "%s: ", menu.name);
+	lcdPrint(port, 2, "%ld",  menu.sensor->value);
+} /* displayMenu */

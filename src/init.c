@@ -44,6 +44,8 @@ void init() {
 	notice("gyroscopes, ");
 
 	analogConf(&mogoAngle,           3, false);
+
+	mogoAngle.redundancy = (Sensor *)malloc(sizeof(Sensor));
 	analogConf(mogoAngle.redundancy, 4, false);
 	notice("mobile goal angle, ");
 
@@ -67,22 +69,20 @@ void init() {
 	notice("arm limit switch, ");
 
 	// Initialize and set up all of the motors, servos, systems, etc
-	motorConf(&claw, 5, false);
+	claw = motorCreate(5, false);
 	notice("claw servo, ");
 
-	motorConf(&arm[0], 1,  false);
-	motorConf(&arm[1], 10, true);
+	arm[0] = motorCreate(1,  false);
+	arm[1] = motorCreate(10, true);
 	notice("arm motors, ");
 
-	motorConf(&mogo[0], 4, false);
-	motorConf(&mogo[1], 7, true);
+	mogo[0] = motorCreate(4, false);
+	mogo[1] = motorCreate(7, true);
 	notice("mobile goal motors, ");
 
-	// drive[0] = newMotor(2, true);
-	notice("left drive motors, ");
-
-	// drive[1] = newMotor(9, false);
-	notice("right drive motors, ");
+	drive[0] = motorCreate(2, true);
+	drive[1] = motorCreate(9, false);
+	notice("drive motors, ");
 
 	// Configure Systems
 	Motor **drives[2] = {
@@ -109,6 +109,7 @@ void init() {
 	notice("done!");
 	print("\n\n");
 	lcdSetText(uart1, 1, "Battery:");
+	setTeamName("709S");
 } /* init */
 
 void initLoop() {
