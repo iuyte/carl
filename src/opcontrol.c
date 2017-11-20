@@ -38,8 +38,8 @@ void   operatorControl() {
 	} /* drive */
 
 	void moveMogo() {
-		mogo[0].power = joystickGetDigital(1, 5, JOY_DOWN);
-		mogo[1].power = joystickGetDigital(1, 5, JOY_UP);
+		mogo->power = joystickGetDigital(1, 5, JOY_DOWN) * -127;
+									+ joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
@@ -51,18 +51,14 @@ void   operatorControl() {
 		}
 
 		if (power) {
-			arm[0].power = 127;
-			arm[1].power = 127;
+			arm->power = 127;
 		} else {
 			if ((armCoder.value < 500) && (armCoder.value >= 50)) {
-				arm[0].power = -11;
-				arm[1].power = -11;
+				arm->power = -11;
 			} else if (armCoder.value > 600) {
-				arm[0].power = 11;
-				arm[1].power = 11;
+				arm->power = 11;
 			} else {
-				arm[0].power = 0;
-				arm[1].power = 0;
+				arm->power = 0;
 			}
 		}
 	} /* moveArm */
@@ -86,8 +82,7 @@ void   operatorControl() {
 		             joystickGetDigital(1, 6, JOY_UP) * 127 +
 		             joystickGetDigital(1, 6, JOY_DOWN) * -127;
 
-		mogo[0].power = power;
-		mogo[1].power = power;
+		mogo->power = power;
 	} /* moveLock */
 
 	void reset() {

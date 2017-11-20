@@ -21,6 +21,7 @@
 
 Motor motorCreate(unsigned char port, bool isInverted) {
 	Motor s = {
+		NULL,
 		clipNum(port, 10, 1),
 		isInverted,
 		0,
@@ -33,6 +34,10 @@ Motor motorCreate(unsigned char port, bool isInverted) {
 void motorUpdate(Motor *m) {
 	if (m == NULL) {
 		return;
+	}
+
+	if (m->slave != NULL) {
+		motorUpdate(m->slave);
 	}
 
 	if (!mutexTake(m->mutex, 5)) {
