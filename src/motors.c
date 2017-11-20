@@ -32,11 +32,11 @@ Motor motorCreate(unsigned char port, bool isInverted) {
 } /* motorCreate */
 
 void motorUpdate(Motor *m) {
-	if (m == NULL) {
+	if (!m) {
 		return;
 	}
 
-	if (m->slave != NULL) {
+	if (m->slave) {
 		motorUpdate(m->slave);
 	}
 
