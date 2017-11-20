@@ -59,7 +59,7 @@ void init() {
 	quadConf(&driveCoder[0], 4, 5, false);
 	notice("left drive quad, ");
 
-	quadConf(&driveCoder[0], 6, 7, true);
+	quadConf(&driveCoder[1], 6, 7, true);
 	notice("right drive quad, ");
 
 	sonicConf(&sonic, 3, 10);
@@ -74,14 +74,17 @@ void init() {
 
 	arm[0] = motorCreate(1,  false);
 	arm[1] = motorCreate(10, true);
+	arm->slave = &arm[1];
 	notice("arm motors, ");
 
 	mogo[0] = motorCreate(4, false);
 	mogo[1] = motorCreate(7, true);
+	mogo->slave = &mogo[1];
 	notice("mobile goal motors, ");
 
 	drive[0] = motorCreate(2, true);
 	drive[1] = motorCreate(9, false);
+	drive->slave = &drive[1];
 	notice("drive motors, ");
 
 	// Configure Systems
