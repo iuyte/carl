@@ -38,20 +38,18 @@ void   operatorControl() {
 	} /* drive */
 
 	void moveMogo() {
-		mogo->power = joystickGetDigital(1, 5, JOY_DOWN) * -127;
+		mogo->power = joystickGetDigital(1, 5, JOY_DOWN) * -127
 									+ joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
-		int power = -100 * digital(2, 6, JOY_UP, JOY_DOWN);
+		arm->power = -100 * digital(2, 6, JOY_UP, JOY_DOWN);
 
-		if (armLimit.value) {
-			armCoder.reset = true;
-			power          = clipNum(power, 127, 0);
-		}
-
-		if (power) {
+		/*
+		if (power > 0) {
 			arm->power = 127;
+		} else if (power < 0) {
+			arm->power = -127;
 		} else {
 			if ((armCoder.value < 500) && (armCoder.value >= 50)) {
 				arm->power = -11;
@@ -61,14 +59,15 @@ void   operatorControl() {
 				arm->power = 0;
 			}
 		}
+		*/
 	} /* moveArm */
 
 	void moveClaw() {
 		static bool lastClose = false;
 
-		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * 100 +
-		             joystickGetDigital(2, 5, JOY_UP) * -100 +
-		             lastClose * 15;
+		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * -100 +
+		             joystickGetDigital(2, 5, JOY_UP) * 100 +
+		             lastClose * 5;
 
 		if (joystickGetDigital(2, 5, JOY_UP)) {
 			lastClose = true;
@@ -107,13 +106,14 @@ void   operatorControl() {
 			reset();
 		}
 
-		  motorUpdate(&claw);
+		motorUpdate(&claw);
 
 		for (size_t i = 0; i < 2; i++) {
 			motorUpdate(&drive[i]);
 			motorUpdate(&arm[i]);
 			motorUpdate(&mogo[i]);
 		}
+
 		delay(20);
 	}
 } /* operatorControl */

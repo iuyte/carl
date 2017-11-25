@@ -84,7 +84,6 @@ void init() {
 
 	drive[0] = motorCreate(2, true);
 	drive[1] = motorCreate(9, false);
-	drive->slave = &drive[1];
 	notice("drive motors, ");
 
 	// Configure Systems

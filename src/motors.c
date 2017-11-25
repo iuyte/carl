@@ -37,6 +37,7 @@ void motorUpdate(Motor *m) {
 	}
 
 	if (m->slave) {
+		m->slave->power = m->power;
 		motorUpdate(m->slave);
 	}
 
