@@ -13,7 +13,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -40,7 +40,7 @@ void sensorRefresh(Sensor *s) {
 		return;
 	}
 
-	long val = 0;
+	int val = 0;
 
 	switch (s->type) {
 	case Digital:

@@ -22,12 +22,14 @@
 Motor motorCreate(unsigned char port, bool isInverted) {
 	Motor s = {
 		NULL,
+		NULL,
 		clipNum(port, 10, 1),
 		isInverted,
 		0,
 		0,
 		mutexCreate(),
 	};
+
 	return s;
 } /* motorCreate */
 

@@ -41,18 +41,25 @@ Motor claw;
 Motor drive[2];
 Motor arm[2];
 Motor mogo[2];
-System Drive[2];
-System Arm;
-System Mogo;
 
 TaskHandle managerHandle;
 
 void init();
-void initLoop();
+
+void reset() {
+	gyro.reset                  = true;
+	mogoAngle.reset             = true;
+	mogoAngle.redundancy->reset = true;
+	driveCoder[0].reset         = true;
+	driveCoder[1].reset         = true;
+	armCoder.reset              = true;
+	clawAngle.reset             = true;
+} /* reset */
+
 void info() {
 	printf(
-	  RED " |  %4f     | " GREEN "%4f    | " YELLOW "%4ld    | "               \
-	  BLUE "%4ld    | " CYAN "%4ld    | " RED "%3ld    | " GREEN " %4ld    | " \
+	  RED " |  %4f     | " GREEN "%4f    | " YELLOW "%4d    | "               \
+	  BLUE "%4d    | " CYAN "%4d    | " RED "%3d    | " GREEN " %4d    | " \
 	  YELLOW "%4u mv | " RESET "\n",
 	  (float)(driveCoder[0].value / inch),
 	  (float)(driveCoder[1].value / inch),
@@ -74,10 +81,11 @@ void driveSet(int l, int r) {
 		mutexGive(drive[0].mutex);
 		return;
 	}
+
 	drive[0].power = l;
 	drive[1].power = r;
-	  mutexGive(drive[0].mutex);
-	  mutexGive(drive[1].mutex);
+	mutexGive(drive[0].mutex);
+	mutexGive(drive[1].mutex);
 } /* driveSet */
 
 void initialize() {
@@ -89,7 +97,7 @@ void initialize() {
 	if (!initialized) {
 		init();
 	}
-	initLoop();
+	reset();
 
 	// Start the manager that manages everything basiccally
 	managerHandle = taskCreate(&manager,

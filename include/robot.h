@@ -13,7 +13,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -118,18 +118,14 @@ extern Motor arm[2];
  */
 extern Motor mogo[2];
 
-extern System Drive[2];
-extern System Arm;
-extern System Mogo;
-
 // Stuff to set stuff
 void driveSet(int l,
               int r);
 
 /**
- * A TaskHandle for the manager task
+ * Reset the robot
  */
-extern TaskHandle managerHandle;
+void reset();
 
 /**
  * Runs the various functions to manage everything

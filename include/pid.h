@@ -13,7 +13,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -24,32 +24,24 @@
 #include "sensors.h"
 
 /**
- * A structure defining a group of motors and a sensor
+ * The settings for step-based PID
  */
-typedef struct System {
-	int     power;
-	int     num;
-	Sensor *sensor;
-	Motor **slaves;
-} System;
+typedef struct PIDSettings {
+	/**
+	 * p value
+	 */
+	float kP;
 
-/**
- * Create and configure a new System.
- *
- * @param system a pointer to the System to configure
- * @param sensor a pointer to the Sensor of the System
- * @param num    the number of motors in the System
- * @param slaves variadic args of the motors in the System
- */
-void confSystem(System *system,
-                Sensor *sensor,
-                int     num,
-                Motor **slaves);
+	/**
+	 * i value
+	 */
+	float kI;
 
-/**
- * The settings for PID
- */
-typedef struct Settings {
+	/**
+	 * d value
+	 */
+	float kD;
+
 	/**
 	 * The ideal position, or goal value
 	 */
@@ -71,90 +63,61 @@ typedef struct Settings {
 	int iLimit;
 
 	/**
-	 * Whether or not the PID loop ends
-	 */
-	bool terminates;
-
-	/**
-	 * p value
-	 */
-	float kP;
-
-	/**
-	 * i value
-	 */
-	float kI;
-
-	/**
-	 * d value
-	 */
-	float kD;
-
-	/**
-	 * Precision for waiting on pid to reach value
-	 */
-	unsigned int precision;
-
-	/**
-	 * How many loop iterations to wait before breaking - only used if terminates
-	 * is set to true
-	 */
-	unsigned int tolerance;
-
-	/**
 	 * The system the pid controls
 	 */
-	System *system;
+	Motor *root;
 
 	/**
-	 * True when finished
+	 * The current sensor value
 	 */
-	bool isDone;
+	int current;
 
-	/*
-	 * Whether or not it is active
+	/**
+	 * The integral
 	 */
-	bool isActive;
-} Settings;
+	int integral;
+
+	/**
+	 * The error
+	 */
+	int error;
+
+	/**
+	 * The derivative
+	 */
+	float derivative;
+} PIDSettings;
 
 /**
  * Create new settings based on the values provided
  *
+ * @param kP         the P multiplier for the PID
+ * @param kI         the I multiplier for the PID
+ * @param kD         the D multiplier for the PID
  * @param target     the destination value
- * @param kP         the P value for the PID
- * @param kI         the I value for the PID
- * @param kD         the D value for the PID
- * @param system     a pointer to the system that the PID will control
- * @param terminates whether or not the PID loop terminates
- * @param max        the maximum value at which it will set the motors in the
- * system
- * @param min        the minimum value at which it will set the motors in the
- * system
+ * @param max        the maximum value at which it will set the motors
+ * @param min        the minimum value at which it will set the motors
  * @param iLimit     the maximum kI value
- * @param precision  the amount of precision to consider when finishing
- * @param tolerance  how many iterations of the loop before the PID loop will
- * finish - only used if terminates is true
+ * @param root       a pointer to the motor linked list that the PID will
+ * control
  *
- * @returns the configured System
+ * @returns the configured PIDSettings
  */
-Settings newSettings(float        target,
-                     float        kP,
-                     float        kI,
-                     float        kD,
-                     System      *system,
-                     bool         terminates,
-                     int          max,
-                     int          min,
-                     int          iLimit,
-                     unsigned int precision,
-                     unsigned int tolerance);
+PIDSettings newPIDSettings(float  kP,
+                           float  kI,
+                           float  kD,
+                           float  target,
+                           int    max,
+                           int    min,
+                           int    iLimit,
+                           Motor *root);
 
 /**
- * Use the Settings to achieve the target
+ * Use the Settings to achieve the target, one step at a time
  *
  * @param target   the target value
  * @param settings a pointer to the settings to be used
  */
-void PID(void *conf);
+void PID(PIDSettings *settings);
 
 #endif // CARL_PID_H_
