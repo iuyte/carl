@@ -13,7 +13,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -68,7 +68,7 @@ void init() {
 	digitalConf(&armLimit, 11, true);
 	notice("arm limit switch, ");
 
-	// Initialize and set up all of the motors, servos, systems, etc
+	// Initialize and set up all of the motors, servos, etc
 	claw = motorCreate(5, false);
 	notice("claw servo, ");
 
@@ -87,40 +87,8 @@ void init() {
 	drive->slave = &drive[1];
 	notice("drive motors, ");
 
-	// Configure Systems
-	Motor **drives[2] = {
-		(Motor **)malloc(sizeof(Motor *)),
-		(Motor **)malloc(sizeof(Motor *))
-	};
-
-	Motor **arms  = (Motor **)malloc(sizeof(Motor *) * 2);
-	Motor **mogos = (Motor **)malloc(sizeof(Motor *) * 2);
-
-	drives[0][0] = &drive[0];
-	drives[1][0] = &drive[1];
-	arms[0]      = &arm[0];
-	arms[1]      = &arm[1];
-	mogos[0]     = &mogo[0];
-	mogos[1]     = &mogo[1];
-
-	confSystem(&Drive[0], &driveCoder[0], 1, drives[0]);
-	confSystem(&Drive[1], &driveCoder[1], 1, drives[1]);
-	confSystem(&Arm,      &armCoder,      2, arms);
-	confSystem(&Mogo,     &mogoAngle,     2, mogos);
-	notice("Systems, ");
-
 	notice("done!");
 	print("\n\n");
 	lcdSetText(uart1, 1, "Battery:");
 	setTeamName("709S");
 } /* init */
-
-void initLoop() {
-	gyro.reset                  = true;
-	mogoAngle.reset             = true;
-	mogoAngle.redundancy->reset = true;
-	driveCoder[0].reset         = true;
-	driveCoder[1].reset         = true;
-	armCoder.reset              = true;
-	clawAngle.reset             = true;
-} /* initLoop */

@@ -13,22 +13,35 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
 #include "../include/robot.h"
 
-void initLoop();
-
 int auton = 1;
+PIDSettings armSettings;
 
-void autonomous() {
+void   autonomous() {
 	int stage = 0;
 
-	printf("\nStage %d", stage++);
-	initLoop();
-	delay(25);
+	void stageUp() {
+		printf("\nStage %d", stage++);
+	} /* stageUp */
+
+	stageUp();
+	reset();
+
+	stageUp();
+	armSettings = newPIDSettings(
+	  .7f,
+	  .17f,
+	  .08f,
+	  0,
+	  127,
+	  -127,
+	  10,
+	  arm);
 
 	if (!auton) {
 		return;

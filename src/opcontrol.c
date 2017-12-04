@@ -13,7 +13,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -27,10 +27,8 @@ int digital(unsigned char joyNum,
 	       joystickGetDigital(joyNum, channel, b1) * 1;
 } /* digital */
 
-void   initLoop();
-
 void   operatorControl() {
-	initLoop();
+	reset();
 
 	void moveDrive() {
 		drive[0].power = joystickGetAnalog(1, 3);
@@ -39,7 +37,7 @@ void   operatorControl() {
 
 	void moveMogo() {
 		mogo->power = joystickGetDigital(1, 5, JOY_DOWN) * -127;
-									+ joystickGetDigital(1, 5, JOY_UP) * 127;
+		+joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
@@ -92,7 +90,7 @@ void   operatorControl() {
 		delay(25);
 		arm[0].power = 0;
 		arm[1].power = 0;
-		initLoop();
+		reset();
 	} /* reset */
 
 	while (true) {

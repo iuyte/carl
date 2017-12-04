@@ -13,7 +13,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -41,8 +41,8 @@ typedef enum {
 typedef struct Sensor {
 	struct Sensor *redundancy;
 	SensorType     type;
-	long           value;
-	long           zero;
+	int            value;
+	int            zero;
 	bool           inverted;
 	bool           reset;
 	unsigned short calibrate;

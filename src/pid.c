@@ -13,107 +13,62 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
 #include "../include/pid.h"
 
-void confSystem(System *system, Sensor *sensor, int num, Motor **slaves) {
-	System s = {
+PIDSettings newPIDSettings(float  kP,
+                           float  kI,
+                           float  kD,
+                           float  target,
+                           int    max,
+                           int    min,
+                           int    iLimit,
+                           Motor *root) {
+	PIDSettings s = {
+		kP,
+		kI,
+		kD,
+		target,
+		max,
+		min,
+		iLimit,
+		root,
 		0,
-		num,
-		sensor,
-		slaves,
+		0,
+		0,
+		0,
 	};
 
-	*system = s;
-} /* newSystem */
-
-Settings newSettings(float        target,
-                     float        kP,
-                     float        kI,
-                     float        kD,
-                     System      *system,
-                     bool         terminates,
-                     int          max,
-                     int          min,
-                     int          iLimit,
-                     unsigned int precision,
-                     unsigned int tolerance) {
-	Settings s;
-
-	s.target     = target;
-	s.kP         = kP;
-	s.kI         = kI;
-	s.kD         = kD;
-	s.system     = system;
-	s.terminates = terminates;
-	s.max        = max;
-	s.min        = min;
-	s.iLimit     = iLimit;
-	s.precision  = precision;
-	s.tolerance  = tolerance;
-	s.isDone     = false;
-	s.isActive   = true;
-
 	return s;
-} /* newSettings */
+} /* newPIDSettings */
 
-void PID(void *conf) {
-	Settings *settings = (Settings *)conf;
-	float     current;
-	float     error;
-	float     lastError = 0;
-	float     integral  = 0;
-	float     derivative;
-	float     power;
-	bool      success[settings->tolerance];
-	Motor   **slaves = settings->system->slaves;
+void PID(PIDSettings *settings) {
+	float error;
+	float power;
 
-	settings->isDone = false;
+	settings->current = settings->root->sensor->value;
+	error             = settings->target - settings->current;
 
-	do {
-		delay(25);
+	settings->integral =
+	  (settings->kI != 0 && abs((int)error) < settings->iLimit) ?
+	  (settings->integral + error) :
+	  clipNum(settings->integral + error, settings->iLimit, -settings->iLimit);
 
-		current = settings->system->sensor->value;
-		error   = settings->target - current;
+	settings->derivative = error - settings->error;
+	settings->error      = error;
 
-		if ((unsigned int)abs((int)error) <= settings->precision) {
-			for (int i = 0; i < settings->tolerance; i++) {
-				if (!success[i]) {
-					success[i] = true;
-					break;
-				}
-			}
+	power =
+	  clipNum(
+	    (settings->kP * error) +
+	    (settings->kI * settings->integral) +
+	    (settings->kD * settings->derivative),
+	    settings->max,
+	    settings->min);
 
-			if ((success[settings->tolerance - 1]) && settings->terminates) {
-				settings->isDone = true;
-			}
-			continue;
-		} else {
-			for (int i = 0; i < 5; i++) {
-				success[i] = false;
-			}
-		}
-		integral = (settings->kI != 0 && abs((int)error) < settings->iLimit)
-		           ? (integral + error)
-							 : 0;
-		derivative = error - lastError;
-		lastError  = error;
-		power      =
-		  (settings->kP * error) +
-		  (settings->kI * integral) + (settings->kD * derivative);
-		power = clipNum(power /* 8.1f / powerLevelMain() */,
-		                settings->max,
-		                settings->min);
-
-		if (settings->isActive) {
-			settings->system->power = (int)power;
-		}
-
-		for (int m = 0; m < settings->system->num; m++) {
-			slaves[m]->power = settings->system->power;
-		}
-	} while (!settings->isDone);
+	mutexTake(settings->root->mutex, -5);
+	settings->root->power = (settings->root->power + (int)(power + 0.5)) / 2;
+	mutexGive(settings->root->mutex);
 } /* PID */

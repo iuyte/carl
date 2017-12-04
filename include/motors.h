@@ -20,6 +20,7 @@
 #ifndef CARL_MOTORS_H_
 #define CARL_MOTORS_H_
 #include "API.h"
+#include "sensors.h"
 
 #define clipNum(input, high, low) (input > high) ? high : (input < \
                                                            low) ? low : input
@@ -31,6 +32,7 @@
  */
 typedef struct Motor {
 	struct Motor *slave;
+	Sensor       *sensor;
 	unsigned char port;
 	bool          isInverted;
 	int           power;
@@ -45,7 +47,7 @@ typedef struct Motor {
  * @param isInverted whether or not the motor is isInverted
  */
 Motor motorCreate(unsigned char port,
-                bool          isInverted);
+                  bool          isInverted);
 
 /**
  * Update and set a motor
