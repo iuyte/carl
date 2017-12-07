@@ -40,18 +40,18 @@ void   operatorControl() {
 	} /* moveMogo */
 
 	void moveArm() {
-		int power = -100 * digital(2, 6, JOY_UP, JOY_DOWN);
+		arm->power = -100 * digital(2, 6, JOY_UP, JOY_DOWN);
 
-		arm->power = power;
-		
 		/*
 		if (armLimit.value) {
 			armCoder.reset = true;
 			power          = clipNum(power, 127, 0);
 		}
 
-		if (power) {
+		if (power > 0) {
 			arm->power = 127;
+		} else if (power < 0) {
+			arm->power = -127;
 		} else {
 			if ((armCoder.value < 500) && (armCoder.value >= 50)) {
 				arm->power = -11;
@@ -67,9 +67,9 @@ void   operatorControl() {
 	void moveClaw() {
 		static bool lastClose = false;
 
-		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * 100 +
-		              joystickGetDigital(2, 5, JOY_UP) * -100 +
-		             lastClose * 15;
+		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * -100 +
+		             joystickGetDigital(2, 5, JOY_UP) * 100 +
+		             lastClose * 5;
 
 		if (joystickGetDigital(2, 5, JOY_UP)) {
 			lastClose = true;

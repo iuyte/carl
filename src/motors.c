@@ -43,6 +43,7 @@ void motorUpdate(Motor *m) {
 	// }
 
 	if (m->child) {
+		m->child->power = m->power;
 		motorUpdate(m->child);
 	}
 
