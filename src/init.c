@@ -39,52 +39,47 @@ void init() {
 	print("\nInitializing... ");
 	lcdSetText(uart1, 1, "Initializing...");
 
-	// Set up the analog sensors
-	gyroConf(&gyro, 1, false, 198);
-	notice("gyroscopes, ");
-
-	analogConf(&mogoAngle,           3, false);
-
-	mogoAngle.redundancy = (Sensor *)malloc(sizeof(Sensor));
-	analogConf(mogoAngle.redundancy, 4, false);
-	notice("mobile goal angle, ");
-
-	analogConf(&clawAngle, 5, true);
-	notice("claw angle, ");
+	// Set up the analog sensors // *
+	// gyro = newGyro(1, false, 198);
+	// notice("gyroscopes, ");
+	// mogoAngle[0]       = newAnalog(3, false);
+	// mogoAngle[1]       = newAnalog(4, false);
+	// mogoAngle[0].child = &mogoAngle[1];
+	// notice("mobile goal angle, ");
+	// clawAngle = newAnalog(5, true);
+	// notice("claw angle, ");
 
 	// Set up the digital sensors
-	quadConf(&armCoder, 1, 2, false);
-	notice("arm quad, ");
+	// armCoder = newQuad(1, 2, false);
+	// notice("arm quad, ");
+	// driveCoder[0] = newQuad(4, 5, false);
+	// notice("left drive quad, ");
+	// driveCoder[1] = newQuad(6, 7, true);
+	// notice("right drive quad, ");
+	// sonic = newSonic(3, 10);
+	// notice("ultrasonic sensor, ");
+	// armLimit = newDigital(11, true);
+	// notice("arm limit switch, ");
 
-	quadConf(&driveCoder[0], 4, 5, false);
-	notice("left drive quad, ");
-
-	quadConf(&driveCoder[1], 6, 7, true);
-	notice("right drive quad, ");
-
-	sonicConf(&sonic, 3, 10);
-	notice("ultrasonic sensor, ");
-
-	digitalConf(&armLimit, 11, true);
-	notice("arm limit switch, ");
+	// */
 
 	// Initialize and set up all of the motors, servos, etc
 	claw = motorCreate(5, false);
 	notice("claw servo, ");
 
-	arm[0] = motorCreate(1,  false);
-	arm[1] = motorCreate(10, true);
-	arm->slave = &arm[1];
+	arm[0]     = motorCreate(1,  false);
+	arm[1]     = motorCreate(10, true);
+	arm->child = &arm[1];
 	notice("arm motors, ");
 
-	mogo[0] = motorCreate(4, false);
-	mogo[1] = motorCreate(7, true);
-	mogo->slave = &mogo[1];
+	mogo[0]     = motorCreate(4, false);
+	mogo[1]     = motorCreate(7, true);
+	mogo->child = &mogo[1];
 	notice("mobile goal motors, ");
 
-	drive[0] = motorCreate(2, true);
-	drive[1] = motorCreate(9, false);
-	drive->slave = &drive[1];
+	drive[0]     = motorCreate(2, true);
+	drive[1]     = motorCreate(9, false);
+	drive->child = &drive[1];
 	notice("drive motors, ");
 
 	notice("done!");

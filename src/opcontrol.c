@@ -28,21 +28,23 @@ int digital(unsigned char joyNum,
 } /* digital */
 
 void   operatorControl() {
-	reset();
-
+	printf("Starting Driver Control...\n");
 	void moveDrive() {
 		drive[0].power = joystickGetAnalog(1, 3);
 		drive[1].power = joystickGetAnalog(1, 2);
 	} /* drive */
 
 	void moveMogo() {
-		mogo->power = joystickGetDigital(1, 5, JOY_DOWN) * -127;
-		+joystickGetDigital(1, 5, JOY_UP) * 127;
+		mogo->power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
+		              joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
 		int power = -100 * digital(2, 6, JOY_UP, JOY_DOWN);
 
+		arm->power = power;
+		
+		/*
 		if (armLimit.value) {
 			armCoder.reset = true;
 			power          = clipNum(power, 127, 0);
@@ -59,13 +61,14 @@ void   operatorControl() {
 				arm->power = 0;
 			}
 		}
+		*/
 	} /* moveArm */
 
 	void moveClaw() {
 		static bool lastClose = false;
 
 		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * 100 +
-		             joystickGetDigital(2, 5, JOY_UP) * -100 +
+		              joystickGetDigital(2, 5, JOY_UP) * -100 +
 		             lastClose * 15;
 
 		if (joystickGetDigital(2, 5, JOY_UP)) {
@@ -76,23 +79,13 @@ void   operatorControl() {
 	} /* moveClaw */
 
 	void moveLock() {
-		int power =
-		             joystickGetDigital(1, 6, JOY_UP) * 127 +
-		             joystickGetDigital(1, 6, JOY_DOWN) * -127;
+		int power = joystickGetDigital(1, 6, JOY_UP) * 127 +
+		              joystickGetDigital(1, 6, JOY_DOWN) * -127;
 
 		mogo->power = power;
 	} /* moveLock */
 
-	void reset() {
-		motorStopAll();
-		arm[0].power = -50;
-		arm[1].power = -50;
-		delay(25);
-		arm[0].power = 0;
-		arm[1].power = 0;
-		reset();
-	} /* reset */
-
+	printf("Beginning driver control loop\n");
 	while (true) {
 		moveDrive();
 		moveMogo();
@@ -100,18 +93,20 @@ void   operatorControl() {
 		moveArm();
 		moveClaw();
 
-		if (joystickGetDigital(1, 7, JOY_LEFT) &&
-		    joystickGetDigital(2, 7, JOY_LEFT)) {
-			reset();
-		}
-
-		  motorUpdate(&claw);
+		motorUpdate(&claw);
+		// sensorRefresh(&clawAngle);
+		// sensorRefresh(&armCoder);
 
 		for (size_t i = 0; i < 2; i++) {
 			motorUpdate(&drive[i]);
 			motorUpdate(&arm[i]);
 			motorUpdate(&mogo[i]);
+
+			// sensorRefresh(&driveCoder[i]);
+			// sensorRefresh(&mogoAngle[i]);
 		}
+
+		info();
 		delay(20);
 	}
 } /* operatorControl */

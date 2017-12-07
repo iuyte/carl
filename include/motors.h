@@ -31,7 +31,7 @@
  * A motor structure, containing a motor's port, invertation, and power
  */
 typedef struct Motor {
-	struct Motor *slave;
+	struct Motor *child;
 	Sensor       *sensor;
 	unsigned char port;
 	bool          isInverted;
