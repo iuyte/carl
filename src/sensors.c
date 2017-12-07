@@ -19,21 +19,13 @@
 
 #include "../include/sensors.h"
 
-Sensor *sensors[35];
-
-void sensorInit() {
-	for (int i = 0; i < 35; i++) {
-		sensors[i] = NULL;
-	}
-} /* sensorInit */
-
 void sensorRefresh(Sensor *s) {
 	if (s == NULL) {
 		return;
 	}
 
-	if (s->redundancy != NULL) {
-		sensorRefresh(s->redundancy);
+	if (s->child != NULL) {
+		sensorRefresh(s->child);
 	}
 
 	if (!mutexTake(s->mutex, 5)) {
@@ -80,45 +72,32 @@ void sensorRefresh(Sensor *s) {
 
 	s->value =
 	  ((s->inverted ? -val : val) - s->zero) +
-	  (s->redundancy == NULL) ? 0 : s->redundancy->value;
+	  (s->child == NULL) ? 0 : s->child->value;
 
 	mutexGive(s->mutex);
 } /* sensorRefresh */
 
-void sensorLoop() {
-	for (int i = 0; i < 35; i++) {
-		sensorRefresh(sensors[i]);
-	}
-} /* sensorLoop */
-
-void sensorConf(Sensor        *s,
-                SensorType     type,
-                unsigned char  port,
-                bool           inverted,
-                unsigned short calibrate) {
+Sensor newSensor(SensorType     type,
+               unsigned char  port,
+               bool           inverted,
+               unsigned short calibrate) {
 	if (port < 1) {
 		port = 1;
 	}
-	int index;
 
-	if ((type == Digital) || (type == Sonic) || (type == Quad)) {
-		index = port - 1;
-	} else {
-		index = port + BOARD_NR_GPIO_PINS - 1;
-	}
+	Sensor s;
 
-	sensors[index] = s;
-	s->redundancy  = NULL;
-	s->type        = type;
-	s->value       = 0;
-	s->zero        = 0;
-	s->port        = port;
-	s->inverted    = inverted;
-	s->exists      = true;
-	s->calibrate   = calibrate;
-	s->reset       = false;
-	s->pros        = NULL;
-	s->mutex       = mutexCreate();
+	s.child  = NULL;
+	s.type        = type;
+	s.value       = 0;
+	s.zero        = 0;
+	s.port        = port;
+	s.inverted    = inverted;
+	s.exists      = true;
+	s.calibrate   = calibrate;
+	s.reset       = false;
+	s.pros        = NULL;
+	s.mutex       = mutexCreate();
 
 	switch (type) {
 	case Digital:
@@ -137,43 +116,41 @@ void sensorConf(Sensor        *s,
 		break;
 
 	case Sonic:
-		s->pros = ultrasonicInit(port, (char)calibrate);
+		s.pros = ultrasonicInit(port, (char)calibrate);
 		break;
 
 	case Quad:
-		s->pros = encoderInit(port, (char)calibrate, false);
+		s.pros = encoderInit(port, (char)calibrate, false);
 		break;
 
 	case Gyroscope:
-		s->pros = gyroInit(port, calibrate);
+		s.pros = gyroInit(port, calibrate);
 		break;
 
 	default:
 		break;
 	} /* switch */
+
+	return s;
 } /* newsensor */
 
-void digitalConf(Sensor *s, unsigned char port, bool inverted) {
-	sensorConf(s, Digital, port, inverted, false);
-} /* digitalConf */
+Sensor newDigital(unsigned char port, bool inverted) {
+	return newSensor(Digital, port, inverted, false);
+}
+Sensor newSonic(unsigned char orange, unsigned char yellow) {
+	return newSensor(Sonic, orange, false, yellow);
+}
+Sensor newQuad(unsigned char top, unsigned char bottom, bool inverted) {
+	return newSensor(Quad, top, inverted, bottom);
+}
+Sensor newAnalog(unsigned char port, bool calibrate) {
+	return newSensor(Analog, port, false, calibrate);
+}
 
-void sonicConf(Sensor *s, unsigned char orange, unsigned char yellow) {
-	sensorConf(s, Sonic, orange, false, yellow);
-} /* sonicConf */
+Sensor newAnalogHR(unsigned char port) {
+	return newSensor(AnalogHR, port, false, true);
+}
 
-void quadConf(Sensor *s, unsigned char top, unsigned char bottom,
-              bool inverted) {
-	sensorConf(s, Quad, top, inverted, bottom);
-} /* quadConf */
-
-void analogConf(Sensor *s, unsigned char port, bool calibrate) {
-	sensorConf(s, Analog, port, false, calibrate);
-} /* analogConf */
-
-void analogHRConf(Sensor *s, unsigned char port) {
-	sensorConf(s, AnalogHR, port, false, true);
-} /* analogHRConf */
-
-void gyroConf(Sensor *s, unsigned char port, bool inverted, int calibration) {
-	sensorConf(s, Gyroscope, port, inverted, calibration);
-} /* gyroConf */
+Sensor newGyro(unsigned char port, bool inverted, int calibration) {
+	return newSensor(Gyroscope, port, inverted, calibration);
+}

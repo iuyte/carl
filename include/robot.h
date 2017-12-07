@@ -9,7 +9,7 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
@@ -24,6 +24,10 @@
 #include "sensors.h"
 #include "pid.h"
 
+#define PI 3.141592653589793238462643383279502884197169399375105820974944
+#define DRIVE_WHEEL_WIDTH 4.10
+#define DRIVE_ENCODER_RATIO (5 / 8)
+
 #define GO(task, arg)                 \
   taskCreate(&task,                   \
              TASK_DEFAULT_STACK_SIZE, \
@@ -31,11 +35,7 @@
              TASK_PRIORITY_DEFAULT)
 
 static const double inch =
-  (1 /
-   (3.141592653589793238462643383279502884197169399375105820974944 * 4 / 360 *
-    5 /
-    8))
-  * 11 / 12;
+  (1 / (PI * (DRIVE_WHEEL_WIDTH / 360) * DRIVE_ENCODER_RATIO));
 
 /**
  * A convienence to distinguish tasks from regular functions
@@ -62,21 +62,23 @@ extern Sensor liftCoder;
 extern Sensor driveCoder[2];
 
 /**
- * Potentiometer on the mogo manipulator in analog 1
+ * Potentiometer on the mogo manipulator
+ *  left  in Analog 3
+ *  right in Analog 4
  */
-extern Sensor mogoAngle;
+extern Sensor mogoAngle[2];
 
 /**
  * Gyroscopes to measure the robot's rotation:
  *  normal     @ index 0 in analog 2
- *  redundancy @ index 1 in analog 3
+ *  child @ index 1 in analog 3
  */
 extern Sensor gyro;
 
 /**
  * The ultrasonic sensor on the robot
- * echo, orange wire, in digital 3
- * ping, yellow wire, in digital 10
+ *  echo, orange wire, in digital 3
+ *  ping, yellow wire, in digital 10
  */
 extern Sensor sonic;
 
@@ -118,6 +120,11 @@ extern Motor arm[2];
  */
 extern Motor mogo[2];
 
+/**
+ * Prints information and sets the LCD line 2 to display battery voltage
+ */
+void info();
+
 // Stuff to set stuff
 void driveSet(int l,
               int r);
@@ -126,10 +133,5 @@ void driveSet(int l,
  * Reset the robot
  */
 void reset();
-
-/**
- * Runs the various functions to manage everything
- */
-void manager(void *none);
 
 #endif // CARL_ROBOT_H_

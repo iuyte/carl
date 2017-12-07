@@ -39,7 +39,7 @@ typedef enum {
  * A struct representing a Sensor of a given type
  */
 typedef struct Sensor {
-	struct Sensor *redundancy;
+	struct Sensor *child;
 	SensorType     type;
 	int            value;
 	int            zero;
@@ -52,91 +52,95 @@ typedef struct Sensor {
 	Mutex          mutex;
 } Sensor;
 
-/**
- * Initialize and clean up the Sensors for the manager. Must be used before
- * creating any new Sensors
+/*
+ * Refresh the information on the Sensor
+ *
+ * @param s the Sensor to refresh
  */
-void sensorInit();
+void   sensorRefresh(Sensor *s);
 
 /**
- * A step in the management loop to handle Sensors
- */
-void sensorLoop();
-
-/**
- * Configure a new Sensor
+ * Create a new Sensor
  *
  * @param type      the type of SensorType, either a Digital, Analog,
  * AnalogHR, Quad, Sonic, or Gyroscope
  * @param port      the port in which the Sensor in in
  * @param inverted  whether or not to invert the value
  * @param calibrate the calibration value in some cases, or anything but 0 to
- * calibrate the Sensor
+ * calibrate the Sensor object
+ *
+ * @return the new Sensor
  */
-void sensorConf(Sensor        *s,
-                SensorType     type,
-                unsigned char  port,
-                bool           inverted,
-                unsigned short calibrate);
+Sensor newSensor(SensorType     type,
+                 unsigned char  port,
+                 bool           inverted,
+                 unsigned short calibrate);
 
 /**
- * Configure a new digital Sensor
+ * Create a new digital Sensor
  *
- * @param s        the Sensor to configure
  * @param port     the port that the digital Sensor is in
  * @param inverted whether or not to invert the value
+ *
+ * @return the new digital Sensor object
  */
-void digitalConf(Sensor *s,
-		unsigned char port,
-                   bool          inverted);
+Sensor newDigital(unsigned char port,
+                  bool          inverted);
 
 /**
- * Configure a Sonic (aka ultrasonic) Sensor
+ * Create a Sonic (aka ultrasonic) Sensor
  *
- * @param s      the Sensor to configure
  * @param orange the port that the orange cable is in
  * @param yellow the port that the yellow cable is in
+ *
+ * @return the new ultrasonic Sensor object
  */
-void sonicConf(Sensor *s, unsigned char orange,
-                 unsigned char yellow);
+Sensor newSonic(unsigned char orange,
+                unsigned char yellow);
 
 /**
- * Configure and initialize a quadrature encoder (the red ones)
- *
- * @param s        the Sensor to configure
+ * Create and initialize a quadrature encoder (the red ones)
  * @param top      the port that the top wire on the encoder is in
  * @param bottom   the port that the bottom wire on the encoder is in
  * @param inverted whether or not the Sensor's value should be inverted
+ *
+ * @return the new quadrature encoder Sensor object
  */
-void quadConf(Sensor *s, unsigned char top,
-                unsigned char bottom,
-                bool          inverted);
+Sensor newQuad(unsigned char top,
+               unsigned char bottom,
+               bool          inverted);
 
 /**
- * Configure a new analog Sensor
+ * Create a new analog Sensor
  *
- * @param s         the Sensor to configure
  * @param port      the port that the Sensor is in
  * @param calibrate whether or not to calibrate the sensor
+ *
+ * @return the new analog Sensor object
  */
-void analogConf(Sensor *s, unsigned char port, bool calibrate);
+Sensor newAnalog(unsigned char port,
+                 bool          calibrate);
 
 /**
- * Configure a new analog HR sensor
+ * Create a new analog HR sensor
  *
- * @param s    the Sensor to configure
  * @param port the port that the Sensor is in
+ *
+ * @return the new analog Sensor object with High Resolution
  */
-void analogHRConf(Sensor *s, unsigned char port);
+Sensor newAnalogHR(unsigned char port);
 
 /**
- * Configure a gyroscope Sensor
+ * Create a gyroscope Sensor
  *
- * @param s           the Sensor to configure
  * @param port        the analog port that the gyro is plugged into
  * @param inverted    whether or not the gyroscope is inverted
  * @param calibration the calibration of the Sensor
+ *
+ * @return the new gyro Sensor object
  */
-void gyroConf(Sensor *s, unsigned char port, bool inverted, int calibration);
+Sensor newGyro(unsigned char port,
+               bool          inverted,
+               int           calibration);
 
 #endif // CARL_SENSORS_H_

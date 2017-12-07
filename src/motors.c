@@ -38,8 +38,12 @@ void motorUpdate(Motor *m) {
 		return;
 	}
 
-	if (m->slave) {
-		motorUpdate(m->slave);
+	// if (m->sensor) {
+	// 	sensorRefresh(m->sensor);
+	// }
+
+	if (m->child) {
+		motorUpdate(m->child);
 	}
 
 	if (!mutexTake(m->mutex, 5)) {
