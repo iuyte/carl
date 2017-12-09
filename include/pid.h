@@ -58,9 +58,9 @@ typedef struct PIDSettings {
 	int min;
 
 	/**
-	 * Limit for the integral value
+	 * The maximum value the integral will be limited to (-1 for none)
 	 */
-	int iLimit;
+	int integralLimit;
 
 	/**
 	 * The system the pid controls
@@ -68,9 +68,9 @@ typedef struct PIDSettings {
 	Motor *root;
 
 	/**
-	 * The current sensor value
+	 * The last recorded time
 	 */
-	int current;
+	unsigned long time;
 
 	/**
 	 * The integral
@@ -97,7 +97,9 @@ typedef struct PIDSettings {
  * @param target     the destination value
  * @param max        the maximum value at which it will set the motors
  * @param min        the minimum value at which it will set the motors
- * @param iLimit     the maximum kI value
+ * @param iLimit     The maximum value the integral will be limited to (-1 for
+ *none)
+ *
  * @param root       a pointer to the motor linked list that the PID will
  * control
  *
@@ -109,7 +111,7 @@ PIDSettings newPIDSettings(float  kP,
                            float  target,
                            int    max,
                            int    min,
-                           int    iLimit,
+                           int    integralLimit,
                            Motor *root);
 
 /**

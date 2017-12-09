@@ -25,7 +25,7 @@
 #define clipNum(input, high, low) (input > high) ? high : (input < \
                                                            low) ? low : input
 #define sng(input) (input > 0) ? 1 : (input < 0) ? -1 : 0
-#define deadBand(input, dead) (abs(input) > dead) ? input : input
+#define deadBand(input, dead) ((input - dead > 0 || input + dead < 0) ? input : 0)
 
 /**
  * A motor structure, containing a motor's port, invertation, and power

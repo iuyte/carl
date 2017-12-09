@@ -18,6 +18,7 @@
  */
 
 #include "../include/pid.h"
+#include <math.h>
 
 PIDSettings newPIDSettings(float  kP,
                            float  kI,
@@ -25,7 +26,7 @@ PIDSettings newPIDSettings(float  kP,
                            float  target,
                            int    max,
                            int    min,
-                           int    iLimit,
+                           int    integralLimit,
                            Motor *root) {
 	PIDSettings s = {
 		kP,
@@ -34,9 +35,9 @@ PIDSettings newPIDSettings(float  kP,
 		target,
 		max,
 		min,
-		iLimit,
+		integralLimit,
 		root,
-		0,
+		millis(),
 		0,
 		0,
 		0,
@@ -49,26 +50,24 @@ void PID(PIDSettings *settings) {
 	float error;
 	float power;
 
-	settings->current = settings->root->sensor->value;
-	error             = settings->target - settings->current;
+	error = settings->target - settings->root->sensor->average;
 
-	settings->integral =
-	  (settings->kI != 0 && abs((int)error) < settings->iLimit) ?
-	  (settings->integral + error) :
-	  clipNum(settings->integral + error, settings->iLimit, -settings->iLimit);
-
+	settings->integral  += error / (millis() - settings->time);
+	settings->time       = millis();
 	settings->derivative = error - settings->error;
 	settings->error      = error;
 
-	power =
-	  clipNum(
-	    (settings->kP * error) +
-	    (settings->kI * settings->integral) +
-	    (settings->kD * settings->derivative),
-	    settings->max,
-	    settings->min);
+	power = clipNum(
+	  (settings->kP * error) +
+	  (settings->kI * (settings->integralLimit == -1) ? settings->integral :
+	   clipNum(settings->integral, settings->integralLimit,
+	           -settings->integralLimit)) +
+	  (settings->kD * settings->derivative),
+	  settings->max,
+	  settings->min);
 
 	mutexTake(settings->root->mutex, -5);
-	settings->root->power = (settings->root->power + (int)(power + 0.5)) / 2;
+
+	settings->root->power = round(power);
 	mutexGive(settings->root->mutex);
 } /* PID */
