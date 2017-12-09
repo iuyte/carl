@@ -38,10 +38,6 @@ void motorUpdate(Motor *m) {
 		return;
 	}
 
-	// if (m->sensor) {
-	// 	sensorRefresh(m->sensor);
-	// }
-
 	if (m->child) {
 		m->child->power = m->power;
 		motorUpdate(m->child);

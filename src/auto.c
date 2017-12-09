@@ -19,36 +19,92 @@
 
 #include "../include/robot.h"
 
-int auton = 1;
-PIDSettings armSettings;
+void armToPosition(float pos) {
+	armSettings.target = pos;
 
-void   autonomous() {
-	int stage = 0;
+	do {
+		PID(&armSettings);
+		update();
+		info();
+		delay(10);
+	} while (armSettings.error > 75 && armSettings.integral > 2.f);
+} /* armToPosition */
 
-	void stageUp() {
-		printf("\nStage %d", stage++);
-	} /* stageUp */
+void driveToPosition(int l, int r, int a) {
+	driveSettings[0].target = l;
+	driveSettings[1].target = r;
 
-	stageUp();
-	reset();
+	do {
+		PID(&driveSettings[0]);
+		PID(&driveSettings[1]);
+		PID(&armSettings);
+		drive[0].power -= (a - gyro.average) * 1.5;
+		drive[1].power += (a - gyro.average) * 1.5;
 
-	stageUp();
-	armSettings = newPIDSettings(
-	  .7f,
-	  .17f,
-	  .08f,
-	  0,
-	  127,
-	  -127,
-	  10,
-	  arm);
+		update();
+		info();
+		delay(10);
+	} while (driveSettings[0].integral > 3.f ||
+	         driveSettings[1].integral > 3.f ||
+	         driveSettings[0].error > 100 ||
+	         driveSettings[1].error > 100);
+} /* driveToPosition */
 
-	if (!auton) {
-		return;
+void mogoP(int p) {
+	while (mogoAngle[1].value<p - 100 || mogoAngle[1].value>p + 100) {
+		mogo->power = (p - mogoAngle[1].value) * -.22;
+		PID(&armSettings);
+		update();
 	}
 
+	mogo->power = 0;
+} /* mogoP */
+
+void gyroP(int o, int precision) {
+	int error      = 0;
+	int derivative = 0;
+
+	do {
+		derivative = (o - gyro.average) - error;
+		error      = o - gyro.average;
+
+		drive[0].power = error * 2 + derivative * .2;
+		drive[1].power = error * -2 + derivative * .2;
+
+		update();
+		info();
+		delay(10);
+	} while (abs(error) > precision ||
+	         abs(drive[0].power) + abs(drive[1].power) > 20);
+
+	drive[0].power = 0;
+	drive[1].power = 0;
+} /* gyroP */
+
+int stage = 0;
+
+void stageUp() {
 	printf("\nStage %d", stage++);
-	claw.power = 127;
+} /* stageUp */
+
+void autonomous() {
+	reset();
+	stageUp();
+
+	armSettings.target = 500;
+	PID(&armSettings);
+	stageUp();
+	delay(1000);
+
+	mogoP(2000);
+	stageUp();
 	delay(500);
-	claw.power = 0;
+
+	driveToPosition(2000, 2000, 2);
+	stageUp();
+
+	mogoP(100);
+	stageUp();
+
+	driveToPosition(1000, 1000, 0);
 } /* autonomous */

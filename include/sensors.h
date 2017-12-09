@@ -39,25 +39,32 @@ typedef enum {
  * A struct representing a Sensor of a given type
  */
 typedef struct Sensor {
-	struct Sensor *child;
-	SensorType     type;
-	int            value;
-	int            zero;
+	SensorType type;
+	int        value;
+	int        zero;
+	int        average;
+	float (*recalc)(int);
 	bool           inverted;
-	bool           reset;
-	unsigned short calibrate;
 	unsigned char  port;
-	bool           exists;
+	unsigned short calibrate;
 	void          *pros;
 	Mutex          mutex;
+	struct Sensor *child;
 } Sensor;
 
-/*
+/**
  * Refresh the information on the Sensor
  *
  * @param s the Sensor to refresh
  */
 void   sensorRefresh(Sensor *s);
+
+/**
+ * Reset a sensor's value
+ *
+ * @param the Sensor to reset
+ */
+void   sensorReset(Sensor *s);
 
 /**
  * Create a new Sensor

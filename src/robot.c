@@ -27,6 +27,8 @@
 #define CYAN    "\x1b[36m"
 #define RESET   "\x1b[0m"
 
+double inch = (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * DRIVE_ENCODER_RATIO));
+
 Sensor armCoder;
 Sensor liftCoder;
 Sensor driveCoder[2];
@@ -34,7 +36,7 @@ Sensor mogoAngle[2];
 Sensor gyro;
 Sensor sonic;
 Sensor clawAngle;
-Sensor armLimit;
+Sensor armLimit[2];
 
 // Motors and servos
 Motor claw;
@@ -42,31 +44,56 @@ Motor drive[2];
 Motor arm[2];
 Motor mogo[2];
 
+// PID settings
+PIDSettings armSettings;
+PIDSettings driveSettings[2];
+
 void init();
 
 void reset() {
-	gyro.reset          = true;
-	mogoAngle[0].reset  = true;
-	mogoAngle[1].reset  = true;
-	driveCoder[0].reset = true;
-	driveCoder[1].reset = true;
-	armCoder.reset      = true;
-	clawAngle.reset     = true;
+	// Reset sensors
+	sensorReset(&gyro);
+	sensorReset(&mogoAngle[0]);
+	sensorReset(&driveCoder[0]);
+	sensorReset(&driveCoder[1]);
+	sensorReset(&armCoder);
+	sensorReset(&clawAngle);
+
+	// Reset PID times
+	armSettings.time      = millis();
+	driveSettings[0].time = millis();
+	driveSettings[1].time = millis();
 } /* reset */
+
+void update() {
+	motorUpdate(&claw);
+	motorUpdate(&mogo[0]);
+	motorUpdate(&arm[0]);
+	sensorRefresh(&clawAngle);
+	sensorRefresh(&armCoder);
+	sensorRefresh(&gyro);
+	sensorRefresh(&sonic);
+	sensorRefresh(&mogoAngle[0]);
+
+	for (size_t i = 0; i < 2; i++) {
+		motorUpdate(&drive[i]);
+		sensorRefresh(&driveCoder[i]);
+	}
+} /* update */
 
 void info() {
 	printf(
-	  RED " |  %4f     | " GREEN "%4f    | " YELLOW "%4d    | " \
+	  RED " |  %4d     | " GREEN "%4d    | " YELLOW "%4d    | " \
 	  BLUE "%4d    | %4d    | " CYAN "%4d    | " RED "%3d    | " GREEN
 	  " %4d    | " \
 	  YELLOW "%4u mv | " RESET "\n",
-	  (float)(driveCoder[0].value / inch),
-	  (float)(driveCoder[1].value / inch),
+	  driveCoder[0].value,
+	  encoderGet(driveCoder[1].pros),
 	  armCoder.value,
 	  mogoAngle[0].value,
 	  mogoAngle[1].value,
 	  clawAngle.value,
-	  gyro.value,
+	  gyro.average,
 	  sonic.value,
 	  powerLevelMain());
 	lcdPrint(uart1, 2, "%u mV", powerLevelMain());

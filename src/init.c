@@ -19,6 +19,10 @@
 
 #include "../include/robot.h"
 
+float recalc(int p) {
+	return p * 5 / 8;
+} /* recalc */
+
 void initializeIO() {}
 
 void init() {
@@ -39,37 +43,40 @@ void init() {
 	print("\nInitializing... ");
 	lcdSetText(uart1, 1, "Initializing...");
 
-	// Set up the analog sensors // *
-	// gyro = newGyro(1, false, 198);
-	// notice("gyroscopes, ");
-	// mogoAngle[0]       = newAnalog(3, false);
-	// mogoAngle[1]       = newAnalog(4, false);
-	// mogoAngle[0].child = &mogoAngle[1];
-	// notice("mobile goal angle, ");
-	// clawAngle = newAnalog(5, true);
-	// notice("claw angle, ");
+	// Set up the analog sensors
+	gyro        = newGyro(1, false, 195);
+	gyro.child  = (Sensor *)malloc(sizeof(Sensor));
+	*gyro.child = newGyro(2, false, 196);
+	notice("gyroscopes, ");
+	mogoAngle[0]       = newAnalog(3, false);
+	mogoAngle[1]       = newAnalog(4, false);
+	mogoAngle[0].child = &mogoAngle[1];
+	notice("mobile goal angle, ");
+	clawAngle = newAnalog(5, true);
+	notice("claw angle, ");
 
 	// Set up the digital sensors
-	// armCoder = newQuad(1, 2, false);
-	// notice("arm quad, ");
-	// driveCoder[0] = newQuad(4, 5, false);
-	// notice("left drive quad, ");
-	// driveCoder[1] = newQuad(6, 7, true);
-	// notice("right drive quad, ");
-	// sonic = newSonic(3, 10);
-	// notice("ultrasonic sensor, ");
-	// armLimit = newDigital(11, true);
-	// notice("arm limit switch, ");
-
-	// */
+	armCoder = newQuad(1, 2, true);
+	notice("arm quad, ");
+	driveCoder[0] = newQuad(4, 5, true);
+	notice("left drive quad, ");
+	driveCoder[1]        = newQuad(8, 9, true);
+	driveCoder[1].recalc = recalc;
+	notice("right drive quad, ");
+	sonic = newSonic(3, 10);
+	notice("ultrasonic sensor, ");
+	armLimit[0] = newDigital(12, true);
+	armLimit[1] = newDigital(11, true);
+	notice("arm limit switch, ");
 
 	// Initialize and set up all of the motors, servos, etc
-	claw = motorCreate(5, false);
+	claw = motorCreate(3, false);
 	notice("claw servo, ");
 
-	arm[0]     = motorCreate(1,  false);
-	arm[1]     = motorCreate(10, true);
-	arm->child = &arm[1];
+	arm[0]      = motorCreate(1,  false);
+	arm[1]      = motorCreate(10, true);
+	arm->child  = &arm[1];
+	arm->sensor = &armCoder;
 	notice("arm motors, ");
 
 	mogo[0]     = motorCreate(4, false);
@@ -77,10 +84,35 @@ void init() {
 	mogo->child = &mogo[1];
 	notice("mobile goal motors, ");
 
-	drive[0]     = motorCreate(2, true);
-	drive[1]     = motorCreate(9, false);
-	drive->child = &drive[1];
+	drive[0]        = motorCreate(2, true);
+	drive[0].sensor = &driveCoder[0];
+	drive[1]        = motorCreate(9, false);
+	drive[1].sensor = &driveCoder[1];
 	notice("drive motors, ");
+
+	// PID
+	armSettings = newPIDSettings(
+	  .45f,
+	  .27f,
+	  .21f,
+	  50,
+	  127,
+	  -127,
+	  14,
+	  &arm[0]);
+
+	driveSettings[0] = newPIDSettings(
+	  .14f,
+	  .03f,
+	  .15f,
+	  0,
+	  100,
+	  -100,
+	  7,
+	  &drive[0]);
+	driveSettings[1]      = driveSettings[0];
+	driveSettings[1].root = &drive[1];
+	notice("PID, ");
 
 	notice("done!");
 	print("\n\n");
