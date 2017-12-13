@@ -73,8 +73,8 @@ void init() {
 	claw = motorCreate(3, false);
 	notice("claw servo, ");
 
-	arm[0]      = motorCreate(1,  false);
-	arm[1]      = motorCreate(10, true);
+	arm[0]      = motorCreate(5,  false);
+	arm[1]      = motorCreate(6, true);
 	arm->child  = &arm[1];
 	arm->sensor = &armCoder;
 	notice("arm motors, ");
@@ -92,9 +92,9 @@ void init() {
 
 	// PID
 	armSettings = newPIDSettings(
-	  .45f,
-	  .27f,
-	  .21f,
+	  .62f,
+	  0.f,
+	  .38f,
 	  50,
 	  127,
 	  -127,
