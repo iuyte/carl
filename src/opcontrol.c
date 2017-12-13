@@ -41,20 +41,25 @@ void   operatorControl() {
 	} /* moveMogo */
 
 	void moveArm() {
-		if (digital(2, 6, JOY_UP, JOY_DOWN)) {
-			arm->power = -122 * digital(2, 6, JOY_UP, JOY_DOWN);
+		if (digital(2, 6, JOY_UP, JOY_DOWN) != 0) {
+			arm->power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
+			/*
 			arm->power = (armLimit[0].value) ? clipNum(arm->power, 100, 0) :
 			             (armLimit[1].value) ? clipNum(arm->power, 0, -100) :
 			             (arm->power);
+									 */
 
+			/*
 			if (armLimit[0].value) {
 				armCoder.zero = armCoder.value;
 			}
+			*/
 			armSettings.target = armCoder.value;
-		} else if (armCoder.value < 75) {
+		} else if (armCoder.value < 75 || armCoder.value > 725) {
 			arm->power = 0;
 		} else {
-			PID(&armSettings);
+			// PID(&armSettings);
+			arm->power = (armCoder.value > 400) ? 20 : -20;
 		}
 	} /* moveArm */
 
