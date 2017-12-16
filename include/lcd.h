@@ -21,6 +21,7 @@
 #define CARL_LCD_H_
 
 #include "sensors.h"
+#include "motors.h"
 
 typedef struct LCDMenu {
 	Sensor         *sensor;
@@ -31,5 +32,7 @@ typedef struct LCDMenu {
 
 void displayMenu(PROS_FILE *port,
                  LCDMenu    menu);
+
+void selectAuton(void *storeSelect);
 
 #endif // CARL_LCD_H_

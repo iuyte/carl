@@ -48,17 +48,19 @@ void init() {
 	gyro.child  = (Sensor *)malloc(sizeof(Sensor));
 	*gyro.child = newGyro(2, false, 196);
 	notice("gyroscopes, ");
-	mogoAngle[0]       = newAnalog(3, false);
-	mogoAngle[1]       = newAnalog(4, false);
-	mogoAngle[0].child = &mogoAngle[1];
+	mogoAngle[0] = newAnalog(3, true);
+	mogoAngle[1] = newAnalog(4, true);
+	analogCalibrate(3);
+	analogCalibrate(4);
+
+	// mogoAngle[0].child = &mogoAngle[1];
 	notice("mobile goal angle, ");
-	clawAngle = newAnalog(5, true);
-	notice("claw angle, ");
 
 	// Set up the digital sensors
 	armCoder = newQuad(1, 2, true);
 	notice("arm quad, ");
-	driveCoder[0] = newQuad(4, 5, true);
+	driveCoder[0]        = newQuad(4, 5, true);
+	driveCoder[0].recalc = recalc;
 	notice("left drive quad, ");
 	driveCoder[1]        = newQuad(8, 9, true);
 	driveCoder[1].recalc = recalc;
@@ -115,7 +117,9 @@ void init() {
 	notice("PID, ");
 
 	notice("done!");
+	lcdSetText(uart1, 1, "Ready!");
 	print("\n\n");
-	lcdSetText(uart1, 1, "Battery:");
 	setTeamName("709S");
+
+	// GO(selectAuton, &selectedAuton);
 } /* init */

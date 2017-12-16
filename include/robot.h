@@ -23,6 +23,7 @@
 #include "motors.h"
 #include "sensors.h"
 #include "pid.h"
+#include "lcd.h"
 
 #define PI 3.141592653589793238462643383279502884197169399375105820974944
 #define DRIVE_WHEEL_DIAMETER 4.10
@@ -35,6 +36,11 @@
              TASK_PRIORITY_DEFAULT)
 
 extern double inch;
+
+/**
+ * The selected autonomous
+ */
+extern int selectedAuton;
 
 /**
  * A convienence to distinguish tasks from regular functions
@@ -83,7 +89,7 @@ extern Sensor clawAngle;
 
 /**
  * The limit switch on the arm
- * 	in  @ digital 11
+ *  in  @ digital 11
  *  out @ digital 12
  */
 extern Sensor armLimit[2];
@@ -123,8 +129,8 @@ extern PIDSettings armSettings;
 
 /**
  * PID settings for the drive
- * 	left  @ index 0
- * 	right @ index 1
+ *  left  @ index 0
+ *  right @ index 1
  */
 extern PIDSettings driveSettings[2];
 

@@ -43,19 +43,15 @@ void   operatorControl() {
 	void moveArm() {
 		if (digital(2, 6, JOY_UP, JOY_DOWN) != 0) {
 			arm->power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
-			/*
-			arm->power = (armLimit[0].value) ? clipNum(arm->power, 100, 0) :
-			             (armLimit[1].value) ? clipNum(arm->power, 0, -100) :
-			             (arm->power);
-									 */
 
-			/*
 			if (armLimit[0].value) {
-				armCoder.zero = armCoder.value;
+				sensorReset(&armCoder);
+				arm->power = clipNum(arm->power, 0, -127);
+			} else if (armLimit[1].value) {
+				arm->power = clipNum(arm->power, 127, 0);
 			}
-			*/
 			armSettings.target = armCoder.value;
-		} else if (armCoder.value < 75 || armCoder.value > 725) {
+		} else if ((armCoder.value < 75) || (armCoder.value > 725)) {
 			arm->power = 0;
 		} else {
 			// PID(&armSettings);
@@ -87,6 +83,11 @@ void   operatorControl() {
 	printf("Beginning driver control loop\n");
 
 	while (true) {
+		if (joystickGetDigital(1, 7, JOY_LEFT) &&
+		    joystickGetDigital(2, 7, JOY_LEFT)) {
+			exit(0);
+		}
+
 		moveDrive();
 		moveMogo();
 		moveLock();
