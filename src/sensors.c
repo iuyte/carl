@@ -20,6 +20,10 @@
 #include "../include/sensors.h"
 #include <math.h>
 
+float defaultRecalc(int n) {
+	return n;
+}
+
 int readSensorValue(Sensor *s) {
 	switch (s->type) {
 	case Digital:
@@ -60,8 +64,13 @@ void sensorRefresh(Sensor *s) {
 		return;
 	}
 
-	int val = readSensorValue(s) - s->zero;
-	val = (s->inverted ? -val : val);
+	int val = (s->type == Digital) ? readSensorValue(s) :
+	          (readSensorValue(s) - s->zero);
+	if (s->type == Digital && s->inverted) {
+		val = !val;
+	} else if (s->type != Digital) {
+		val = (s->inverted ? -val : val);
+	}
 
 	if (s->recalc) {
 		val = round(s->recalc(val));
@@ -74,10 +83,17 @@ void sensorRefresh(Sensor *s) {
 } /* sensorRefresh */
 
 void sensorReset(Sensor *s) {
-	s->zero = readSensorValue(s);
-
 	if (s->child) {
 		sensorReset(s->child);
+	}
+
+	switch (s->type) {
+		case Gyroscope:
+			gyroReset(s->pros);
+		case Quad:
+			encoderReset(s->pros);
+		default:
+			s->zero = readSensorValue(s);
 	}
 } /* sensorReset */
 
@@ -94,7 +110,7 @@ Sensor newSensor(SensorType     type,
 	s.child     = 0;
 	s.type      = type;
 	s.value     = 0;
-	s.recalc    = 0;
+	s.recalc    = &defaultRecalc;
 	s.zero      = 0;
 	s.average   = 0;
 	s.port      = port;
@@ -105,11 +121,10 @@ Sensor newSensor(SensorType     type,
 
 	switch (type) {
 	case Digital:
-		pinMode(port, OUTPUT);
+		pinMode(port, INPUT);
 		break;
 
 	case Analog:
-
 		if (calibrate) {
 			analogCalibrate(port);
 		}

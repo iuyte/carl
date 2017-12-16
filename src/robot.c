@@ -48,16 +48,26 @@ Motor mogo[2];
 PIDSettings armSettings;
 PIDSettings driveSettings[2];
 
+int selectedAuton = 1;
+
+void altRefresh(Sensor *s) {
+	mutexTake(s->mutex, -1);
+	s->value = analogReadCalibrated(s->port);
+	mutexGive(s->mutex);
+}
+
 void init();
 
 void reset() {
 	// Reset sensors
 	sensorReset(&gyro);
-	sensorReset(&mogoAngle[0]);
 	sensorReset(&driveCoder[0]);
 	sensorReset(&driveCoder[1]);
-	sensorReset(&armCoder);
-	sensorReset(&clawAngle);
+
+	if (!isAutonomous()) {
+		sensorReset(&armCoder);
+		sensorReset(&mogoAngle[0]);
+	}
 
 	// Reset PID times
 	armSettings.time      = millis();
@@ -69,34 +79,42 @@ void update() {
 	motorUpdate(&claw);
 	motorUpdate(&mogo[0]);
 	motorUpdate(&arm[0]);
-	sensorRefresh(&clawAngle);
 	sensorRefresh(&armCoder);
-	sensorRefresh(&gyro);
-	sensorRefresh(&sonic);
-	sensorRefresh(&mogoAngle[0]);
+	altRefresh(&mogoAngle[0]);
+	altRefresh(&mogoAngle[1]);
+
+	if (isAutonomous()) {
+		sensorRefresh(&gyro);
+		sensorRefresh(&sonic);
+	}
 
 	for (size_t i = 0; i < 2; i++) {
 		motorUpdate(&drive[i]);
 		sensorRefresh(&driveCoder[i]);
+		sensorRefresh(&armLimit[i]);
 	}
 } /* update */
 
 void info() {
-	printf(
-	  RED " |  %4d     | " GREEN "%4d    | " YELLOW "%4d    | " \
-	  BLUE "%4d    | %4d    | " CYAN "%4d    | " RED "%3d    | " GREEN
-	  " %4d    | " \
-	  YELLOW "%4u mv | " RESET "\n",
-	  driveCoder[0].value,
-	  encoderGet(driveCoder[1].pros),
-	  armCoder.value,
-	  mogoAngle[0].value,
-	  mogoAngle[1].value,
-	  clawAngle.value,
-	  gyro.average,
-	  sonic.value,
-	  powerLevelMain());
-	lcdPrint(uart1, 2, "%u mV", powerLevelMain());
+	static unsigned long time = 0;
+	if (millis() - time >= 25) {
+		printf(
+			RED " |  %4d     | " GREEN "%4d    | " YELLOW "%4d    | " \
+			BLUE "%4d    | %4d    | " CYAN "%4d    | " RED "%3d    | " GREEN
+			" %4d    | " \
+			YELLOW "%4u mv | " RESET "\n",
+			driveCoder[0].value,
+			driveCoder[1].value,
+			armCoder.value,
+			mogoAngle[0].value,
+			mogoAngle[1].value,
+			0,
+			gyro.average,
+			sonic.value,
+			powerLevelMain());
+		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
+		time = millis();
+	}
 } /* info */
 
 bool initialized = false;
