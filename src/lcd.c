@@ -19,7 +19,38 @@
 
 #include "../include/lcd.h"
 
-void displayMenu(PROS_FILE *port, LCDMenu menu) {
-	lcdPrint(port, 1, "%s: ", menu.name);
-	lcdPrint(port, 2, "%d",  menu.sensor->value);
-} /* displayMenu */
+TaskHandle LCDHandle;
+
+Task selectAuton(void *none) {
+	unsigned int lcdState = 0x000;
+
+	while (true) {
+			if (lcdState == 0x100) {
+				if (selectedAuton < 1) {
+					selectedAuton = NUM_AUTON - 1;
+				} else {
+					selectedAuton -= 1;
+				}
+
+				while (lcdReadButtons(uart1) == 0x100) {
+					delay(15);
+				}
+			} else if (lcdState == 0x001) {
+				if (selectedAuton > NUM_AUTON - 1) {
+					selectedAuton = 0;
+				} else {
+					selectedAuton += 1;
+				}
+
+				while (lcdReadButtons(uart1) == 0x001) {
+					delay(15);
+				}
+			}
+
+		update();
+		info();
+		lcdSetText(uart1, 1, autons[selectedAuton].name);
+		lcdState = lcdReadButtons(uart1);
+		delay(25);
+	}
+} /* selectAuton */

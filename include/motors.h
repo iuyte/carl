@@ -22,10 +22,17 @@
 #include "API.h"
 #include "sensors.h"
 
-#define clipNum(input, high, low) (input > high) ? high : (input < \
-                                                           low) ? low : input
-#define sng(input) (input > 0) ? 1 : (input < 0) ? -1 : 0
-#define deadBand(input, dead) (abs(input) > dead) ? input : input
+#define clipNum(input, high, low) ((input > high) ? high : (input < \
+                                                            low) ? low : input)
+#define sng(input) ((input > 0) ? 1 : (input < 0) ? -1 : 0)
+#define deadBand(input, \
+                 dead) ((input - dead > 0 || input + dead < 0) ? input : 0)
+#define expand(input, tip, high, low) ((input > tip) ? high : low)
+
+/**
+ * A convienence to distinguish tasks from regular functions
+ */
+typedef void Task;
 
 /**
  * A motor structure, containing a motor's port, invertation, and power
@@ -36,8 +43,11 @@ typedef struct Motor {
 	unsigned char port;
 	bool          isInverted;
 	int           power;
-	int           last;
-	Mutex         mutex;
+	int           deadband;
+	int           _power;
+	int           _lastPower;
+	unsigned long _lastTime;
+	Mutex         _mutex;
 } Motor;
 
 /**

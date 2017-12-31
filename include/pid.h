@@ -52,70 +52,77 @@ typedef struct PIDSettings {
 	 */
 	int max;
 
-	/**
+	/*
 	 * Minimum value to be assigned to the controlled system
 	 */
 	int min;
 
 	/**
-	 * Limit for the integral value
+	 * The maximum value the integral will be limited to (-1 for none)
 	 */
-	int iLimit;
+	int integralLimit;
+
+	/**
+	 * The amount of distance from target to still be considered *at* the target
+	 */
+	int tolerance;
+
+	/**
+	 * How long the sensor must be near it's target, as defined by tolerance, to be considered reached it's target
+	 */
+	unsigned long precision;
 
 	/**
 	 * The system the pid controls
 	 */
 	Motor *root;
 
-	/**
-	 * The current sensor value
+	/** 
+	 * Whether or not the instance has remained at it's target, within the range of tolerance, longer than precision
 	 */
-	int current;
+	bool isTargetReached;
+
+	/**
+	 * The output of millis() at the point in time which target within tolerance was reached. 0 if not currently at target within tolerance
+	 */
+	unsigned long _reached;
+
+	/**
+	 * The last recorded time
+	 */
+	unsigned long _time;
 
 	/**
 	 * The integral
 	 */
-	int integral;
+	int _integral;
 
 	/**
 	 * The error
 	 */
-	int error;
+	int _error;
 
 	/**
 	 * The derivative
 	 */
-	float derivative;
+	float _derivative;
 } PIDSettings;
 
-/**
- * Create new settings based on the values provided
- *
- * @param kP         the P multiplier for the PID
- * @param kI         the I multiplier for the PID
- * @param kD         the D multiplier for the PID
- * @param target     the destination value
- * @param max        the maximum value at which it will set the motors
- * @param min        the minimum value at which it will set the motors
- * @param iLimit     the maximum kI value
- * @param root       a pointer to the motor linked list that the PID will
- * control
- *
- * @returns the configured PIDSettings
- */
-PIDSettings newPIDSettings(float  kP,
-                           float  kI,
-                           float  kD,
-                           float  target,
-                           int    max,
-                           int    min,
-                           int    iLimit,
-                           Motor *root);
+#define DEFAULT_PID_SETTINGS \
+		.kP = 1, \
+		.kI = 0, \
+		.kD = 0, \
+		.target = 0, \
+		.max = 127, \
+		.min = -127, \
+		.integralLimit = 10, \
+		.tolerance = 5, \
+		.precision = 220
+
 
 /**
  * Use the Settings to achieve the target, one step at a time
  *
- * @param target   the target value
  * @param settings a pointer to the settings to be used
  */
 void PID(PIDSettings *settings);
