@@ -1,6 +1,6 @@
 /**
- * @file lcd.h
- * @brief Useful for interacting with LCD displays. Menus and the like
+ * @file leftRed.c
+ * @brief Left side red alliance autonomous routines
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -13,19 +13,18 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License along
+ * You should have received a copy of the GNU General Public License aint
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_LCD_H_
-#define CARL_LCD_H_
+#include "../include/auto.h"
 
-#include "sensors.h"
-#include "motors.h"
-#include "auto.h"
+void autonLeftRed12() {
+	getMogo();
 
-Task selectAuton(void *none);
-
-extern TaskHandle LCDHandle;
-
-#endif // CARL_LCD_H_
+	while (isAutonomous()) {
+		PID(&armSettings);
+		update();
+		delay(10);
+	}
+}

@@ -27,7 +27,7 @@
 #define CYAN    "\x1b[36m"
 #define RESET   "\x1b[0m"
 
-double inch = (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * DRIVE_ENCODER_RATIO));
+double inch = (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
 
 Sensor armCoder;
 Sensor liftCoder;
@@ -41,17 +41,33 @@ Sensor armLimit[2];
 // Motors and servos
 Motor claw;
 Motor drive[2];
-Motor arm[2];
-Motor mogo[2];
+Motor arm;
+Motor mogo;
 
 // PID settings
-PIDSettings armSettings;
-PIDSettings driveSettings[2];
+PIDSettings armSettings = {
+	DEFAULT_PID_SETTINGS,
+	.kP = .7f,
+	.kI = .17f,
+	.kD = .08f,
+	.root = &arm,
+	.target = 10,
+};
 
-int selectedAuton = 1;
+PIDSettings driveSettings[2] = {{
+	  .kP = .14f,
+	  .kI = .03f,
+	  .kD = .15f,
+		.root = &drive[0],
+	}, {
+	  .kP = .14f,
+	  .kI = .03f,
+	  .kD = .15f,
+		.root = &drive[1],
+	}};
 
 void altRefresh(Sensor *s) {
-	mutexTake(s->mutex, -1);
+	mutexTake(s->mutex, 5);
 	s->value = analogReadCalibrated(s->port);
 	mutexGive(s->mutex);
 }
@@ -70,15 +86,15 @@ void reset() {
 	}
 
 	// Reset PID times
-	armSettings.time      = millis();
-	driveSettings[0].time = millis();
-	driveSettings[1].time = millis();
+	armSettings._time      = millis();
+	driveSettings[0]._time = millis();
+	driveSettings[1]._time = millis();
 } /* reset */
 
 void update() {
 	motorUpdate(&claw);
-	motorUpdate(&mogo[0]);
-	motorUpdate(&arm[0]);
+	motorUpdate(&mogo);
+	motorUpdate(&arm);
 	sensorRefresh(&armCoder);
 	altRefresh(&mogoAngle[0]);
 	altRefresh(&mogoAngle[1]);
@@ -120,17 +136,17 @@ void info() {
 bool initialized = false;
 
 void driveSet(int l, int r) {
-	if (!mutexTake(drive[0].mutex, 5)) {
+	if (!mutexTake(drive[0]._mutex, 5)) {
 		return;
-	} else if (!mutexTake(drive[1].mutex, 5)) {
-		mutexGive(drive[0].mutex);
+	} else if (!mutexTake(drive[1]._mutex, 5)) {
+		mutexGive(drive[0]._mutex);
 		return;
 	}
 
 	drive[0].power = l;
 	drive[1].power = r;
-	  mutexGive(drive[0].mutex);
-	  mutexGive(drive[1].mutex);
+	  mutexGive(drive[0]._mutex);
+	  mutexGive(drive[1]._mutex);
 } /* driveSet */
 
 void initialize() {

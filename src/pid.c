@@ -20,54 +20,46 @@
 #include "../include/pid.h"
 #include <math.h>
 
-PIDSettings newPIDSettings(float  kP,
-                           float  kI,
-                           float  kD,
-                           float  target,
-                           int    max,
-                           int    min,
-                           int    integralLimit,
-                           Motor *root) {
-	PIDSettings s = {
-		kP,
-		kI,
-		kD,
-		target,
-		max,
-		min,
-		integralLimit,
-		root,
-		millis(),
-		0,
-		0,
-		0,
-	};
-
-	return s;
-} /* newPIDSettings */
-
 void PID(PIDSettings *settings) {
 	float error;
 	float power;
 
 	error = settings->target - settings->root->sensor->average;
 
-	settings->integral  += error / (millis() - settings->time);
-	settings->time       = millis();
-	settings->derivative = error - settings->error;
-	settings->error      = error;
+	settings->_integral  += error / (millis() - settings->_time);
+	settings->_time       = millis();
+	settings->_derivative = error - settings->_error;
+	settings->_error      = error;
 
 	power = clipNum(
 	  (settings->kP * error) +
-	  (settings->kI * (settings->integralLimit == -1) ? settings->integral :
-	   clipNum(settings->integral, settings->integralLimit,
-	           -settings->integralLimit)) +
-	  (settings->kD * settings->derivative),
+	  (settings->kI * ((settings->integralLimit == -1) ? settings->_integral :
+	                   clipNum(settings->_integral, settings->integralLimit,
+	                           -settings->integralLimit))) +
+	  (settings->kD * settings->_derivative),
 	  settings->max,
 	  settings->min);
 
-	mutexTake(settings->root->mutex, -5);
+	if (!mutexTake(settings->root->_mutex, 5)) {
+		return;
+	}
 
 	settings->root->power = round(power);
-	mutexGive(settings->root->mutex);
+	mutexGive(settings->root->_mutex);
+
+	if (abs(error) <= settings->tolerance) {
+		if (settings->_reached) {
+			if (millis() - settings->_reached >= settings->precision) {
+				settings->isTargetReached = true;
+			} else {
+				settings->isTargetReached = false;
+			}
+		} else {
+			settings->_reached        = millis();
+			settings->isTargetReached = false;
+		}
+	} else if (!settings->_reached || settings->isTargetReached) {
+		settings->_reached        = 0;
+		settings->isTargetReached = false;
+	}
 } /* PID */
