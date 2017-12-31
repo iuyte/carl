@@ -20,17 +20,20 @@
 #include "../include/motors.h"
 
 Motor motorCreate(unsigned char port, bool isInverted) {
-	Motor s = {
+	Motor m = {
 		NULL,
 		NULL,
 		clipNum(port, 10, 1),
 		isInverted,
 		0,
 		0,
+		0,
+		millis(),
+		10,
 		mutexCreate(),
 	};
 
-	return s;
+	return m;
 } /* motorCreate */
 
 void motorUpdate(Motor *m) {
@@ -38,24 +41,63 @@ void motorUpdate(Motor *m) {
 		return;
 	}
 
-	// if (m->sensor) {
-	// 	sensorRefresh(m->sensor);
-	// }
+	if (!mutexTake(m->_mutex, 5)) {
+		return;
+	}
+
+	m->power = deadBand(m->power, 10);
+
+	if (m->_lastPower != m->power) {
+		motorSet(m->port,
+		         m->isInverted ? m->power : -m->power);
+	}
+
+	m->_lastPower = m->power;
+	mutexGive(m->_mutex);
 
 	if (m->child) {
 		m->child->power = m->power;
 		motorUpdate(m->child);
 	}
+} /* motorUpdate */
 
-	if (!mutexTake(m->mutex, 5)) {
+void motorUpdateSlew(Motor *m, float rate) {
+	if (!m) {
 		return;
 	}
 
-	if (m->last != m->power) {
-		m->power = deadBand(m->power, 10);
-		motorSet(m->port,
-		         m->isInverted ? m->power : -m->power);
+	if (!mutexTake(m->_mutex, 0)) {
+		return;
 	}
-	m->last = m->power;
-	mutexGive(m->mutex);
-} /* motorUpdate */
+
+	m->power = deadBand(m->power, 10);
+	int change = (m->power == m->_power) ? 0 :
+	             (int)(rate * (m->_lastTime - micros()) + 0.5);
+
+	if (m->power < m->_power) {
+		m->_power += change;
+
+		if (m->_power > m->power) {
+			m->_power = m->power;
+		}
+	} else if (m->power > m->_power) {
+		m->_power -= change;
+
+		if (m->_power < m->power) {
+			m->_power = m->power;
+		}
+	}
+
+	if (m->_lastPower != m->_power) {
+		motorSet(m->port,
+		         m->isInverted ? m->_power : -m->_power);
+	}
+
+	m->_lastPower = m->_power;
+	mutexGive(m->_mutex);
+
+	if (m->child) {
+		m->child->power = m->power;
+		motorUpdateSlew(m->child, rate);
+	}
+} /* motorUpdateSlew */

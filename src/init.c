@@ -19,6 +19,10 @@
 
 #include "../include/robot.h"
 
+float recalc(int p) {
+	return p * 5 / 8;
+} /* recalc */
+
 void initializeIO() {}
 
 void init() {
@@ -39,51 +43,70 @@ void init() {
 	print("\nInitializing... ");
 	lcdSetText(uart1, 1, "Initializing...");
 
-	// Set up the analog sensors // *
-	// gyro = newGyro(1, false, 198);
-	// notice("gyroscopes, ");
-	// mogoAngle[0]       = newAnalog(3, false);
-	// mogoAngle[1]       = newAnalog(4, false);
+	// Set up the analog sensors
+	gyro        = newGyro(1, false, 195);
+	gyro.child  = (Sensor *)malloc(sizeof(Sensor));
+	*gyro.child = newGyro(2, false, 196);
+	notice("gyroscopes, ");
+	mogoAngle[0] = newAnalog(3, true);
+	mogoAngle[1] = newAnalog(4, true);
+	clawAngle    = newAnalogHR(5);
+	analogCalibrate(3);
+	analogCalibrate(4);
+
 	// mogoAngle[0].child = &mogoAngle[1];
-	// notice("mobile goal angle, ");
-	// clawAngle = newAnalog(5, true);
-	// notice("claw angle, ");
+	notice("mobile goal angle, ");
 
 	// Set up the digital sensors
-	// armCoder = newQuad(1, 2, false);
-	// notice("arm quad, ");
-	// driveCoder[0] = newQuad(4, 5, false);
-	// notice("left drive quad, ");
-	// driveCoder[1] = newQuad(6, 7, true);
-	// notice("right drive quad, ");
-	// sonic = newSonic(3, 10);
-	// notice("ultrasonic sensor, ");
-	// armLimit = newDigital(11, true);
-	// notice("arm limit switch, ");
-
-	// */
+	armCoder = newQuad(1, 2, true);
+	notice("arm quad, ");
+	driveCoder[0]        = newQuad(4, 5, true);
+	driveCoder[0].recalc = recalc;
+	notice("left drive quad, ");
+	driveCoder[1]        = newQuad(8, 9, true);
+	driveCoder[1].recalc = recalc;
+	notice("right drive quad, ");
+	sonic = newSonic(3, 10);
+	notice("ultrasonic sensor, ");
+	armLimit[0] = newDigital(12, true);
+	armLimit[1] = newDigital(11, true);
+	notice("arm limit switch, ");
 
 	// Initialize and set up all of the motors, servos, etc
-	claw = motorCreate(5, false);
+	claw = motorCreate(3, false);
 	notice("claw servo, ");
 
-	arm[0]     = motorCreate(1,  false);
-	arm[1]     = motorCreate(10, true);
-	arm->child = &arm[1];
+	arm = motorCreate(5,  false);
+	Motor *arm2 = (Motor *)(malloc(sizeof(Motor)));
+	*arm2      = motorCreate(6, true);
+	arm.child  = arm2;
+	arm.sensor = &armCoder;
 	notice("arm motors, ");
 
-	mogo[0]     = motorCreate(4, false);
-	mogo[1]     = motorCreate(7, true);
-	mogo->child = &mogo[1];
+	mogo = motorCreate(4, false);
+	Motor *mogo2 = (Motor *)(malloc(sizeof(Motor)));
+	*mogo2     = motorCreate(7, true);
+	mogo.child = mogo2;
 	notice("mobile goal motors, ");
 
-	drive[0]     = motorCreate(2, true);
-	drive[1]     = motorCreate(9, false);
-	drive->child = &drive[1];
+	drive[0]        = motorCreate(2, true);
+	drive[0].sensor = &driveCoder[0];
+	drive[1]        = motorCreate(9, false);
+	drive[1].sensor = &driveCoder[1];
 	notice("drive motors, ");
 
+	PIDSettings armSettings = {
+		.kP = .7f,
+		.kI = .17f,
+		.kD = .08f,
+		.target = 10,
+	};
+
 	notice("done!");
+	lcdSetText(uart1, 1, "Ready!");
 	print("\n\n");
-	lcdSetText(uart1, 1, "Battery:");
+	info();
 	setTeamName("709S");
+
+	LCDHandle = GO(selectAuton, NULL);
 } /* init */

@@ -27,6 +27,8 @@
 #define CYAN    "\x1b[36m"
 #define RESET   "\x1b[0m"
 
+double inch = (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
+
 Sensor armCoder;
 Sensor liftCoder;
 Sensor driveCoder[2];
@@ -34,58 +36,117 @@ Sensor mogoAngle[2];
 Sensor gyro;
 Sensor sonic;
 Sensor clawAngle;
-Sensor armLimit;
+Sensor armLimit[2];
 
 // Motors and servos
 Motor claw;
 Motor drive[2];
-Motor arm[2];
-Motor mogo[2];
+Motor arm;
+Motor mogo;
+
+// PID settings
+PIDSettings armSettings = {
+	DEFAULT_PID_SETTINGS,
+	.kP = .7f,
+	.kI = .17f,
+	.kD = .08f,
+	.root = &arm,
+	.target = 10,
+};
+
+PIDSettings driveSettings[2] = {{
+	  .kP = .14f,
+	  .kI = .03f,
+	  .kD = .15f,
+		.root = &drive[0],
+	}, {
+	  .kP = .14f,
+	  .kI = .03f,
+	  .kD = .15f,
+		.root = &drive[1],
+	}};
+
+void altRefresh(Sensor *s) {
+	mutexTake(s->mutex, 5);
+	s->value = analogReadCalibrated(s->port);
+	mutexGive(s->mutex);
+}
 
 void init();
 
 void reset() {
-	gyro.reset          = true;
-	mogoAngle[0].reset  = true;
-	mogoAngle[1].reset  = true;
-	driveCoder[0].reset = true;
-	driveCoder[1].reset = true;
-	armCoder.reset      = true;
-	clawAngle.reset     = true;
+	// Reset sensors
+	sensorReset(&gyro);
+	sensorReset(&driveCoder[0]);
+	sensorReset(&driveCoder[1]);
+
+	if (!isAutonomous()) {
+		sensorReset(&armCoder);
+		sensorReset(&mogoAngle[0]);
+	}
+
+	// Reset PID times
+	armSettings._time      = millis();
+	driveSettings[0]._time = millis();
+	driveSettings[1]._time = millis();
 } /* reset */
 
+void update() {
+	motorUpdate(&claw);
+	motorUpdate(&mogo);
+	motorUpdate(&arm);
+	sensorRefresh(&armCoder);
+	altRefresh(&mogoAngle[0]);
+	altRefresh(&mogoAngle[1]);
+
+	if (isAutonomous()) {
+		sensorRefresh(&gyro);
+		sensorRefresh(&sonic);
+	}
+
+	for (size_t i = 0; i < 2; i++) {
+		motorUpdate(&drive[i]);
+		sensorRefresh(&driveCoder[i]);
+		sensorRefresh(&armLimit[i]);
+	}
+} /* update */
+
 void info() {
-	printf(
-	  RED " |  %4f     | " GREEN "%4f    | " YELLOW "%4d    | " \
-	  BLUE "%4d    | %4d    | " CYAN "%4d    | " RED "%3d    | " GREEN
-	  " %4d    | " \
-	  YELLOW "%4u mv | " RESET "\n",
-	  (float)(driveCoder[0].value / inch),
-	  (float)(driveCoder[1].value / inch),
-	  armCoder.value,
-	  mogoAngle[0].value,
-	  mogoAngle[1].value,
-	  clawAngle.value,
-	  gyro.value,
-	  sonic.value,
-	  powerLevelMain());
-	lcdPrint(uart1, 2, "%u mV", powerLevelMain());
+	static unsigned long time = 0;
+	if (millis() - time >= 25) {
+		printf(
+			RED " |  %4d     | " GREEN "%4d    | " YELLOW "%4d    | " \
+			BLUE "%4d    | %4d    | " CYAN "%4d    | " RED "%3d    | " GREEN
+			" %4d    | " \
+			YELLOW "%4u mv | " RESET "\n",
+			driveCoder[0].value,
+			driveCoder[1].value,
+			armCoder.value,
+			mogoAngle[0].value,
+			mogoAngle[1].value,
+			0,
+			gyro.average,
+			sonic.value,
+			powerLevelMain());
+		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
+		time = millis();
+	}
 } /* info */
 
 bool initialized = false;
 
 void driveSet(int l, int r) {
-	if (!mutexTake(drive[0].mutex, 5)) {
+	if (!mutexTake(drive[0]._mutex, 5)) {
 		return;
-	} else if (!mutexTake(drive[1].mutex, 5)) {
-		mutexGive(drive[0].mutex);
+	} else if (!mutexTake(drive[1]._mutex, 5)) {
+		mutexGive(drive[0]._mutex);
 		return;
 	}
 
 	drive[0].power = l;
 	drive[1].power = r;
-	  mutexGive(drive[0].mutex);
-	  mutexGive(drive[1].mutex);
+	  mutexGive(drive[0]._mutex);
+	  mutexGive(drive[1]._mutex);
 } /* driveSet */
 
 void initialize() {

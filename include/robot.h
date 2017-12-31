@@ -23,10 +23,11 @@
 #include "motors.h"
 #include "sensors.h"
 #include "pid.h"
+#include "lcd.h"
 
 #define PI 3.141592653589793238462643383279502884197169399375105820974944
-#define DRIVE_WHEEL_WIDTH 4.10
-#define DRIVE_ENCODER_RATIO (5 / 8)
+#define DRIVE_WHEEL_DIAMETER 4.10
+#define DRIVE_ENCODER_RATIO 1.6
 
 #define GO(task, arg)                 \
   taskCreate(&task,                   \
@@ -34,13 +35,7 @@
              (void *)arg,             \
              TASK_PRIORITY_DEFAULT)
 
-static const double inch =
-  (1 / (PI * (DRIVE_WHEEL_WIDTH / 360) * DRIVE_ENCODER_RATIO));
-
-/**
- * A convienence to distinguish tasks from regular functions
- */
-typedef void Task;
+extern double inch;
 
 // Sensors and the like
 
@@ -48,11 +43,6 @@ typedef void Task;
  * Quadrature encoder in digital 1, 2
  */
 extern Sensor armCoder;
-
-/**
- * Quadrature encoder in digital 8, 9
- */
-extern Sensor liftCoder;
 
 /**
  * Drive encoders:
@@ -70,8 +60,8 @@ extern Sensor mogoAngle[2];
 
 /**
  * Gyroscopes to measure the robot's rotation:
- *  normal     @ index 0 in analog 2
- *  child @ index 1 in analog 3
+ *  normal @ index 0 in analog 1
+ *  child  @ index 1 in analog 2
  */
 extern Sensor gyro;
 
@@ -89,13 +79,15 @@ extern Sensor clawAngle;
 
 /**
  * The limit switch on the arm
+ *  in  @ digital 11
+ *  out @ digital 12
  */
-extern Sensor armLimit;
+extern Sensor armLimit[2];
 
 // Motors and servos
 
 /**
- * The claw, a servo @ port 5
+ * The claw, a motor @ port 3
  */
 extern Motor claw;
 
@@ -111,14 +103,26 @@ extern Motor drive[2];
  *  left  motor @ port    1
  *  right motor @ port    10
  */
-extern Motor arm[2];
+extern Motor arm;
 
 /**
  * The mogo manipulator, consisting of:
- *  left  motor   @ port   4
- *  right motor   @ port   7
+ *  left  motor @ port   4
+ *  right motor @ port   7
  */
-extern Motor mogo[2];
+extern Motor mogo;
+
+/**
+ * PID settings for the arm
+ */
+extern PIDSettings armSettings;
+
+/**
+ * PID settings for the drive
+ *  left  @ index 0
+ *  right @ index 1
+ */
+extern PIDSettings driveSettings[2];
 
 /**
  * Prints information and sets the LCD line 2 to display battery voltage
@@ -130,8 +134,13 @@ void driveSet(int l,
               int r);
 
 /**
- * Reset the robot
+ * Reset the sensors on the robot
  */
 void reset();
+
+/**
+ * Update motors and refresh sensors
+ */
+void update();
 
 #endif // CARL_ROBOT_H_

@@ -18,57 +18,48 @@
  */
 
 #include "../include/pid.h"
-
-PIDSettings newPIDSettings(float  kP,
-                           float  kI,
-                           float  kD,
-                           float  target,
-                           int    max,
-                           int    min,
-                           int    iLimit,
-                           Motor *root) {
-	PIDSettings s = {
-		kP,
-		kI,
-		kD,
-		target,
-		max,
-		min,
-		iLimit,
-		root,
-		0,
-		0,
-		0,
-		0,
-	};
-
-	return s;
-} /* newPIDSettings */
+#include <math.h>
 
 void PID(PIDSettings *settings) {
 	float error;
 	float power;
 
-	settings->current = settings->root->sensor->value;
-	error             = settings->target - settings->current;
+	error = settings->target - settings->root->sensor->average;
 
-	settings->integral =
-	  (settings->kI != 0 && abs((int)error) < settings->iLimit) ?
-	  (settings->integral + error) :
-	  clipNum(settings->integral + error, settings->iLimit, -settings->iLimit);
+	settings->_integral  += error / (millis() - settings->_time);
+	settings->_time       = millis();
+	settings->_derivative = error - settings->_error;
+	settings->_error      = error;
 
-	settings->derivative = error - settings->error;
-	settings->error      = error;
+	power = clipNum(
+	  (settings->kP * error) +
+	  (settings->kI * ((settings->integralLimit == -1) ? settings->_integral :
+	                   clipNum(settings->_integral, settings->integralLimit,
+	                           -settings->integralLimit))) +
+	  (settings->kD * settings->_derivative),
+	  settings->max,
+	  settings->min);
 
-	power =
-	  clipNum(
-	    (settings->kP * error) +
-	    (settings->kI * settings->integral) +
-	    (settings->kD * settings->derivative),
-	    settings->max,
-	    settings->min);
+	if (!mutexTake(settings->root->_mutex, 5)) {
+		return;
+	}
 
-	mutexTake(settings->root->mutex, -5);
-	settings->root->power = (settings->root->power + (int)(power + 0.5)) / 2;
-	mutexGive(settings->root->mutex);
+	settings->root->power = round(power);
+	mutexGive(settings->root->_mutex);
+
+	if (abs(error) <= settings->tolerance) {
+		if (settings->_reached) {
+			if (millis() - settings->_reached >= settings->precision) {
+				settings->isTargetReached = true;
+			} else {
+				settings->isTargetReached = false;
+			}
+		} else {
+			settings->_reached        = millis();
+			settings->isTargetReached = false;
+		}
+	} else if (!settings->_reached || settings->isTargetReached) {
+		settings->_reached        = 0;
+		settings->isTargetReached = false;
+	}
 } /* PID */

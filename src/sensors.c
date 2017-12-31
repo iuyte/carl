@@ -18,13 +18,45 @@
  */
 
 #include "../include/sensors.h"
+#include <math.h>
+
+float defaultRecalc(int n) {
+	return n;
+}
+
+int readSensorValue(Sensor *s) {
+	switch (s->type) {
+		case Digital:
+			return digitalRead(s->port);
+
+		case Analog:
+			return (s->calibrate) ?
+						 analogReadCalibrated(s->port) :
+						 analogRead(s->port);
+
+		case AnalogHR:
+			return analogReadCalibratedHR(s->port);
+
+		case Sonic:
+			return ultrasonicGet(s->pros);
+
+		case Quad:
+			return encoderGet(s->pros);
+
+		case Gyroscope:
+			return gyroGet(s->pros);
+
+		default:
+			return 0;
+	} /* switch */
+} /* readValue */
 
 void sensorRefresh(Sensor *s) {
-	if (s == NULL) {
+	if (!s) {
 		return;
 	}
 
-	if (s->child != NULL) {
+	if (s->child) {
 		sensorRefresh(s->child);
 	}
 
@@ -32,103 +64,98 @@ void sensorRefresh(Sensor *s) {
 		return;
 	}
 
-	int val = 0;
+	int val = (s->type == Digital) ? readSensorValue(s) :
+	          (readSensorValue(s) - s->zero);
 
-	switch (s->type) {
-	case Digital:
-		val = digitalRead(s->port);
-		break;
-
-	case Analog:
-		val = (!s->calibrate) ?
-		      analogReadCalibrated(s->port) :
-		      analogRead(s->port);
-		break;
-
-	case AnalogHR:
-		val = analogReadCalibratedHR(s->port);
-		break;
-
-	case Sonic:
-		val = ultrasonicGet(s->pros);
-		break;
-
-	case Quad:
-		val = encoderGet(s->pros);
-		break;
-
-	case Gyroscope:
-		val = gyroGet(s->pros);
-		break;
-
-	default:
-		break;
-	} /* switch */
-
-	if (s->reset) {
-		s->zero  = val;
-		s->reset = false;
+	if (s->inverted) {
+		if (s->type == Digital) {
+			val = !val;
+		} else if (s->type != Digital) {
+			val = -val;
+		}
 	}
 
-	s->value =
-	  ((s->inverted ? -val : val) - s->zero) +
-	  (s->child == NULL) ? 0 : s->child->value;
+		if (s->recalc) {
+			val = round(s->recalc(val));
+		}
+
+	s->value   = val;
+	s->average = s->child ? ((s->value + s->child->average) / 2) : s->value;
 
 	mutexGive(s->mutex);
 } /* sensorRefresh */
 
+void sensorReset(Sensor *s) {
+	if (s->child) {
+		sensorReset(s->child);
+	}
+
+	switch (s->type) {
+		case Gyroscope:
+			gyroReset(s->pros);
+			break;
+
+		case Quad:
+			encoderReset(s->pros);
+			break;
+
+		default:
+			s->zero = readSensorValue(s);
+			break;
+	}
+} /* sensorReset */
+
 Sensor newSensor(SensorType     type,
-               unsigned char  port,
-               bool           inverted,
-               unsigned short calibrate) {
+                 unsigned char  port,
+                 bool           inverted,
+                 unsigned short calibrate) {
 	if (port < 1) {
 		port = 1;
 	}
 
 	Sensor s;
 
-	s.child  = NULL;
-	s.type        = type;
-	s.value       = 0;
-	s.zero        = 0;
-	s.port        = port;
-	s.inverted    = inverted;
-	s.exists      = true;
-	s.calibrate   = calibrate;
-	s.reset       = false;
-	s.pros        = NULL;
-	s.mutex       = mutexCreate();
+	s.child     = 0;
+	s.type      = type;
+	s.value     = 0;
+	s.recalc    = &defaultRecalc;
+	s.zero      = 0;
+	s.average   = 0;
+	s.port      = port;
+	s.inverted  = inverted;
+	s.calibrate = calibrate;
+	s.pros      = 0;
+	s.mutex     = mutexCreate();
 
 	switch (type) {
-	case Digital:
-		pinMode(port, OUTPUT);
-		break;
+		case Digital:
+			pinMode(port, INPUT);
+			break;
 
-	case Analog:
+		case Analog:
+			if (calibrate) {
+				analogCalibrate(port);
+			}
+			break;
 
-		if (calibrate) {
-			analogCalibrate(port);
-		}
-		break;
+		case AnalogHR:
+				analogCalibrate(port);
+			break;
 
-	case AnalogHR:
-		  analogCalibrate(port);
-		break;
+		case Sonic:
+			s.pros = ultrasonicInit(port, (char)calibrate);
+			break;
 
-	case Sonic:
-		s.pros = ultrasonicInit(port, (char)calibrate);
-		break;
+		case Quad:
+			s.pros = encoderInit(port, (char)calibrate, false);
+			break;
 
-	case Quad:
-		s.pros = encoderInit(port, (char)calibrate, false);
-		break;
+		case Gyroscope:
+			s.pros = gyroInit(port, calibrate);
+			break;
 
-	case Gyroscope:
-		s.pros = gyroInit(port, calibrate);
-		break;
-
-	default:
-		break;
+		default:
+			break;
 	} /* switch */
 
 	return s;
@@ -136,21 +163,24 @@ Sensor newSensor(SensorType     type,
 
 Sensor newDigital(unsigned char port, bool inverted) {
 	return newSensor(Digital, port, inverted, false);
-}
+} /* newDigital */
+
 Sensor newSonic(unsigned char orange, unsigned char yellow) {
 	return newSensor(Sonic, orange, false, yellow);
-}
+} /* newSonic */
+
 Sensor newQuad(unsigned char top, unsigned char bottom, bool inverted) {
 	return newSensor(Quad, top, inverted, bottom);
-}
+} /* newQuad */
+
 Sensor newAnalog(unsigned char port, bool calibrate) {
 	return newSensor(Analog, port, false, calibrate);
-}
+} /* newAnalog */
 
 Sensor newAnalogHR(unsigned char port) {
 	return newSensor(AnalogHR, port, false, true);
-}
+} /* newAnalogHR */
 
 Sensor newGyro(unsigned char port, bool inverted, int calibration) {
 	return newSensor(Gyroscope, port, inverted, calibration);
-}
+} /* newGyro */
