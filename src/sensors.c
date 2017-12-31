@@ -26,28 +26,28 @@ float defaultRecalc(int n) {
 
 int readSensorValue(Sensor *s) {
 	switch (s->type) {
-	case Digital:
-		return digitalRead(s->port);
+		case Digital:
+			return digitalRead(s->port);
 
-	case Analog:
-		return (s->calibrate) ?
-		       analogReadCalibrated(s->port) :
-		       analogRead(s->port);
+		case Analog:
+			return (s->calibrate) ?
+						 analogReadCalibrated(s->port) :
+						 analogRead(s->port);
 
-	case AnalogHR:
-		return analogReadCalibratedHR(s->port);
+		case AnalogHR:
+			return analogReadCalibratedHR(s->port);
 
-	case Sonic:
-		return ultrasonicGet(s->pros);
+		case Sonic:
+			return ultrasonicGet(s->pros);
 
-	case Quad:
-		return encoderGet(s->pros);
+		case Quad:
+			return encoderGet(s->pros);
 
-	case Gyroscope:
-		return gyroGet(s->pros);
+		case Gyroscope:
+			return gyroGet(s->pros);
 
-	default:
-		return 0;
+		default:
+			return 0;
 	} /* switch */
 } /* readValue */
 
@@ -66,15 +66,18 @@ void sensorRefresh(Sensor *s) {
 
 	int val = (s->type == Digital) ? readSensorValue(s) :
 	          (readSensorValue(s) - s->zero);
-	if (s->type == Digital && s->inverted) {
-		val = !val;
-	} else if (s->type != Digital) {
-		val = (s->inverted ? -val : val);
+
+	if (s->inverted) {
+		if (s->type == Digital) {
+			val = !val;
+		} else if (s->type != Digital) {
+			val = -val;
+		}
 	}
 
-	if (s->recalc) {
-		val = round(s->recalc(val));
-	}
+		if (s->recalc) {
+			val = round(s->recalc(val));
+		}
 
 	s->value   = val;
 	s->average = s->child ? ((s->value + s->child->average) / 2) : s->value;
@@ -90,10 +93,15 @@ void sensorReset(Sensor *s) {
 	switch (s->type) {
 		case Gyroscope:
 			gyroReset(s->pros);
+			break;
+
 		case Quad:
 			encoderReset(s->pros);
+			break;
+
 		default:
 			s->zero = readSensorValue(s);
+			break;
 	}
 } /* sensorReset */
 
@@ -120,34 +128,34 @@ Sensor newSensor(SensorType     type,
 	s.mutex     = mutexCreate();
 
 	switch (type) {
-	case Digital:
-		pinMode(port, INPUT);
-		break;
+		case Digital:
+			pinMode(port, INPUT);
+			break;
 
-	case Analog:
-		if (calibrate) {
-			analogCalibrate(port);
-		}
-		break;
+		case Analog:
+			if (calibrate) {
+				analogCalibrate(port);
+			}
+			break;
 
-	case AnalogHR:
-		  analogCalibrate(port);
-		break;
+		case AnalogHR:
+				analogCalibrate(port);
+			break;
 
-	case Sonic:
-		s.pros = ultrasonicInit(port, (char)calibrate);
-		break;
+		case Sonic:
+			s.pros = ultrasonicInit(port, (char)calibrate);
+			break;
 
-	case Quad:
-		s.pros = encoderInit(port, (char)calibrate, false);
-		break;
+		case Quad:
+			s.pros = encoderInit(port, (char)calibrate, false);
+			break;
 
-	case Gyroscope:
-		s.pros = gyroInit(port, calibrate);
-		break;
+		case Gyroscope:
+			s.pros = gyroInit(port, calibrate);
+			break;
 
-	default:
-		break;
+		default:
+			break;
 	} /* switch */
 
 	return s;

@@ -27,7 +27,7 @@
 
 #define PI 3.141592653589793238462643383279502884197169399375105820974944
 #define DRIVE_WHEEL_DIAMETER 4.10
-#define DRIVE_ENCODER_RATIO (5 / 8)
+#define DRIVE_ENCODER_RATIO 1.6
 
 #define GO(task, arg)                 \
   taskCreate(&task,                   \
@@ -36,16 +36,6 @@
              TASK_PRIORITY_DEFAULT)
 
 extern double inch;
-
-/**
- * The selected autonomous
- */
-extern int selectedAuton;
-
-/**
- * A convienence to distinguish tasks from regular functions
- */
-typedef void Task;
 
 // Sensors and the like
 
@@ -113,14 +103,14 @@ extern Motor drive[2];
  *  left  motor @ port    1
  *  right motor @ port    10
  */
-extern Motor arm[2];
+extern Motor arm;
 
 /**
  * The mogo manipulator, consisting of:
- *  left  motor   @ port   4
- *  right motor   @ port   7
+ *  left  motor @ port   4
+ *  right motor @ port   7
  */
-extern Motor mogo[2];
+extern Motor mogo;
 
 /**
  * PID settings for the arm

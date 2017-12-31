@@ -50,6 +50,7 @@ void init() {
 	notice("gyroscopes, ");
 	mogoAngle[0] = newAnalog(3, true);
 	mogoAngle[1] = newAnalog(4, true);
+	clawAngle    = newAnalogHR(5);
 	analogCalibrate(3);
 	analogCalibrate(4);
 
@@ -75,15 +76,17 @@ void init() {
 	claw = motorCreate(3, false);
 	notice("claw servo, ");
 
-	arm[0]      = motorCreate(5,  false);
-	arm[1]      = motorCreate(6, true);
-	arm->child  = &arm[1];
-	arm->sensor = &armCoder;
+	arm = motorCreate(5,  false);
+	Motor *arm2 = (Motor *)(malloc(sizeof(Motor)));
+	*arm2      = motorCreate(6, true);
+	arm.child  = arm2;
+	arm.sensor = &armCoder;
 	notice("arm motors, ");
 
-	mogo[0]     = motorCreate(4, false);
-	mogo[1]     = motorCreate(7, true);
-	mogo->child = &mogo[1];
+	mogo = motorCreate(4, false);
+	Motor *mogo2 = (Motor *)(malloc(sizeof(Motor)));
+	*mogo2     = motorCreate(7, true);
+	mogo.child = mogo2;
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);
@@ -92,34 +95,18 @@ void init() {
 	drive[1].sensor = &driveCoder[1];
 	notice("drive motors, ");
 
-	// PID
-	armSettings = newPIDSettings(
-	  .62f,
-	  0.f,
-	  .38f,
-	  50,
-	  127,
-	  -127,
-	  14,
-	  &arm[0]);
-
-	driveSettings[0] = newPIDSettings(
-	  .14f,
-	  .03f,
-	  .15f,
-	  0,
-	  100,
-	  -100,
-	  7,
-	  &drive[0]);
-	driveSettings[1]      = driveSettings[0];
-	driveSettings[1].root = &drive[1];
-	notice("PID, ");
+	PIDSettings armSettings = {
+		.kP = .7f,
+		.kI = .17f,
+		.kD = .08f,
+		.target = 10,
+	};
 
 	notice("done!");
 	lcdSetText(uart1, 1, "Ready!");
 	print("\n\n");
+	info();
 	setTeamName("709S");
 
-	// GO(selectAuton, &selectedAuton);
+	LCDHandle = GO(selectAuton, NULL);
 } /* init */
