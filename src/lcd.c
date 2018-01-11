@@ -21,7 +21,7 @@
 
 TaskHandle LCDHandle;
 
-Task selectAuton(void *none) {
+Task lcdTask(void *none) {
 	unsigned int lcdState = 0x000;
 
 	while (true) {
