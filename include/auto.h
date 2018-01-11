@@ -14,7 +14,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -30,15 +30,26 @@ typedef struct Auton {
 	void (*execute)();
 } Auton;
 
+typedef enum {
+	dUp,
+	dDown,
+	dLeft,
+	dRight,
+	dIn,
+	dOut,
+} Direction;
+
 extern Auton autons[NUM_AUTON];
 extern int   selectedAuton;
 
 void armToPosition(float pos, unsigned long until);
 void driveToPosition(int l, int r, int a, unsigned long until);
 void mogoP(int p);
-void gyroP(int target, int precision);
+void gyroPID(int target, int precision);
 void getMogo();
+void turnTo(int angle, unsigned long until);
 
 Task backUp(void *time);
+Task placeCone(void *none);
 
 #endif // AUTO_ROBOT_H_

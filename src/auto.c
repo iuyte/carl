@@ -9,11 +9,11 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -28,24 +28,19 @@ void autonLeftBlue12()  {}
 void autonRightBlue12() {}
 
 int   selectedAuton     = 0;
-Auton autons[NUM_AUTON] = {
-	{
-		.name    = "red left 12",
-		.execute = &autonLeftRed12,
-	},
-	{
-		.name    = "red right 12",
-		.execute = &autonRightRed12,
-	},
-	{
-		.name    = "blue left 12",
-		.execute = &autonLeftBlue12,
-	},
-	{
-		.name    = "blue right 12",
-		.execute = &autonRightBlue12,
-	},
-};
+Auton autons[NUM_AUTON] = { {
+															.name    = "red left 12",
+															.execute = &autonLeftRed12,
+														},{
+															.name    = "red right 12",
+															.execute = &autonRightRed12,
+														},{
+															.name    = "blue left 12",
+															.execute = &autonLeftBlue12,
+														},{
+															.name    = "blue right 12",
+															.execute = &autonRightBlue12,
+														}, };
 
 void armToPosition(float pos, unsigned long until) {
 	armSettings.target = pos;
@@ -61,6 +56,7 @@ void armToPosition(float pos, unsigned long until) {
 void driveToPosition(int l, int r, int a, unsigned long until) {
 	driveSettings[0].target = l;
 	driveSettings[1].target = r;
+	until                  += millis();
 
 	do {
 		PID(&driveSettings[0]);
@@ -71,8 +67,9 @@ void driveToPosition(int l, int r, int a, unsigned long until) {
 
 		update();
 		delay(10);
-	} while (!driveSettings[0].isTargetReached ||
-	         !driveSettings[1].isTargetReached);
+	} while ((!driveSettings[0].isTargetReached ||
+	          !driveSettings[1].isTargetReached) &&
+	         millis() < until);
 
 	drive[0].power = 0;
 	drive[1].power = 0;
@@ -88,9 +85,13 @@ void mogoP(int p) {
 	mogo.power = 0;
 } /* mogoP */
 
-float gyroPID[3] = { .278, .072, .307 };
+float gyroPIDC[3] = {
+	5.279,
+	0.0,
+	1.953,
+};
 
-void gyroP(int target, int precision) {
+void gyroPID(int target, int precision) {
 	int error      = 0;
 	int integral   = 0;
 	int derivative = 0;
@@ -100,44 +101,84 @@ void gyroP(int target, int precision) {
 		error      = target - gyro.average;
 		integral  += error / 10;
 
-		drive[0].power = -((error * gyroPID[0]) +
-		                   (integral * gyroPID[1]) -
-		                   (derivative * gyroPID[2]));
-		drive[1].power = (error * gyroPID[0]) +
-		                 (integral * gyroPID[1]) -
-		                 (derivative * gyroPID[2]);
+		drive[0].power = -((error * gyroPIDC[0]) +
+		                   (integral * gyroPIDC[1]) +
+		                   (derivative * gyroPIDC[2]));
+		drive[1].power = ((error * gyroPIDC[0]) +
+		                  (integral * gyroPIDC[1]) +
+		                  (derivative * gyroPIDC[2]));
 
+		if (lcdReadButtons(uart1)) {
+			gyroPIDC[0] += 0.005;
+			delay(100);
+		}
+		info();
+		printf("%f\n", gyroPIDC[0]);
+		lcdPrint(uart1, 1, "%f", ((float)(powerLevelMain())) / 1000.0);
+		lcdPrint(uart1, 2, "%f", gyroPIDC[0]);
 		update();
 		delay(10);
-	} while (abs(error) > precision ||
+	} while (true || abs(error) > precision ||
 	         integral > 10);
 
 	drive[0].power = 0;
 	drive[1].power = 0;
-} /* gyroP */
+} /* gyroPID */
 
-void autonomous() {
-	reset();
-	sensorReset(&armCoder);
-	sensorReset(&mogoAngle[0]);
+void turnTo(int angle, unsigned long until) {
+	until += millis();
 
-	selectedAuton = clipNum(selectedAuton, NUM_AUTON - 1, 0);
-	autons[selectedAuton].execute();
+	gyroSettings[0].target = angle;
+	gyroSettings[1].target = angle;
 
-	gyroShutdown(gyro.pros);
-	gyroShutdown(gyro.child->pros);
-	ultrasonicShutdown(sonic.pros);
-} /* autonomous */
+	do {
+		PID(&gyroSettings[0]);
+		PID(&gyroSettings[1]);
+
+		update();
+		delay(10);
+	} while ((!gyroSettings[0].isTargetReached ||
+	          !gyroSettings[1].isTargetReached) || true);
+
+	//						millis() < until);
+
+	driveSet(0, 0);
+} /* turnTo */
 
 void getMogo() {
-	Task driveForward(void *none) {
-		driveToPosition(1600, 1600, 0, 2250);
-	}
-	GO(driveForward, NULL);
+	claw.power         = -50;
+	armSettings.target = 300;
 
-	claw.power = -50;
-	armToPosition(-300, 300);
-	mogoP(2150);
+	Task mogoUp(void *none) {
+		while (isEnabled() && armCoder.value < 210) {
+			delay(10);
+		}
+		mogoP(2150);
+	} /* mogoUp */
+
+	GO(mogoUp, NULL);
+	delay(750);
+
+	int maxMin[2][2] = { { driveSettings[0].max, driveSettings[0].min },
+											 { driveSettings[1].max, driveSettings[1].min } };
+	int newPower = 80;
+	driveSettings[0].max = newPower;
+	driveSettings[1].max = newPower;
+	driveSettings[0].min = -newPower;
+	driveSettings[1].min = -newPower;
+	driveToPosition(1200, 1200, 0, 1600);
+
+	while (mogo.sensor->value < 2000) {
+		driveSet(40, 40);
+		update();
+	}
+
+	driveToPosition(1450, 1450, 0, 900);
+	driveSettings[0].max = maxMin[0][0];
+	driveSettings[1].max = maxMin[1][0];
+	driveSettings[0].min = maxMin[0][1];
+	driveSettings[1].min = maxMin[1][1];
+
 	delay(250);
 	mogoP(350);
 } /* getMogo */
@@ -155,6 +196,31 @@ Task backUp(void *time) {
 		update();
 	}
 } /* backUp */
+
+void autonomous() {
+	reset();
+	sensorReset(&armCoder);
+	sensorReset(&mogoAngle[0]);
+
+	selectedAuton = clipNum(selectedAuton, NUM_AUTON - 1, 0);
+	autons[selectedAuton].execute();
+} /* autonomous */
+
+Task placeCone(void *none) {
+	claw.power = -50;
+	armToPosition(25, 450);
+	arm.power = 0;
+	update();
+	delay(175);
+	claw.power = 127;
+	update();
+	delay(200);
+	claw.power = 0;
+	armToPosition(250, 500);
+	arm.power = -25;
+	mogoP(100);
+	print("Cone placed!\n");
+} /* placeCone */
 
 void auton() {
 	print("\nBeginning of autonomous\n");
@@ -191,32 +257,16 @@ void auton() {
 
 	GO(backUp, NULL);
 
-	Task placeCone(void *none) {
-		claw.power = -50;
-		armToPosition(25, millis() + 450);
-		arm.power = 0;
-		update();
-		delay(175);
-		claw.power = 127;
-		update();
-		delay(200);
-		claw.power = 0;
-		armToPosition(250, millis() + 500);
-		arm.power = -25;
-		mogoP(100);
-		print("Cone placed!\n");
-	} /* placeCone */
-
 	TaskHandle coneHandle = GO(placeCone, NULL);
 
 	if (selectedAuton) {
 		driveToPosition(150, -150, 15, millis() + 2000);
 
-		gyroP(-162, 8);
+		gyroPID(-162, 8);
 	} else {
 		driveToPosition(200, 400, 0, millis() + 2000);
 
-		gyroP(-160, 7);
+		gyroPID(-160, 7);
 	}
 
 	reset();
@@ -256,7 +306,7 @@ void auton() {
 	delay(400);
 
 	arm.power = 0;
-	gyroP(0, -expand(selectedAuton, .5, 10, -10));
+	gyroPID(0, -expand(selectedAuton, .5, 10, -10));
 	driveSet(-80, -80);
 
 	delay(175);

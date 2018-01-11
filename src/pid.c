@@ -9,11 +9,11 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -24,7 +24,9 @@ void PID(PIDSettings *settings) {
 	float error;
 	float power;
 
-	error = settings->target - settings->root->sensor->average;
+	error = settings->target - (settings->sensor ?
+	                            settings->sensor->average :
+	                            settings->root->sensor->average);
 
 	settings->_integral  += error / (millis() - settings->_time);
 	settings->_time       = millis();

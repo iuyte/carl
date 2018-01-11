@@ -9,11 +9,11 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -29,6 +29,7 @@ int digital(unsigned char joyNum,
 
 void   operatorControl() {
 	printf("Starting Driver Control...\n");
+	ultrasonicShutdown(sonic.pros);
 	reset();
 	void moveDrive() {
 		drive[0].power = deadBand(joystickGetAnalog(1, 3), 10);
@@ -37,26 +38,27 @@ void   operatorControl() {
 
 	void moveMogo() {
 		mogo.power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
-		              joystickGetDigital(1, 5, JOY_UP) * 127;
+		             joystickGetDigital(1, 5, JOY_UP) * 127;
 	} /* moveMogo */
 
 	void moveArm() {
 		static unsigned long lastPress;
 
-		if (digital(2, 6, JOY_UP, JOY_DOWN) || millis() - lastPress < 200) {
-			arm.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
+		if (digital(2, 6, JOY_UP, JOY_DOWN) || (millis() - lastPress < 175)) {
+			arm.power = -127 * digital(2, 6, JOY_UP, JOY_DOWN);
+
 			if (arm.power) {
 				lastPress = millis();
 			}
 
 			if (armLimit[0].value) {
 				sensorReset(&armCoder);
-				arm.power = clipNum(arm.power, 0, -127);
-			} else if (armLimit[1].value) {
 				arm.power = clipNum(arm.power, 127, 0);
+			} else if (armLimit[1].value) {
+				arm.power = clipNum(arm.power, 0, -127);
 			}
 			armSettings.target = armCoder.value;
-		} else if ((armCoder.value < 75) && (armCoder.value > 1150)) {
+		} else if (armLimit[0].value || armLimit[1].value) {
 			arm.power = 0;
 		} else {
 			PID(&armSettings);

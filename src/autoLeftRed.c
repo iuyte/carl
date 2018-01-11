@@ -9,18 +9,23 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
 #include "../include/auto.h"
 
 void autonLeftRed12() {
+	turnTo(180, 1500);
+
+	return;
 	getMogo();
+	TaskHandle placingCone = GO(placeCone, NULL);
+	driveToPosition(500, 500, 0, 1700);
 
 	while (isAutonomous()) {
 		PID(&armSettings);
