@@ -25,27 +25,27 @@ Task selectAuton(void *none) {
 	unsigned int lcdState = 0x000;
 
 	while (true) {
-			if (lcdState == 0x100) {
-				if (selectedAuton < 1) {
-					selectedAuton = NUM_AUTON - 1;
-				} else {
-					selectedAuton -= 1;
-				}
-
-				while (lcdReadButtons(uart1) == 0x100) {
-					delay(15);
-				}
-			} else if (lcdState == 0x001) {
-				if (selectedAuton > NUM_AUTON - 1) {
-					selectedAuton = 0;
-				} else {
-					selectedAuton += 1;
-				}
-
-				while (lcdReadButtons(uart1) == 0x001) {
-					delay(15);
-				}
+		if (lcdState == 0x100) {
+			if (selectedAuton < 1) {
+				selectedAuton = NUM_AUTON - 1;
+			} else {
+				selectedAuton -= 1;
 			}
+
+			while (lcdReadButtons(uart1) == 0x100) {
+				delay(15);
+			}
+		} else if (lcdState == 0x001) {
+			if (selectedAuton > NUM_AUTON - 1) {
+				selectedAuton = 0;
+			} else {
+				selectedAuton += 1;
+			}
+
+			while (lcdReadButtons(uart1) == 0x001) {
+				delay(15);
+			}
+		}
 
 		update();
 		info();

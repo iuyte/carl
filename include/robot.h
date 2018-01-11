@@ -25,7 +25,8 @@
 #include "pid.h"
 #include "lcd.h"
 
-#define PI 3.1415926535897932384626433832795028841971693993751058209749445923078
+#define PI \
+  3.1415926535897932384626433832795028841971693993751058209749445923078
 #define DRIVE_WHEEL_DIAMETER 4.10
 #define DRIVE_ENCODER_RATIO 1.6
 #define LCD_PORT uart1
@@ -104,8 +105,8 @@ extern Motor drive[2];
 /**
  * The arm, containing:
  *  left  motor       @ port 5
- *  	child right motor @ port 6
- * 	Quad encoder in digital 1, 2
+ *    child right motor @ port 6
+ *  Quad encoder in digital 1, 2
  */
 extern Motor arm;
 

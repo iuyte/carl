@@ -32,7 +32,7 @@ typedef struct Auton {
 	void (*execute)();
 } Auton;
 
-typedef enum {
+typedef enum Direction {
 	dUp,
 	dDown,
 	dLeft,

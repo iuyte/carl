@@ -86,12 +86,12 @@ void init() {
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);
-	drive[0].child = (Motor *)(malloc(sizeof(Motor)));
+	drive[0].child  = (Motor *)(malloc(sizeof(Motor)));
 	*drive[0].child = motorCreate(4, true);
 	drive[0].sensor = &driveCoder[0];
 
 	drive[1]        = motorCreate(9, false);
-	drive[1].child = (Motor *)(malloc(sizeof(Motor)));
+	drive[1].child  = (Motor *)(malloc(sizeof(Motor)));
 	*drive[1].child = motorCreate(7, false);
 	drive[1].sensor = &driveCoder[1];
 	notice("drive motors, ");
