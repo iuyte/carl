@@ -9,11 +9,11 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -44,21 +44,19 @@ void init() {
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
-	gyro        = newGyro(1, false, 195);
+	gyro        = newGyro(1, true, 199);
 	gyro.child  = (Sensor *)malloc(sizeof(Sensor));
-	*gyro.child = newGyro(2, false, 196);
+	*gyro.child = newGyro(2, true, 198);
 	notice("gyroscopes, ");
 	mogoAngle[0] = newAnalog(3, true);
 	mogoAngle[1] = newAnalog(4, true);
-	clawAngle    = newAnalogHR(5);
-	analogCalibrate(3);
-	analogCalibrate(4);
+	clawAngle    = newAnalog(5, true);
 
 	// mogoAngle[0].child = &mogoAngle[1];
 	notice("mobile goal angle, ");
 
 	// Set up the digital sensors
-	armCoder = newQuad(1, 2, true);
+	armCoder = newQuad(1, 2, false);
 	notice("arm quad, ");
 	driveCoder[0]        = newQuad(4, 5, true);
 	driveCoder[0].recalc = recalc;
@@ -74,33 +72,29 @@ void init() {
 
 	// Initialize and set up all of the motors, servos, etc
 	claw = motorCreate(3, false);
-	notice("claw servo, ");
+	notice("claw motor, ");
 
-	arm = motorCreate(5,  false);
-	Motor *arm2 = (Motor *)(malloc(sizeof(Motor)));
-	*arm2      = motorCreate(6, true);
-	arm.child  = arm2;
+	arm        = motorCreate(5,  true);
+	arm.child  = (Motor *)(malloc(sizeof(Motor)));
+	*arm.child = motorCreate(6, false);
 	arm.sensor = &armCoder;
 	notice("arm motors, ");
 
-	mogo = motorCreate(4, false);
-	Motor *mogo2 = (Motor *)(malloc(sizeof(Motor)));
-	*mogo2     = motorCreate(7, true);
-	mogo.child = mogo2;
+	mogo        = motorCreate(1, false);
+	mogo.child  = (Motor *)(malloc(sizeof(Motor)));
+	*mogo.child = motorCreate(10, true);
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);
+	drive[0].child = (Motor *)(malloc(sizeof(Motor)));
+	*drive[0].child = motorCreate(4, true);
 	drive[0].sensor = &driveCoder[0];
+
 	drive[1]        = motorCreate(9, false);
+	drive[1].child = (Motor *)(malloc(sizeof(Motor)));
+	*drive[1].child = motorCreate(7, false);
 	drive[1].sensor = &driveCoder[1];
 	notice("drive motors, ");
-
-	PIDSettings armSettings = {
-		.kP = .7f,
-		.kI = .17f,
-		.kD = .08f,
-		.target = 10,
-	};
 
 	notice("done!");
 	lcdSetText(uart1, 1, "Ready!");

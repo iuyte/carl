@@ -9,11 +9,11 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -68,7 +68,8 @@ typedef struct PIDSettings {
 	int tolerance;
 
 	/**
-	 * How long the sensor must be near it's target, as defined by tolerance, to be considered reached it's target
+	 * How long the sensor must be near it's target, as defined by tolerance, to
+	 * be considered reached it's target
 	 */
 	unsigned long precision;
 
@@ -77,13 +78,20 @@ typedef struct PIDSettings {
 	 */
 	Motor *root;
 
-	/** 
-	 * Whether or not the instance has remained at it's target, within the range of tolerance, longer than precision
+	/**
+	 * Whether or not the instance has remained at it's target, within the range
+	 ***of tolerance, longer than precision
 	 */
 	bool isTargetReached;
 
 	/**
-	 * The output of millis() at the point in time which target within tolerance was reached. 0 if not currently at target within tolerance
+	 * A sensor to use instead of root->sensor
+	 */
+	Sensor *sensor;
+
+	/**
+	 * The output of millis() at the point in time which target within tolerance
+	 * was reached. 0 if not currently at target within tolerance
 	 */
 	unsigned long _reached;
 
@@ -109,16 +117,16 @@ typedef struct PIDSettings {
 } PIDSettings;
 
 #define DEFAULT_PID_SETTINGS \
-		.kP = 1, \
-		.kI = 0, \
-		.kD = 0, \
-		.target = 0, \
-		.max = 127, \
-		.min = -127, \
-		.integralLimit = 10, \
-		.tolerance = 5, \
-		.precision = 220
-
+  .kP            = 1,        \
+  .kI            = 0,        \
+  .kD            = 0,        \
+  .target        = 0,        \
+  .max           = 127,      \
+  .min           = -127,     \
+  .integralLimit = 10,       \
+  .tolerance     = 5,        \
+  .precision     = 220,      \
+  .sensor        = NULL
 
 /**
  * Use the Settings to achieve the target, one step at a time

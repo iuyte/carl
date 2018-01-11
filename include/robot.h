@@ -13,7 +13,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the GNU General Public License aint
+ * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
@@ -25,9 +25,10 @@
 #include "pid.h"
 #include "lcd.h"
 
-#define PI 3.141592653589793238462643383279502884197169399375105820974944
+#define PI 3.1415926535897932384626433832795028841971693993751058209749445923078
 #define DRIVE_WHEEL_DIAMETER 4.10
 #define DRIVE_ENCODER_RATIO 1.6
+#define LCD_PORT uart1
 
 #define GO(task, arg)                 \
   taskCreate(&task,                   \
@@ -47,7 +48,7 @@ extern Sensor armCoder;
 /**
  * Drive encoders:
  *  left  @ index 0 in digital 4, 5
- *  right @ index 1 in digital 6, 7
+ *  right @ index 1 in digital 8, 9
  */
 extern Sensor driveCoder[2];
 
@@ -60,8 +61,8 @@ extern Sensor mogoAngle[2];
 
 /**
  * Gyroscopes to measure the robot's rotation:
- *  normal @ index 0 in analog 1
- *  child  @ index 1 in analog 2
+ *  left          in analog 1
+ *  right @ child in analog 2
  */
 extern Sensor gyro;
 
@@ -73,14 +74,14 @@ extern Sensor gyro;
 extern Sensor sonic;
 
 /**
- * The angle sensor on the claw @ analog 5
+ * The angle sensor on the claw in analog 5
  */
 extern Sensor clawAngle;
 
 /**
  * The limit switch on the arm
- *  in  @ digital 11
- *  out @ digital 12
+ *  in  @ digital 12
+ *  out @ digital 11
  */
 extern Sensor armLimit[2];
 
@@ -94,21 +95,24 @@ extern Motor claw;
 /**
  * The two sides of the drive:
  *  left  @ index 0 in power expander @ port 2
+ *    child center motor              @ port 4
  *  right @ index 1 in power expander @ port 9
+ *    child center motor              @ port 7
  */
 extern Motor drive[2];
 
 /**
  * The arm, containing:
- *  left  motor @ port    1
- *  right motor @ port    10
+ *  left  motor       @ port 5
+ *  	child right motor @ port 6
+ * 	Quad encoder in digital 1, 2
  */
 extern Motor arm;
 
 /**
  * The mogo manipulator, consisting of:
- *  left  motor @ port   4
- *  right motor @ port   7
+ *  left  motor @ port 1
+ *  right motor @ port 10
  */
 extern Motor mogo;
 
@@ -123,6 +127,13 @@ extern PIDSettings armSettings;
  *  right @ index 1
  */
 extern PIDSettings driveSettings[2];
+
+/**
+ * PID settings for the gyro on the drive
+ *  left  @ index 0
+ *  right @ index 1
+ */
+extern PIDSettings gyroSettings[2];
 
 /**
  * Prints information and sets the LCD line 2 to display battery voltage

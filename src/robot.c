@@ -9,7 +9,7 @@
  * later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
@@ -55,16 +55,42 @@ PIDSettings armSettings = {
 };
 
 PIDSettings driveSettings[2] = {{
-	  .kP = .14f,
-	  .kI = .03f,
+		DEFAULT_PID_SETTINGS,
+	  .kP = .16f,
+	  .kI = .043f,
 	  .kD = .15f,
+		.tolerance = 50,
 		.root = &drive[0],
 	}, {
-	  .kP = .14f,
-	  .kI = .03f,
+		DEFAULT_PID_SETTINGS,
+	  .kP = .16f,
+	  .kI = .043f,
 	  .kD = .15f,
+		.tolerance = 50,
 		.root = &drive[1],
-	}};
+	},
+};
+
+PIDSettings gyroSettings[2] = {{
+		DEFAULT_PID_SETTINGS,
+	  .kP = 3.441f,
+	  .kI = 0.f,
+	  .kD = 2.136f,
+		.tolerance = 3,
+		.precision = 270,
+		.root = &drive[0],
+		.sensor = &gyro,
+	}, {
+		DEFAULT_PID_SETTINGS,
+	  .kP = -3.441f,
+	  .kI = -0.f,
+	  .kD = -2.136f,
+		.tolerance = 3,
+		.precision = 270,
+		.root = &drive[1],
+		.sensor = &gyro,
+	},
+};
 
 void altRefresh(Sensor *s) {
 	mutexTake(s->mutex, 5);
@@ -95,11 +121,13 @@ void update() {
 	motorUpdate(&claw);
 	motorUpdate(&mogo);
 	motorUpdate(&arm);
-	sensorRefresh(&armCoder);
-	altRefresh(&mogoAngle[0]);
-	altRefresh(&mogoAngle[1]);
 
-	if (isAutonomous()) {
+	sensorRefresh(&armCoder);
+	sensorRefresh(&clawAngle);
+	sensorRefresh(&mogoAngle[0]);
+	sensorRefresh(&mogoAngle[1]);
+
+	if (true) { // isAutonomous()) {
 		sensorRefresh(&gyro);
 		sensorRefresh(&sonic);
 	}
@@ -145,8 +173,11 @@ void driveSet(int l, int r) {
 
 	drive[0].power = l;
 	drive[1].power = r;
-	  mutexGive(drive[0]._mutex);
-	  mutexGive(drive[1]._mutex);
+
+	for (int i = 0; i < 2; i++) {
+		mutexGive(drive[i]._mutex);
+		motorUpdate(&drive[i]);
+	}
 } /* driveSet */
 
 void initialize() {
