@@ -24,7 +24,7 @@
 #include "motors.h"
 #include "auto.h"
 
-Task selectAuton(void *none);
+Task lcdTask(void *none);
 
 extern TaskHandle LCDHandle;
 

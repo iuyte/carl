@@ -102,5 +102,5 @@ void init() {
 	info();
 	setTeamName("709S");
 
-	LCDHandle = GO(selectAuton, NULL);
+	LCDHandle = GO(lcdTask, NULL);
 } /* init */
