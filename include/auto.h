@@ -24,6 +24,8 @@
 #include "../include/robot.h"
 
 #define NUM_AUTON 4
+#define MOGO_UP 350
+#define MOGO_DOWN 2150
 
 typedef struct Auton {
 	const char *name;

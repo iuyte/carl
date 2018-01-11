@@ -20,16 +20,34 @@
 #include "../include/auto.h"
 
 void autonLeftRed12() {
-	turnTo(180, 1500);
+	TaskHandle backUpHandle = GO(backUp, millis());
 
-	return;
 	getMogo();
 	TaskHandle placingCone = GO(placeCone, NULL);
 	driveToPosition(500, 500, 0, 1700);
+	turnTo(180, 1500);
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+
+	driveToPosition(750, 780, -3, 1000);
+	mogoP(MOGO_DOWN);
+
+	driveSet(-127, -127);
+	delay(250);
+	mogoP(MOGO_UP);
+
+	// Cleanup of tasks
+	if (placingCone) {
+		taskDelete(placingCone);
+	}
+
+	if (backUpHandle) {
+		taskDelete(backUpHandle);
+	}
 
 	while (isAutonomous()) {
 		PID(&armSettings);
 		update();
 		delay(10);
 	}
-}
+} /* autonLeftRed12 */

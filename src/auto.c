@@ -153,7 +153,7 @@ void getMogo() {
 		while (isEnabled() && armCoder.value < 210) {
 			delay(10);
 		}
-		mogoP(2150);
+		mogoP(MOGO_DOWN);
 	} /* mogoUp */
 
 	GO(mogoUp, NULL);
@@ -168,7 +168,7 @@ void getMogo() {
 	driveSettings[1].min = -newPower;
 	driveToPosition(1200, 1200, 0, 1600);
 
-	while (mogo.sensor->value < 2000) {
+	while (mogo.sensor->value < MOGO_DOWN - 150) {
 		driveSet(40, 40);
 		update();
 	}
@@ -180,7 +180,7 @@ void getMogo() {
 	driveSettings[1].min = maxMin[1][1];
 
 	delay(250);
-	mogoP(350);
+	mogoP(MOGO_UP);
 } /* getMogo */
 
 Task backUp(void *time) {
@@ -190,10 +190,12 @@ Task backUp(void *time) {
 		delay(10);
 	}
 
-	while (isAutonomous()) {
+	t = millis();
+
+	while (isAutonomous() && millis() - t < 500) {
 		driveSet(-127, -127);
-		delay(10);
 		update();
+		delay(10);
 	}
 } /* backUp */
 
