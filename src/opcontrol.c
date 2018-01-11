@@ -27,7 +27,7 @@ int digital(unsigned char joyNum,
 	       joystickGetDigital(joyNum, channel, b1) * 1;
 } /* digital */
 
-void   operatorControl() {
+void operatorControl() {
 	printf("Starting Driver Control...\n");
 	ultrasonicShutdown(sonic.pros);
 	reset();

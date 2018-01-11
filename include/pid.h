@@ -80,7 +80,7 @@ typedef struct PIDSettings {
 
 	/**
 	 * Whether or not the instance has remained at it's target, within the range
-	 ***of tolerance, longer than precision
+	 ****of tolerance, longer than precision
 	 */
 	bool isTargetReached;
 

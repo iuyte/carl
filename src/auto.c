@@ -73,7 +73,7 @@ void driveToPosition(int l, int r, int a, unsigned long until) {
 
 	drive[0].power = 0;
 	drive[1].power = 0;
-	update();
+	  update();
 } /* driveToPosition */
 
 void mogoP(int p) {
