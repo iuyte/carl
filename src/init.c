@@ -19,9 +19,7 @@
 
 #include "../include/robot.h"
 
-float recalc(int p) {
-	return p * 5 / 8;
-} /* recalc */
+float recalc(int p);
 
 void initializeIO() {}
 
@@ -48,35 +46,37 @@ void init() {
 	gyro.child  = (Sensor *)malloc(sizeof(Sensor));
 	*gyro.child = newGyro(2, true, 198);
 	notice("gyroscopes, ");
-	mogoAngle[0] = newAnalog(3, true);
-	mogoAngle[1] = newAnalog(4, true);
-	clawAngle    = newAnalog(5, true);
-
-	// mogoAngle[0].child = &mogoAngle[1];
+	mogoAngle        = newAnalog(8, true);
+	mogoAngle.child  = (Sensor *)(malloc(sizeof(Sensor)));
+	*mogoAngle.child = newAnalog(7, true);
 	notice("mobile goal angle, ");
+	clawAngle          = newAnalog(5, true);
+	clawAngle.inverted = true;
+	notice("claw angle, ");
 
 	// Set up the digital sensors
 	armCoder = newQuad(1, 2, false);
 	notice("arm quad, ");
-	driveCoder[0]        = newQuad(4, 5, true);
-	driveCoder[0].recalc = recalc;
-	notice("left drive quad, ");
-	driveCoder[1]        = newQuad(8, 9, true);
-	driveCoder[1].recalc = recalc;
-	notice("right drive quad, ");
 	sonic = newSonic(3, 10);
+	ultrasonicShutdown(sonic.pros);
 	notice("ultrasonic sensor, ");
+	driveCoder[0] = newQuad(4, 5, true);
+	driveCoder[0].recalc = &recalc;
+	notice("left drive quad, ");
+	driveCoder[1] = newQuad(8, 9, true);
+	notice("right drive quad, ");
 	armLimit[0] = newDigital(12, true);
 	armLimit[1] = newDigital(11, true);
 	notice("arm limit switch, ");
 
 	// Initialize and set up all of the motors, servos, etc
-	claw = motorCreate(3, false);
+	claw        = motorCreate(3, false);
+	claw.sensor = &clawAngle;
 	notice("claw motor, ");
 
-	arm        = motorCreate(5,  true);
+	arm        = motorCreate(5,  false);
 	arm.child  = (Motor *)(malloc(sizeof(Motor)));
-	*arm.child = motorCreate(6, false);
+	*arm.child = motorCreate(6, true);
 	arm.sensor = &armCoder;
 	notice("arm motors, ");
 
@@ -102,5 +102,10 @@ void init() {
 	info();
 	setTeamName("709S");
 
+	// Start the LCD task
 	LCDHandle = GO(lcdTask, NULL);
 } /* init */
+
+float recalc(int p) {
+	return p * 8 / 5;
+}

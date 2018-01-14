@@ -29,23 +29,25 @@ int digital(unsigned char joyNum,
 
 void operatorControl() {
 	printf("Starting Driver Control...\n");
-	ultrasonicShutdown(sonic.pros);
+
+	// ultrasonicShutdown(sonic.pros);
 	reset();
+
 	void moveDrive() {
 		drive[0].power = deadBand(joystickGetAnalog(1, 3), 10);
 		drive[1].power = deadBand(joystickGetAnalog(1, 2), 10);
 	} /* drive */
 
 	void moveMogo() {
-		mogo.power = joystickGetDigital(1, 5, JOY_DOWN) * -127 +
-		             joystickGetDigital(1, 5, JOY_UP) * 127;
+		mogo.power = joystickGetDigital(1, 6, JOY_UP) * 127 +
+		             joystickGetDigital(1, 6, JOY_DOWN) * -127;
 	} /* moveMogo */
 
 	void moveArm() {
 		static unsigned long lastPress;
 
-		if (digital(2, 6, JOY_UP, JOY_DOWN) || (millis() - lastPress < 175)) {
-			arm.power = -127 * digital(2, 6, JOY_UP, JOY_DOWN);
+		if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 175)) {
+			arm.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
 
 			if (arm.power) {
 				lastPress = millis();
@@ -53,9 +55,10 @@ void operatorControl() {
 
 			if (armLimit[0].value) {
 				sensorReset(&armCoder);
-				arm.power = clipNum(arm.power, 127, 0);
-			} else if (armLimit[1].value) {
 				arm.power = clipNum(arm.power, 0, -127);
+			} else if (armLimit[1].value) {
+				armCoder.zero = armCoder.value - 1000;
+				arm.power = clipNum(arm.power, 127, 0);
 			}
 			armSettings.target = armCoder.value;
 		} else if (armLimit[0].value || armLimit[1].value) {
@@ -68,8 +71,8 @@ void operatorControl() {
 	void moveClaw() {
 		static bool lastClose = false;
 
-		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * -100 +
-		             joystickGetDigital(2, 5, JOY_UP) * 100 +
+		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
+		             joystickGetDigital(2, 5, JOY_UP) * 127 +
 		             lastClose * 5;
 
 		if (joystickGetAnalog(2, 4)) {
@@ -83,14 +86,25 @@ void operatorControl() {
 		}
 	} /* moveClaw */
 
-	void moveLock() {
-		int power = joystickGetDigital(1, 6, JOY_UP) * 127 +
-		             joystickGetDigital(1, 6, JOY_DOWN) * -127;
+	void clawPID() {
+		static unsigned long lastPress;
+		static int power;
 
-		mogo.power = power;
-	} /* moveLock */
+		power = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
+		             joystickGetDigital(2, 5, JOY_UP) * 127;
 
-	printf("Beginning driver control loop\n");
+		if (power) {
+			claw.power          = power;
+			clawSettings.target = clawAngle.value;
+			lastPress           = millis();
+		} else if (millis() - lastPress < 225) {
+			clawSettings.target = clawAngle.value;
+		} else {
+			// PID(&clawSettings);
+		}
+	} /* clawPID */
+
+	print("Beginning driver control loop\n");
 
 	while (true) {
 		if (joystickGetDigital(1, 7, JOY_LEFT) &&
@@ -100,12 +114,10 @@ void operatorControl() {
 
 		moveDrive();
 		moveMogo();
-		moveLock();
 		moveArm();
 		moveClaw();
-
 		update();
-		info();
+
 		delay(20);
 	}
 } /* operatorControl */

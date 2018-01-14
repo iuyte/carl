@@ -55,10 +55,10 @@ extern Sensor driveCoder[2];
 
 /**
  * Potentiometer on the mogo manipulator
- *  left  in Analog 3
- *  right in Analog 4
+ *  left         in Analog 3
+ *  child, right in Analog 4
  */
-extern Sensor mogoAngle[2];
+extern Sensor mogoAngle;
 
 /**
  * Gyroscopes to measure the robot's rotation:
@@ -135,6 +135,11 @@ extern PIDSettings driveSettings[2];
  *  right @ index 1
  */
 extern PIDSettings gyroSettings[2];
+
+/**
+ * PID settings for the claw
+ */
+extern PIDSettings clawSettings;
 
 /**
  * Prints information and sets the LCD line 2 to display battery voltage
