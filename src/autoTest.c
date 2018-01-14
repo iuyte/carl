@@ -1,6 +1,6 @@
 /**
- * @file autoLeftRed.c
- * @brief Left side red alliance autonomous routines
+ * @file autoTest.c
+ * @brief autonomous mode for testing
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -19,48 +19,17 @@
 
 #include "../include/auto.h"
 
-void autonLeftRed12() {
-	TaskHandle backUpHandle = NULL; // GO(backUp, millis());
+void autonTest() {
+	print("Starting autonomous...\n");
 
-	getMogo();
-
-	// Drop cone
-	claw.power = 127;
-	motorUpdate(&claw);
-	delay(400);
-	claw.power = 0;
-
-	// Align to a left tilt
-	turnTo(-5, 300);
-	// Limit right side speed
-	driveSettings[1].max -= 40;
-	// Back up
-	driveToPosition(300, 700, 1700);
-	// Correct speed
-	driveSettings[1].max += 40;
-
-	// Turn around
-	// turnTo(180, 1500);
-
-	// Reset drive encoders
-	sensorReset(&driveCoder[0]);
-	sensorReset(&driveCoder[1]);
-
-	driveToPositionAngle(700, 780, -5, 1200);
+	armToPosition(ARM_QUARTER, 500);
 	mogoP(MOGO_DOWN);
 
-	driveSet(-127, -127);
-	delay(250);
-	mogoP(MOGO_DOWN - 100);
-	delay(500);
-	driveSet(0, 0);
+	unsigned long t = millis();
+	driveToPosition(1900, 1900, 10000);
 
-	// Cleanup of tasks
-	if (backUpHandle) {
-		taskDelete(backUpHandle);
-	}
+	printf("Autonomous complete - %lu\n", millis() - t);
 
-	armSettings.target = armCoder.average;
 	while (isAutonomous()) {
 		PID(&armSettings);
 		update();

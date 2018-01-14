@@ -23,9 +23,20 @@
 
 #include "../include/robot.h"
 
-#define NUM_AUTON 4
-#define MOGO_UP 350
-#define MOGO_DOWN 2150
+#define NUM_AUTON 5
+
+enum MOGO_POS {
+	MOGO_UP = 75,
+	MOGO_DOWN = 2125,
+};
+
+enum ARM_POS {
+	ARM_DOWN = 10,
+	ARM_QUARTER = 275,
+	ARM_HALF = 430,
+	ARM_3_QUARTER = 500,
+};
+
 
 typedef struct Auton {
 	const char *name;
@@ -45,7 +56,8 @@ extern Auton autons[NUM_AUTON];
 extern int   selectedAuton;
 
 void armToPosition(float pos, unsigned long until);
-void driveToPosition(int l, int r, int a, unsigned long until);
+void driveToPosition(int l, int r, unsigned long until);
+void driveToPositionAngle(int l, int r, int a, unsigned long until);
 void mogoP(int p);
 void gyroPID(int target, int precision);
 void getMogo();

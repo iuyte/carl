@@ -32,7 +32,7 @@ double inch = (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO
 Sensor armCoder;
 Sensor liftCoder;
 Sensor driveCoder[2];
-Sensor mogoAngle[2];
+Sensor mogoAngle;
 Sensor gyro;
 Sensor sonic;
 Sensor clawAngle;
@@ -47,11 +47,19 @@ Motor mogo;
 // PID settings
 PIDSettings armSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP = .7f,
-	.kI = .17f,
-	.kD = .08f,
+	.kP = -.7f,
+	.kI = -.17f,
+	.kD = -.08f,
 	.root = &arm,
 	.target = 10,
+};
+
+PIDSettings clawSettings = {
+	DEFAULT_PID_SETTINGS,
+	.kP = .38f,
+	.kI = .0f,
+	.kD = .42f,
+	.root = &claw,
 };
 
 PIDSettings driveSettings[2] = {{
@@ -59,21 +67,21 @@ PIDSettings driveSettings[2] = {{
 	  .kP = .16f,
 	  .kI = .043f,
 	  .kD = .15f,
-		.tolerance = 50,
+		.tolerance = 55,
 		.root = &drive[0],
 	}, {
 		DEFAULT_PID_SETTINGS,
 	  .kP = .16f,
 	  .kI = .043f,
 	  .kD = .15f,
-		.tolerance = 50,
+		.tolerance = 55,
 		.root = &drive[1],
 	},
 };
 
 PIDSettings gyroSettings[2] = {{
 		DEFAULT_PID_SETTINGS,
-	  .kP = 3.441f,
+	  .kP = 3.17f,
 	  .kI = 0.f,
 	  .kD = 2.136f,
 		.tolerance = 3,
@@ -82,7 +90,7 @@ PIDSettings gyroSettings[2] = {{
 		.sensor = &gyro,
 	}, {
 		DEFAULT_PID_SETTINGS,
-	  .kP = -3.441f,
+	  .kP = -3.17f,
 	  .kI = -0.f,
 	  .kD = -2.136f,
 		.tolerance = 3,
@@ -101,6 +109,25 @@ void altRefresh(Sensor *s) {
 void init();
 
 void reset() {
+	// free mutexes
+	mutexGive(gyro.mutex);
+	mutexGive(gyro.child->mutex);
+	mutexGive(armCoder.mutex);
+	mutexGive(sonic.mutex);
+	mutexGive(mogoAngle.child->mutex);
+
+	mutexGive(claw._mutex);
+	mutexGive(arm._mutex);
+	mutexGive(arm.child->_mutex);
+	mutexGive(mogo.child->_mutex);
+
+	for (int i = 0; i < 2; i++) {
+		mutexGive(drive[i]._mutex);
+
+		mutexGive(driveCoder[i].mutex);
+		mutexGive(armLimit[i].mutex);
+	}
+
 	// Reset sensors
 	sensorReset(&gyro);
 	sensorReset(&driveCoder[0]);
@@ -108,7 +135,7 @@ void reset() {
 
 	if (!isAutonomous()) {
 		sensorReset(&armCoder);
-		sensorReset(&mogoAngle[0]);
+		sensorReset(&mogoAngle);
 	}
 
 	// Reset PID times
@@ -124,13 +151,10 @@ void update() {
 
 	sensorRefresh(&armCoder);
 	sensorRefresh(&clawAngle);
-	sensorRefresh(&mogoAngle[0]);
-	sensorRefresh(&mogoAngle[1]);
+	sensorRefresh(&mogoAngle);
 
-	if (true) { // isAutonomous()) {
-		sensorRefresh(&gyro);
-		sensorRefresh(&sonic);
-	}
+	sensorRefresh(&gyro);
+	sensorRefresh(&sonic);
 
 	for (size_t i = 0; i < 2; i++) {
 		motorUpdate(&drive[i]);
@@ -150,9 +174,9 @@ void info() {
 			driveCoder[0].value,
 			driveCoder[1].value,
 			armCoder.value,
-			mogoAngle[0].value,
-			mogoAngle[1].value,
-			0,
+			mogoAngle.value,
+			mogoAngle.child->value,
+			clawAngle.value,
 			gyro.average,
 			sonic.value,
 			powerLevelMain());

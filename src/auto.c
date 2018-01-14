@@ -21,11 +21,15 @@
 
 void autonLeftRed12();
 
-void autonRightRed12()  {}
+void autonRightRed12() {}
+
+void auton();
 
 void autonLeftBlue12()  {}
 
 void autonRightBlue12() {}
+
+void autonTest();
 
 int   selectedAuton     = 0;
 Auton autons[NUM_AUTON] = { {
@@ -33,13 +37,16 @@ Auton autons[NUM_AUTON] = { {
 															.execute = &autonLeftRed12,
 														},{
 															.name    = "red right 12",
-															.execute = &autonRightRed12,
+															.execute = &auton,
 														},{
 															.name    = "blue left 12",
 															.execute = &autonLeftBlue12,
 														},{
 															.name    = "blue right 12",
 															.execute = &autonRightBlue12,
+														},{
+															.name    = "test",
+															.execute = &autonTest,
 														}, };
 
 void armToPosition(float pos, unsigned long until) {
@@ -53,7 +60,28 @@ void armToPosition(float pos, unsigned long until) {
 	} while (!armSettings.isTargetReached && millis() < until);
 } /* armToPosition */
 
-void driveToPosition(int l, int r, int a, unsigned long until) {
+void driveToPosition(int l, int r, unsigned long until) {
+	driveSettings[0].target = l;
+	driveSettings[1].target = r;
+	until                  += millis();
+
+	do {
+		PID(&driveSettings[0]);
+		PID(&driveSettings[1]);
+		PID(&armSettings);
+
+		update();
+		delay(10);
+	} while ((!driveSettings[0].isTargetReached ||
+	          !driveSettings[1].isTargetReached) &&
+	         millis() < until);
+
+	drive[0].power = 0;
+	drive[1].power = 0;
+	update();
+} /* driveToPosition */
+
+void driveToPositionAngle(int l, int r, int a, unsigned long until) {
 	driveSettings[0].target = l;
 	driveSettings[1].target = r;
 	until                  += millis();
@@ -73,16 +101,18 @@ void driveToPosition(int l, int r, int a, unsigned long until) {
 
 	drive[0].power = 0;
 	drive[1].power = 0;
-	  update();
+	update();
 } /* driveToPosition */
 
 void mogoP(int p) {
-	while (mogoAngle[1].value<p - 100 || mogoAngle[1].value>p + 100) {
-		mogo.power = (p - mogoAngle[1].value) * -.22;
+	while (isAutonomous() && abs(p - mogoAngle.average) > 75) {
+		mogo.power = sgn(p - mogoAngle.average) * 127;
+		PID(&armSettings);
 		update();
 	}
 
 	mogo.power = 0;
+	motorUpdate(&mogo);
 } /* mogoP */
 
 float gyroPIDC[3] = {
@@ -138,49 +168,36 @@ void turnTo(int angle, unsigned long until) {
 		update();
 		delay(10);
 	} while ((!gyroSettings[0].isTargetReached ||
-	          !gyroSettings[1].isTargetReached) || true);
-
-	//						millis() < until);
+	          !gyroSettings[1].isTargetReached) &&
+	         millis() < until);
 
 	driveSet(0, 0);
 } /* turnTo */
 
 void getMogo() {
 	claw.power         = -50;
-	armSettings.target = 300;
+	armSettings.target = ARM_QUARTER - 100;
+
+	Task mogoDown(void *none) {
+		mogoP(MOGO_DOWN);
+	} /* mogoDown */
 
 	Task mogoUp(void *none) {
-		while (isEnabled() && armCoder.value < 210) {
-			delay(10);
-		}
-		mogoP(MOGO_DOWN);
+		mogoP(MOGO_UP);
+		taskDelete(NULL);
 	} /* mogoUp */
 
-	GO(mogoUp, NULL);
+	GO(mogoDown, NULL);
 	delay(750);
 
-	int maxMin[2][2] = { { driveSettings[0].max, driveSettings[0].min },
-											 { driveSettings[1].max, driveSettings[1].min } };
-	int newPower = 80;
-	driveSettings[0].max = newPower;
-	driveSettings[1].max = newPower;
-	driveSettings[0].min = -newPower;
-	driveSettings[1].min = -newPower;
-	driveToPosition(1200, 1200, 0, 1600);
+	driveToPosition(2150, 2150, 1800);
 
-	while (mogo.sensor->value < MOGO_DOWN - 150) {
-		driveSet(40, 40);
-		update();
+	TaskHandle mogoUpHandle = GO(mogoUp, NULL);
+	driveToPosition(2400, 2400, 600);
+
+	while (taskGetState(mogoUpHandle) != TASK_DEAD) {
+		delay(10);
 	}
-
-	driveToPosition(1450, 1450, 0, 900);
-	driveSettings[0].max = maxMin[0][0];
-	driveSettings[1].max = maxMin[1][0];
-	driveSettings[0].min = maxMin[0][1];
-	driveSettings[1].min = maxMin[1][1];
-
-	delay(250);
-	mogoP(MOGO_UP);
 } /* getMogo */
 
 Task backUp(void *time) {
@@ -202,7 +219,7 @@ Task backUp(void *time) {
 void autonomous() {
 	reset();
 	sensorReset(&armCoder);
-	sensorReset(&mogoAngle[0]);
+	sensorReset(&mogoAngle);
 
 	selectedAuton = clipNum(selectedAuton, NUM_AUTON - 1, 0);
 	autons[selectedAuton].execute();
@@ -210,13 +227,13 @@ void autonomous() {
 
 Task placeCone(void *none) {
 	claw.power = -50;
-	armToPosition(25, 450);
-	arm.power = 0;
+	armToPosition(75, 450);
+	arm.power = 10;
 	update();
 	delay(175);
 	claw.power = 127;
 	update();
-	delay(200);
+	delay(300);
 	claw.power = 0;
 	armToPosition(250, 500);
 	arm.power = -25;
@@ -248,25 +265,24 @@ void auton() {
 	print("\nAbout to start driving!");
 
 	if (selectedAuton) {
-		driveToPosition(1500, 1800, 8, millis() + 2250);
+		driveToPositionAngle(1500, 1800, 8, millis() + 2250);
 	} else {
-		driveToPosition(1500, 1800, 2, millis() + 2250);
+		driveToPositionAngle(1500, 1800, 2, millis() + 2250);
 	}
 
 
 	mogoP(350);
-
 
 	GO(backUp, NULL);
 
 	TaskHandle coneHandle = GO(placeCone, NULL);
 
 	if (selectedAuton) {
-		driveToPosition(150, -150, 15, millis() + 2000);
+		driveToPositionAngle(150, -150, 15, millis() + 2000);
 
 		gyroPID(-162, 8);
 	} else {
-		driveToPosition(200, 400, 0, millis() + 2000);
+		driveToPositionAngle(200, 400, 0, millis() + 2000);
 
 		gyroPID(-160, 7);
 	}
@@ -275,11 +291,11 @@ void auton() {
 
 
 	if (selectedAuton) {
-		driveToPosition(675, 750, -8, millis() + 1600);
+		driveToPositionAngle(675, 750, -8, millis() + 1600);
 		driveSet(70, 40);
 	} else {
-		driveToPosition(250,  250,  7,  millis() + 1400);
-		driveToPosition(2550, 2250, 30, millis() + 1400);
+		driveToPositionAngle(250,  250,  7,  millis() + 1400);
+		driveToPositionAngle(2550, 2250, 30, millis() + 1400);
 	}
 	update();
 	reset();

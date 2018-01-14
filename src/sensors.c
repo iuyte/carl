@@ -94,10 +94,12 @@ void sensorReset(Sensor *s) {
 	switch (s->type) {
 		case Gyroscope:
 			gyroReset(s->pros);
+			s->zero = 0;
 			break;
 
 		case Quad:
 			encoderReset(s->pros);
+			s->zero = 0;
 			break;
 
 		default:
@@ -159,6 +161,7 @@ Sensor newSensor(SensorType     type,
 			break;
 	} /* switch */
 
+	sensorReset(&s);
 	return s;
 } /* newsensor */
 

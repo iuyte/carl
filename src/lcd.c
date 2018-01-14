@@ -47,7 +47,10 @@ Task lcdTask(void *none) {
 			}
 		}
 
-		update();
+		if (!isEnabled()) {
+			update();
+		}
+
 		info();
 		lcdSetText(uart1, 1, autons[selectedAuton].name);
 		lcdState = lcdReadButtons(uart1);
