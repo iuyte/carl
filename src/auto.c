@@ -21,29 +21,23 @@
 
 void autonLeftRed12();
 
-void autonRightRed12() {}
-
-void auton();
-
-void autonLeftBlue12()  {}
-
-void autonRightBlue12() {}
+void autonRightRed12();
 
 void autonTest();
 
-int   selectedAuton     = 0;
+int   selectedAuton     = 1;
 Auton autons[NUM_AUTON] = { {
 															.name    = "red left 12",
 															.execute = &autonLeftRed12,
 														},{
 															.name    = "red right 12",
-															.execute = &auton,
+															.execute = &autonRightRed12,
 														},{
 															.name    = "blue left 12",
-															.execute = &autonLeftBlue12,
+															.execute = &autonRightRed12,
 														},{
 															.name    = "blue right 12",
-															.execute = &autonRightBlue12,
+															.execute = &autonLeftRed12,
 														},{
 															.name    = "test",
 															.execute = &autonTest,
@@ -218,8 +212,11 @@ Task backUp(void *time) {
 
 void autonomous() {
 	reset();
+	sensorReset(&driveCoder[0]);
+	sensorReset(&driveCoder[1]);
 	sensorReset(&armCoder);
 	sensorReset(&mogoAngle);
+	sensorReset(&gyro);
 
 	selectedAuton = clipNum(selectedAuton, NUM_AUTON - 1, 0);
 	autons[selectedAuton].execute();
