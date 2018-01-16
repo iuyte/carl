@@ -1,6 +1,6 @@
 /**
- * @file autoLeftRed.c
- * @brief Left side red alliance autonomous routines
+ * @file autoRightRed.c
+ * @brief Right side red alliance autonomous routines
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -19,7 +19,7 @@
 
 #include "../include/auto.h"
 
-void autonLeftRed12() {
+void autonRightRed12() {
 	getMogo();                       // Get the mobile goal
 
 	// Drop cone
@@ -28,32 +28,32 @@ void autonLeftRed12() {
 	delay(400);                      // Give claw time to open
 	claw.power = 0;                  // Stop claw
 
-	turnTo(-5, 300);                 // Align to a left tilt
-	driveSettings[1].max -= 40;      // Limit right side speed
-	driveToPosition(400, 800, 1550); // Back up
-	driveSettings[1].max += 40;      // Correct speed
-	turnTo(-165, 2000);              // Turn around
+	turnTo(5, 300);                  // Align to a right tilt
+	driveSettings[0].max -= 40;      // Limit left side speed
+	driveToPosition(800, 400, 1550); // Back up
+	driveSettings[0].max += 40;      // Correct speed
+	turnTo(165, 2000);               // Turn around
 
 	// Reset drive encoders & gyro
 	sensorReset(&driveCoder[0]);
 	sensorReset(&driveCoder[1]);
 	sensorReset(&gyro);
 
-	driveToPositionAngle(800, 700, 13, 1200); // Drive arc 13 degrees clockwise
+	driveToPositionAngle(840, 900, -6, 1350); // Drive arc -13 degrees
 	mogoP(MOGO_DOWN);
 
-	driveSet(-127, -127);                     // Back up the drive
+	driveSet(-127, -127);                      // Back up the drive
 	delay(130);
-	mogoP(MOGO_DOWN - 300);                   // Bring the mobile goal up a bit
+	mogoP(MOGO_DOWN - 300);                    // Bring the mobile goal up a bit
 	delay(250);
-	driveSet(0, 0);                           // Stop the drive
+	driveSet(0, 0);                            // Stop the drive
 
-	armSettings.target = armCoder.average;    // Reset the arm position to it's
-	                                          // current position
+	armSettings.target = armCoder.average;     // Reset the arm position to
+	                                           // it's current position
 
 	while (isAutonomous()) {
-		PID(&armSettings);                      // Hold the arm position
+		PID(&armSettings);                       // Hold the arm position
 		update();
 		delay(10);
 	}
-} /* autonLeftRed12 */
+} /* autonRightRed12 */

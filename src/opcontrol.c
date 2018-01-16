@@ -58,10 +58,16 @@ void operatorControl() {
 				arm.power = clipNum(arm.power, 0, -127);
 			} else if (armLimit[1].value) {
 				armCoder.zero = armCoder.value - 1000;
-				arm.power = clipNum(arm.power, 127, 0);
+				arm.power     = clipNum(arm.power, 127, 0);
 			}
 			armSettings.target = armCoder.value;
-		} else if (armLimit[0].value || armLimit[1].value) {
+		} else if (armLimit[0].value) {
+			sensorReset(&armCoder);
+			armSettings.target = 0;
+			arm.power = 0;
+		} else if (armLimit[1].value) {
+			armCoder.zero = armCoder.value - 1000;
+			armSettings.target = 1000;
 			arm.power = 0;
 		} else {
 			PID(&armSettings);
@@ -91,7 +97,8 @@ void operatorControl() {
 		static int power;
 
 		power = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
-		             joystickGetDigital(2, 5, JOY_UP) * 127;
+		        joystickGetDigital(2, 5, JOY_UP) * 127 +
+		        (millis() - lastPress < 225) ? power : 0;
 
 		if (power) {
 			claw.power          = power;
@@ -100,7 +107,7 @@ void operatorControl() {
 		} else if (millis() - lastPress < 225) {
 			clawSettings.target = clawAngle.value;
 		} else {
-			// PID(&clawSettings);
+			PID(&clawSettings);
 		}
 	} /* clawPID */
 

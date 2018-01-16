@@ -45,6 +45,8 @@ Task lcdTask(void *none) {
 			while (lcdReadButtons(uart1) == 0x001) {
 				delay(15);
 			}
+		} else if (lcdState == 0x111) {
+			exit(0);
 		}
 
 		if (!isEnabled()) {
