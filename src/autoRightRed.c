@@ -21,12 +21,7 @@
 
 void autonRightRed12() {
 	getMogo();                       // Get the mobile goal
-
-	// Drop cone
-	claw.power = 127;                // Open claw
-	motorUpdate(&claw);
-	delay(400);                      // Give claw time to open
-	claw.power = 0;                  // Stop claw
+	placeCone();                     // Place the cone
 
 	turnTo(5, 300);                  // Align to a right tilt
 	driveSettings[0].max -= 40;      // Limit left side speed
@@ -42,18 +37,12 @@ void autonRightRed12() {
 	driveToPositionAngle(840, 900, -6, 1350); // Drive arc -13 degrees
 	mogoP(MOGO_DOWN);
 
-	driveSet(-127, -127);                      // Back up the drive
+	driveSet(-127, -127);                     // Back up the drive
 	delay(130);
-	mogoP(MOGO_DOWN - 300);                    // Bring the mobile goal up a bit
+	mogoP(MOGO_DOWN - 300);                   // Bring the mobile goal up a bit
 	delay(250);
-	driveSet(0, 0);                            // Stop the drive
+	driveSet(0, 0);                           // Stop the drive
 
-	armSettings.target = armCoder.average;     // Reset the arm position to
-	                                           // it's current position
-
-	while (isAutonomous()) {
-		PID(&armSettings);                       // Hold the arm position
-		update();
-		delay(10);
-	}
+	armSettings.target = armCoder.average;    // Reset the arm position to
+	                                          // it's current position
 } /* autonRightRed12 */

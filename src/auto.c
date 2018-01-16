@@ -20,12 +20,11 @@
 #include "../include/auto.h"
 
 void autonLeftRed12();
-
+void autonLeftRed22();
 void autonRightRed12();
-
 void autonTest();
 
-int   selectedAuton     = 1;
+int   selectedAuton     = 4;
 Auton autons[NUM_AUTON] = { {
 															.name    = "red left 12",
 															.execute = &autonLeftRed12,
@@ -38,6 +37,9 @@ Auton autons[NUM_AUTON] = { {
 														},{
 															.name    = "blue right 12",
 															.execute = &autonLeftRed12,
+														},{
+															.name    = "red left 22",
+															.execute = &autonLeftRed22,
 														},{
 															.name    = "test",
 															.execute = &autonTest,
@@ -220,22 +222,24 @@ void autonomous() {
 
 	selectedAuton = clipNum(selectedAuton, NUM_AUTON - 1, 0);
 	autons[selectedAuton].execute();
+
+	armSettings.target = armCoder.average; // Reset the arm position to it's
+	                                       // current position
+
+	while (isAutonomous()) {
+		PID(&armSettings);                   // Hold the arm position
+		update();
+		delay(10);
+	}
 } /* autonomous */
 
-Task placeCone(void *none) {
-	claw.power = -50;
-	armToPosition(75, 450);
-	arm.power = 10;
-	update();
-	delay(175);
-	claw.power = 127;
-	update();
-	delay(300);
-	claw.power = 0;
-	armToPosition(250, 500);
-	arm.power = -25;
-	mogoP(100);
-	print("Cone placed!\n");
+void placeCone() {
+	// Drop cone
+	claw.power = 127;        // Open claw
+	motorUpdate(&claw);
+	delay(400);              // Give claw time to open
+	claw.power = 0;          // Stop claw
+	print("Cone placed!\n"); // Notify computer of cone state
 } /* placeCone */
 
 void auton() {

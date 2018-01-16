@@ -23,7 +23,7 @@
 
 #include "../include/robot.h"
 
-#define NUM_AUTON 5
+#define NUM_AUTON 6
 
 enum MOGO_POS {
 	MOGO_UP = 75,
@@ -60,10 +60,11 @@ void driveToPosition(int l, int r, unsigned long until);
 void driveToPositionAngle(int l, int r, int a, unsigned long until);
 void mogoP(int p);
 void gyroPID(int target, int precision);
-void getMogo();
 void turnTo(int angle, unsigned long until);
 
+void getMogo();
+void placeCone();
+
 Task backUp(void *time);
-Task placeCone(void *none);
 
 #endif // AUTO_ROBOT_H_
