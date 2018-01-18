@@ -186,10 +186,10 @@ void getMogo() {
 	GO(mogoDown, NULL);
 	delay(750);
 
-	driveToPosition(2150, 2150, 1800);
+	driveToPosition(2150, 2150, 2000);
 
 	TaskHandle mogoUpHandle = GO(mogoUp, NULL);
-	driveToPosition(2400, 2400, 600);
+	driveToPosition(2400, 2400, 800);
 
 	while (taskGetState(mogoUpHandle) != TASK_DEAD) {
 		delay(10);

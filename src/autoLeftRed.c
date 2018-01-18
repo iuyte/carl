@@ -48,29 +48,29 @@ void autonLeftRed12() {
 } /* autonLeftRed12 */
 
 void autonLeftRed22() {
-	getMogo();                       // Get the mobile goal
-	placeCone();                     // Place the cone
+	getMogo();                         // Get the mobile goal
+	placeCone();                       // Place the cone
 
-	turnTo(-5, 300);                 // Align to a left tilt
-	driveSettings[1].max -= 40;      // Limit right side speed
-	driveToPosition(200, 600, 1550); // Back up
-	driveSettings[1].max += 40;      // Correct speed
-	turnTo(-175, 2000);              // Turn around
+	turnTo(-5, 300);                   // Align to a left tilt
+	driveSettings[1].max -= 25;        // Limit right side speed
+	driveToPosition(-210, -210, 2600); // Back up
+	driveSettings[1].max += 25;        // Correct speed
+	turnTo(-154, 2000);                // Turn around
 
 	// Reset drive encoders & gyro
 	sensorReset(&driveCoder[0]);
 	sensorReset(&driveCoder[1]);
 	sensorReset(&gyro);
 
-	driveToPositionAngle(900, 1000, -5, 1200); // Drive arc -5 degrees clockwise
+	driveToPositionAngle(1300, 1500, -5, 1300); // Drive arc -5 degrees clockwise
 	mogoP(MOGO_DOWN);
 
-	driveSet(-127, -127);                      // Back up the drive
+	driveSet(-127, -127);                       // Back up the drive
 	delay(130);
-	mogoP(MOGO_DOWN - 300);                    // Bring the mobile goal up a bit
+	mogoP(MOGO_DOWN - 300);                     // Bring the mobile goal up a bit
 	delay(250);
-	driveSet(0, 0);                            // Stop the drive
+	driveSet(0, 0);                             // Stop the drive
 
-	armSettings.target = armCoder.average;     // Reset the arm position to it's
-	                                           // current position
+	armSettings.target = armCoder.average;      // Reset the arm position to it's
+	                                            // current position
 } /* autonLeftRed22 */
