@@ -27,7 +27,7 @@ Task lcdTask(void *none) {
 	while (true) {
 		if (lcdState == 0x100) {
 			if (selectedAuton < 1) {
-				selectedAuton = NUM_AUTON - 1;
+				selectedAuton = MAX_AUTON;
 			} else {
 				selectedAuton -= 1;
 			}
@@ -36,7 +36,7 @@ Task lcdTask(void *none) {
 				delay(15);
 			}
 		} else if (lcdState == 0x001) {
-			if (selectedAuton > NUM_AUTON - 1) {
+			if (selectedAuton == MAX_AUTON) {
 				selectedAuton = 0;
 			} else {
 				selectedAuton += 1;

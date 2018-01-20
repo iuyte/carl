@@ -21,13 +21,13 @@
 
 void autonRightRed12() {
 	getMogo();                       // Get the mobile goal
-	placeCone();                     // Place the cone
 
-	turnTo(5, 300);                  // Align to a right tilt
+	turnTo(5, 425);                  // Align to a right tilt
 	driveSettings[0].max -= 40;      // Limit left side speed
 	driveToPosition(800, 400, 1550); // Back up
 	driveSettings[0].max += 40;      // Correct speed
 	turnTo(165, 2000);               // Turn around
+	placeCone();                     // Place the cone
 
 	// Reset drive encoders & gyro
 	sensorReset(&driveCoder[0]);

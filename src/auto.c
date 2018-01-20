@@ -22,28 +22,43 @@
 void autonLeftRed12();
 void autonLeftRed22();
 void autonRightRed12();
+void autonLeftBlue12();
+void autonLeftBlue22();
+void autonSkills();
 void autonTest();
 
-int   selectedAuton     = 4;
-Auton autons[NUM_AUTON] = { {
-															.name    = "red left 12",
-															.execute = &autonLeftRed12,
-														},{
-															.name    = "red right 12",
-															.execute = &autonRightRed12,
-														},{
-															.name    = "blue left 12",
-															.execute = &autonRightRed12,
-														},{
-															.name    = "blue right 12",
-															.execute = &autonLeftRed12,
-														},{
-															.name    = "red left 22",
-															.execute = &autonLeftRed22,
-														},{
-															.name    = "test",
-															.execute = &autonTest,
-														}, };
+void autonNone() {}
+
+int   selectedAuton         = 4;
+Auton autons[MAX_AUTON + 1] =
+{ {
+		.name    = "< red left 12  >",
+		.execute = &autonLeftRed12,
+	},{
+		.name    = "< red right 12 >",
+		.execute = &autonRightRed12,
+	},{
+		.name    = "< blue left 12 >",
+		.execute = &autonLeftBlue12,
+	},{
+		.name    = "< blue right 12>",
+		.execute = &autonRightRed12,
+	},{
+		.name    = "< red left 22  >",
+		.execute = &autonLeftRed22,
+	},{
+		.name    = "< blue left 22 >",
+		.execute = &autonLeftBlue22,
+	},{
+		.name    = "<    skills    >",
+		.execute = &autonSkills,
+	},{
+		.name    = "<     none     >",
+		.execute = &autonNone,
+	},{
+		.name    = "<    test      >",
+		.execute = &autonTest,
+	}, };
 
 void armToPosition(float pos, unsigned long until) {
 	armSettings.target = pos;
@@ -111,6 +126,10 @@ void mogoP(int p) {
 	motorUpdate(&mogo);
 } /* mogoP */
 
+Task mogoPT(void *p) {
+	mogoP((int)p);
+} /* mogoPT */
+
 float gyroPIDC[3] = {
 	5.279,
 	0.0,
@@ -174,22 +193,13 @@ void getMogo() {
 	claw.power         = -50;
 	armSettings.target = ARM_QUARTER - 100;
 
-	Task mogoDown(void *none) {
-		mogoP(MOGO_DOWN);
-	} /* mogoDown */
-
-	Task mogoUp(void *none) {
-		mogoP(MOGO_UP);
-		taskDelete(NULL);
-	} /* mogoUp */
-
-	GO(mogoDown, NULL);
+	GO(mogoPT, MOGO_DOWN + 50);
 	delay(750);
 
-	driveToPosition(2150, 2150, 2000);
+	driveToPosition(2300, 2300, 2200);
 
-	TaskHandle mogoUpHandle = GO(mogoUp, NULL);
-	driveToPosition(2400, 2400, 800);
+	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
+	driveToPosition(2550, 2550, 450);
 
 	while (taskGetState(mogoUpHandle) != TASK_DEAD) {
 		delay(10);
@@ -212,6 +222,16 @@ Task backUp(void *time) {
 	}
 } /* backUp */
 
+void placeCone() {
+	// Drop cone
+	claw.power = 127;        // Open claw
+	motorUpdate(&claw);
+	delay(400);              // Give claw time to open
+	claw.power = 0;          // Stop claw
+	print("Cone placed!\n"); // Notify computer of cone state
+	delay(250);              // Wait a lil bit
+} /* placeCone */
+
 void autonomous() {
 	reset();
 	sensorReset(&driveCoder[0]);
@@ -220,7 +240,7 @@ void autonomous() {
 	sensorReset(&mogoAngle);
 	sensorReset(&gyro);
 
-	selectedAuton = clipNum(selectedAuton, NUM_AUTON - 1, 0);
+	selectedAuton = clipNum(selectedAuton, MAX_AUTON - 1, 0);
 	autons[selectedAuton].execute();
 
 	armSettings.target = armCoder.average; // Reset the arm position to it's
@@ -232,15 +252,6 @@ void autonomous() {
 		delay(10);
 	}
 } /* autonomous */
-
-void placeCone() {
-	// Drop cone
-	claw.power = 127;        // Open claw
-	motorUpdate(&claw);
-	delay(400);              // Give claw time to open
-	claw.power = 0;          // Stop claw
-	print("Cone placed!\n"); // Notify computer of cone state
-} /* placeCone */
 
 void auton() {
 	print("\nBeginning of autonomous\n");

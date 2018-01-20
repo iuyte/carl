@@ -21,9 +21,9 @@
 
 float recalc(int p);
 
-void initializeIO() {}
+void  initializeIO() {}
 
-void init() {
+void  init() {
 	// LCD initialization
 	lcdInit(uart1);
 	lcdSetBacklight(uart1, true);
@@ -43,11 +43,11 @@ void init() {
 
 	// Set up the analog sensors
 	gyro        = newGyro(1, true, 199);
-	gyro.child  = (Sensor *)malloc(sizeof(Sensor));
+	gyro.child  = new(Sensor);
 	*gyro.child = newGyro(2, true, 198);
 	notice("gyroscopes, ");
 	mogoAngle        = newAnalog(8, true);
-	mogoAngle.child  = (Sensor *)(malloc(sizeof(Sensor)));
+	mogoAngle.child  = new(Sensor);
 	*mogoAngle.child = newAnalog(7, true);
 	notice("mobile goal angle, ");
 	clawAngle          = newAnalog(5, true);
@@ -60,7 +60,7 @@ void init() {
 	sonic = newSonic(3, 10);
 	ultrasonicShutdown(sonic.pros);
 	notice("ultrasonic sensor, ");
-	driveCoder[0] = newQuad(4, 5, true);
+	driveCoder[0]        = newQuad(4, 5, true);
 	driveCoder[0].recalc = &recalc;
 	notice("left drive quad, ");
 	driveCoder[1] = newQuad(8, 9, true);
@@ -75,23 +75,23 @@ void init() {
 	notice("claw motor, ");
 
 	arm        = motorCreate(5,  false);
-	arm.child  = (Motor *)(malloc(sizeof(Motor)));
+	arm.child  = new(Motor);
 	*arm.child = motorCreate(6, true);
 	arm.sensor = &armCoder;
 	notice("arm motors, ");
 
 	mogo        = motorCreate(1, false);
-	mogo.child  = (Motor *)(malloc(sizeof(Motor)));
+	mogo.child  = new(Motor);
 	*mogo.child = motorCreate(10, true);
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);
-	drive[0].child  = (Motor *)(malloc(sizeof(Motor)));
+	drive[0].child  = new(Motor);
 	*drive[0].child = motorCreate(4, true);
 	drive[0].sensor = &driveCoder[0];
 
 	drive[1]        = motorCreate(9, false);
-	drive[1].child  = (Motor *)(malloc(sizeof(Motor)));
+	drive[1].child  = new(Motor);
 	*drive[1].child = motorCreate(7, false);
 	drive[1].sensor = &driveCoder[1];
 	notice("drive motors, ");
@@ -108,4 +108,4 @@ void init() {
 
 float recalc(int p) {
 	return p * 8 / 5;
-}
+} /* recalc */

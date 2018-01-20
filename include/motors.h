@@ -28,6 +28,8 @@
 #define deadBand(input, \
                  dead) ((input - dead > 0 || input + dead < 0) ? input : 0)
 #define expand(input, tip, high, low) ((input > tip) ? high : low)
+#define new(type) ((type*)malloc(sizeof(type)))
+#define delete(pointer) free((void*)pointer)
 
 /**
  * A convienence to distinguish tasks from regular functions

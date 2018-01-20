@@ -23,7 +23,7 @@
 
 #include "../include/robot.h"
 
-#define NUM_AUTON 6
+#define MAX_AUTON 8
 
 enum MOGO_POS {
 	MOGO_UP = 75,
@@ -52,7 +52,7 @@ typedef enum Direction {
 	dOut,
 } Direction;
 
-extern Auton autons[NUM_AUTON];
+extern Auton autons[MAX_AUTON + 1];
 extern int   selectedAuton;
 
 void armToPosition(float pos, unsigned long until);
@@ -66,5 +66,6 @@ void getMogo();
 void placeCone();
 
 Task backUp(void *time);
+Task mogoPT(void *p);
 
 #endif // AUTO_ROBOT_H_
