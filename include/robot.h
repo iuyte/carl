@@ -34,31 +34,12 @@
 #define GO(task, arg)                 \
   taskCreate(&task,                   \
              TASK_DEFAULT_STACK_SIZE, \
-             (void *)arg,             \
+             (void *)(arg),           \
              TASK_PRIORITY_DEFAULT)
 
 extern double inch;
 
 // Sensors and the like
-
-/**
- * Quadrature encoder in digital 1, 2
- */
-extern Sensor armCoder;
-
-/**
- * Drive encoders:
- *  left  @ index 0 in digital 4, 5
- *  right @ index 1 in digital 8, 9
- */
-extern Sensor driveCoder[2];
-
-/**
- * Potentiometer on the mogo manipulator
- *  left         in Analog 3
- *  child, right in Analog 4
- */
-extern Sensor mogoAngle;
 
 /**
  * Gyroscopes to measure the robot's rotation:
@@ -75,11 +56,6 @@ extern Sensor gyro;
 extern Sensor sonic;
 
 /**
- * The angle sensor on the claw in analog 5
- */
-extern Sensor clawAngle;
-
-/**
  * The limit switch on the arm
  *  in  @ digital 12
  *  out @ digital 11
@@ -90,6 +66,7 @@ extern Sensor armLimit[2];
 
 /**
  * The claw, a motor @ port 3
+ *  sensor pot       @ analog 5
  */
 extern Motor claw;
 
@@ -97,23 +74,27 @@ extern Motor claw;
  * The two sides of the drive:
  *  left  @ index 0 in power expander @ port 2
  *    child center motor              @ port 4
+ *    sensor                          @ digital 4, 5
  *  right @ index 1 in power expander @ port 9
  *    child center motor              @ port 7
+ *    sensor                          @ digital 8, 9
  */
 extern Motor drive[2];
 
 /**
  * The arm, containing:
- *  left  motor       @ port 5
+ *  left motor          @ port 5
  *    child right motor @ port 6
- *  Quad encoder in digital 1, 2
+ *    sensor quad       @ digital 1, 2
  */
 extern Motor arm;
 
 /**
  * The mogo manipulator, consisting of:
- *  left  motor @ port 1
- *  right motor @ port 10
+ *  left  motor  @ port 1
+ *    sensor pot @ analog 3
+ *  right motor  @ port 10
+ *    sensor pot @ analog 4
  */
 extern Motor mogo;
 

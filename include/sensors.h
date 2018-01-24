@@ -26,12 +26,25 @@
  * The different types of Sensors
  */
 typedef enum {
+	/** Analog Sensor */
 	Analog,
+
+	/** High Resolution Analog */
 	AnalogHR,
+
+	/** Digital Sensor */
 	Digital,
+
+	/** Quadrature shaft encoder */
 	Quad,
+
+	/** Ultrasonic Sensor */
 	Sonic,
+
+	/** Gyro Sensor */
 	Gyroscope,
+
+	/** Placeholder for a late init Sensor */
 	Placeholder,
 } SensorType;
 
@@ -39,17 +52,31 @@ typedef enum {
  * A struct representing a Sensor of a given type
  */
 typedef struct Sensor {
-	SensorType type;
-	int        value;
-	int        zero;
-	int        average;
-	float (*recalc)(int);
-	bool           inverted;
-	unsigned char  port;
-	unsigned short calibrate;
-	void          *pros;
-	Mutex          mutex;
+	/** Child in the linked list */
 	struct Sensor *child;
+
+	/** Current Sensor value */
+	int value;
+
+	/** The average of the Sensor value and it's child's value */
+	int average;
+
+	/** Recalculation function of the Sensor's value */
+	float (*recalc)(int);
+
+	/** Whether or not the Sensor's value is inverted */
+	bool inverted;
+
+	/** Sensor port */
+	unsigned char port;
+
+	/** Calibration data, like a gyro multiplier. Can also be used as a bool */
+	unsigned short calibrate;
+
+	int        zero;
+	SensorType _type;
+	void      *_pros;
+	Mutex      _mutex;
 } Sensor;
 
 /**

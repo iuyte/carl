@@ -46,24 +46,28 @@ void  init() {
 	gyro.child  = new(Sensor);
 	*gyro.child = newGyro(2, true, 198);
 	notice("gyroscopes, ");
-	mogoAngle        = newAnalog(8, true);
-	mogoAngle.child  = new(Sensor);
-	*mogoAngle.child = newAnalog(7, true);
+	Sensor *mogoAngle = new(Sensor);
+	*mogoAngle       = newAnalog(8, true);
+	mogoAngle->child  = new(Sensor);
+	*mogoAngle->child = newAnalog(7, true);
 	notice("mobile goal angle, ");
-	clawAngle          = newAnalog(5, true);
-	clawAngle.inverted = true;
+	Sensor *clawAngle = new(Sensor);
+	*clawAngle         = newAnalog(5, true);
+	clawAngle->inverted = true;
 	notice("claw angle, ");
 
 	// Set up the digital sensors
-	armCoder = newQuad(1, 2, false);
+	Sensor *armCoder = new(Sensor);
+	*armCoder = newQuad(1, 2, false);
 	notice("arm quad, ");
 	sonic = newSonic(3, 10);
-	ultrasonicShutdown(sonic.pros);
+	ultrasonicShutdown(sonic._pros);
 	notice("ultrasonic sensor, ");
-	driveCoder[0]        = newQuad(4, 5, true);
-	driveCoder[0].recalc = &recalc;
+	Sensor *driveCoder[2] = { new(Sensor), new(Sensor) };
+	*driveCoder[0]        = newQuad(4, 5, true);
+	driveCoder[0]->recalc = &recalc;
 	notice("left drive quad, ");
-	driveCoder[1] = newQuad(8, 9, true);
+	*driveCoder[1] = newQuad(8, 9, true);
 	notice("right drive quad, ");
 	armLimit[0] = newDigital(12, true);
 	armLimit[1] = newDigital(11, true);
@@ -71,13 +75,13 @@ void  init() {
 
 	// Initialize and set up all of the motors, servos, etc
 	claw        = motorCreate(3, false);
-	claw.sensor = &clawAngle;
+	claw.sensor = clawAngle;
 	notice("claw motor, ");
 
 	arm        = motorCreate(5,  false);
 	arm.child  = new(Motor);
 	*arm.child = motorCreate(6, true);
-	arm.sensor = &armCoder;
+	arm.sensor = armCoder;
 	notice("arm motors, ");
 
 	mogo        = motorCreate(1, false);
@@ -88,12 +92,12 @@ void  init() {
 	drive[0]        = motorCreate(2, true);
 	drive[0].child  = new(Motor);
 	*drive[0].child = motorCreate(4, true);
-	drive[0].sensor = &driveCoder[0];
+	drive[0].sensor = driveCoder[0];
 
 	drive[1]        = motorCreate(9, false);
 	drive[1].child  = new(Motor);
 	*drive[1].child = motorCreate(7, false);
-	drive[1].sensor = &driveCoder[1];
+	drive[1].sensor = driveCoder[1];
 	notice("drive motors, ");
 
 	notice("done!");

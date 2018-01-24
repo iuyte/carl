@@ -30,8 +30,8 @@ void autonSkills() {
 	placeCone();                       // Place the cone
 
 	// Reset drive encoders & gyro
-	sensorReset(&driveCoder[0]);
-	sensorReset(&driveCoder[1]);
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
 	driveToPositionAngle(900,  1100, -5, 1300);         // Drive arc -5 degrees
@@ -55,19 +55,19 @@ void autonSkills() {
 	driveToPositionAngle(0, 0, 0, 2500);
 
 	turnTo(120, 1000);                       // Turn to angle to the right
-	sensorReset(&driveCoder[0]);             // Reset the drive encoders
-	sensorReset(&driveCoder[1]);
+	sensorReset(drive[0].sensor);            // Reset the drive encoders
+	sensorReset(drive[1].sensor);
 
 	GO(mogoPT, MOGO_DOWN);                   // Drop the mogo intake
 	driveToPosition(300, 300, 1200);         // Drive forward a bit
 	turnTo(210, 1000);                       // Turn to fully face the mobile goal
 
-	sensorReset(&driveCoder[0]);             // Reset the drive encoders
-	sensorReset(&driveCoder[1]);
+	sensorReset(drive[0].sensor);            // Reset the drive encoders
+	sensorReset(drive[1].sensor);
 
 	driveToPositionAngle(940, 900, 6, 2000); // Get the mogo
 	mogoP(MOGO_UP);
 
 	// Reset the arm's target position to it's current position
-	armSettings.target = armCoder.average;
+	armSettings.target = arm.sensor->average;
 } /* autonLeftRed22 */

@@ -29,8 +29,7 @@ int digital(unsigned char joyNum,
 
 void operatorControl() {
 	printf("Starting Driver Control...\n");
-
-	// ultrasonicShutdown(sonic.pros);
+	// ultrasonicShutdown(sonic._pros);
 	reset();
 
 	void moveDrive() {
@@ -54,21 +53,21 @@ void operatorControl() {
 			}
 
 			if (armLimit[0].value) {
-				sensorReset(&armCoder);
+				sensorReset(arm.sensor);
 				arm.power = clipNum(arm.power, 0, -127);
 			} else if (armLimit[1].value) {
-				armCoder.zero = armCoder.value - 1000;
+				arm.sensor->zero = arm.sensor->value - 1000;
 				arm.power     = clipNum(arm.power, 127, 0);
 			}
-			armSettings.target = armCoder.value;
+			armSettings.target = arm.sensor->value;
 		} else if (armLimit[0].value) {
-			sensorReset(&armCoder);
+			  sensorReset(arm.sensor);
 			armSettings.target = 0;
-			arm.power = 0;
+			arm.power          = 0;
 		} else if (armLimit[1].value) {
-			armCoder.zero = armCoder.value - 1000;
+			arm.sensor->zero      = arm.sensor->value - 1000;
 			armSettings.target = 1000;
-			arm.power = 0;
+			arm.power          = 0;
 		} else {
 			PID(&armSettings);
 		}
@@ -97,15 +96,15 @@ void operatorControl() {
 		static int power;
 
 		power = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
-		        joystickGetDigital(2, 5, JOY_UP) * 127 +
+		             joystickGetDigital(2, 5, JOY_UP) * 127 +
 		        (millis() - lastPress < 225) ? power : 0;
 
 		if (power) {
 			claw.power          = power;
-			clawSettings.target = clawAngle.value;
+			clawSettings.target = claw.sensor->value;
 			lastPress           = millis();
 		} else if (millis() - lastPress < 225) {
-			clawSettings.target = clawAngle.value;
+			clawSettings.target = claw.sensor->value;
 		} else {
 			PID(&clawSettings);
 		}

@@ -28,8 +28,8 @@
 #define deadBand(input, \
                  dead) ((input - dead > 0 || input + dead < 0) ? input : 0)
 #define expand(input, tip, high, low) ((input > tip) ? high : low)
-#define new(type) ((type*)malloc(sizeof(type)))
-#define delete(pointer) free((void*)pointer)
+#define new(type) ((type *)malloc(sizeof(type)))
+#define delete(pointer) free((void *)pointer)
 
 /**
  * A convienence to distinguish tasks from regular functions
@@ -40,12 +40,23 @@ typedef void Task;
  * A motor structure, containing a motor's port, invertation, and power
  */
 typedef struct Motor {
+	/** The child in the linked list of Motors */
 	struct Motor *child;
-	Sensor       *sensor;
+
+	/** The controlling Sensor to be used by default for PID */
+	Sensor *sensor;
+
+	/** Cortex port, 1-10 that the motor is plugged in to */
 	unsigned char port;
-	bool          isInverted;
-	int           power;
-	int           deadband;
+
+	/** Whether or not the Motor is inverted */
+	bool isInverted;
+
+	/** Motor power */
+	int power;
+
+	/** Deadband for the Motor power */
+	int deadband;
 
 	int           _power;
 	int           _lastPower;

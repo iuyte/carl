@@ -116,8 +116,8 @@ void driveToPositionAngle(int l, int r, int a, unsigned long until) {
 } /* driveToPosition */
 
 void mogoP(int p) {
-	while (isAutonomous() && abs(p - mogoAngle.average) > 75) {
-		mogo.power = sgn(p - mogoAngle.average) * 127;
+	while (isAutonomous() && abs(p - mogo.sensor->average) > 75) {
+		mogo.power = sgn(p - mogo.sensor->average) * 127;
 		PID(&armSettings);
 		update();
 	}
@@ -234,117 +234,21 @@ void placeCone() {
 
 void autonomous() {
 	reset();
-	sensorReset(&driveCoder[0]);
-	sensorReset(&driveCoder[1]);
-	sensorReset(&armCoder);
-	sensorReset(&mogoAngle);
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+	sensorReset(arm.sensor);
+	sensorReset(mogo.sensor);
 	sensorReset(&gyro);
 
 	selectedAuton = clipNum(selectedAuton, MAX_AUTON - 1, 0);
 	autons[selectedAuton].execute();
 
-	armSettings.target = armCoder.average; // Reset the arm position to it's
-	                                       // current position
+	armSettings.target = arm.sensor->average; // Reset the arm position to it's
+	                                          // current position
 
 	while (isAutonomous()) {
-		PID(&armSettings);                   // Hold the arm position
+		PID(&armSettings);                      // Hold the arm position
 		update();
 		delay(10);
 	}
-} /* autonomous */
-
-void auton() {
-	print("\nBeginning of autonomous\n");
-	unsigned long t = millis() - 5;
-
-	/*
-	 *   while (arm->sensor->value < 250 && millis() < t) {
-	 *        arm[0].power = -127;
-	 *        update();
-	 *   }
-	 */
-	claw.power = -50;
-	armToPosition(275, t + 500);
-	arm.power = 50;
-	delay(150);
-	arm.power = -25;
-
-
-	mogoP(2150);
-
-	delay(250);
-
-	print("\nAbout to start driving!");
-
-	if (selectedAuton) {
-		driveToPositionAngle(1500, 1800, 8, millis() + 2250);
-	} else {
-		driveToPositionAngle(1500, 1800, 2, millis() + 2250);
-	}
-
-
-	mogoP(350);
-
-	GO(backUp, NULL);
-
-	TaskHandle coneHandle = GO(placeCone, NULL);
-
-	if (selectedAuton) {
-		driveToPositionAngle(150, -150, 15, millis() + 2000);
-
-		gyroPID(-162, 8);
-	} else {
-		driveToPositionAngle(200, 400, 0, millis() + 2000);
-
-		gyroPID(-160, 7);
-	}
-
-	reset();
-
-
-	if (selectedAuton) {
-		driveToPositionAngle(675, 750, -8, millis() + 1600);
-		driveSet(70, 40);
-	} else {
-		driveToPositionAngle(250,  250,  7,  millis() + 1400);
-		driveToPositionAngle(2550, 2250, 30, millis() + 1400);
-	}
-	update();
-	reset();
-
-
-	mogoP(2000);
-
-
-	mogo.power = -50;
-	update();
-	delay(250);
-
-	driveSet(-127, -127);
-	update();
-
-
-	delay(250);
-	mogo.power = 50;
-	update();
-	delay(350);
-	driveSet(-100, -100);
-	mogo.power = 0;
-	arm.power  = 80;
-	update();
-
-	delay(400);
-
-	arm.power = 0;
-	gyroPID(0, -expand(selectedAuton, .5, 10, -10));
-	driveSet(-80, -80);
-
-	delay(175);
-
-	motorStopAll();
-
-	if (coneHandle) {
-		taskDelete(coneHandle);
-	}
-	printf("Ending autonomous with %lu to spare\n", t + 15000 - millis());
 } /* autonomous */

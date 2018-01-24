@@ -30,8 +30,8 @@ void autonLeftBlue12() {
 	placeCone();                     // Place the cone
 
 	// Reset drive encoders & gyro
-	sensorReset(&driveCoder[0]);
-	sensorReset(&driveCoder[1]);
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
 	driveToPositionAngle(770, 880, 13, 1600); // Drive arc 13 degrees clockwise
@@ -43,7 +43,7 @@ void autonLeftBlue12() {
 	delay(250);
 	driveSet(0, 0);                           // Stop the drive
 
-	armSettings.target = armCoder.average;    // Reset the arm position to it's
+	armSettings.target = arm.sensor->average;    // Reset the arm position to it's
 	                                          // current position
 } /* autonLeftRed12 */
 
@@ -58,8 +58,8 @@ void autonLeftBlue22() {
 	placeCone();                       // Place the cone
 
 	// Reset drive encoders & gyro
-	sensorReset(&driveCoder[0]);
-	sensorReset(&driveCoder[1]);
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
 	driveToPositionAngle(900,  1100, -5, 1300); // Drive arc -5 degrees
@@ -80,5 +80,5 @@ void autonLeftBlue22() {
 	driveSet(0, 0);         // Stop the drive
 
 	// Reset the target arm position to it's current position
-	armSettings.target = armCoder.average;
+	armSettings.target = arm.sensor->average;
 } /* autonLeftRed22 */
