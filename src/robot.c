@@ -63,14 +63,16 @@ PIDSettings driveSettings[2] = { {
 																	 .kP        = .16f,
 																	 .kI        = .043f,
 																	 .kD        = .15f,
-																	 .tolerance = 85,
+																	 .tolerance = 115,
+																	 .precision = 270,
 																	 .root      = &drive[0],
 																 }, {
 																	 DEFAULT_PID_SETTINGS,
 																	 .kP        = .16f,
 																	 .kI        = .043f,
 																	 .kD        = .15f,
-																	 .tolerance = 85,
+																	 .tolerance = 115,
+																	 .precision = 270,
 																	 .root      = &drive[1],
 																 }, };
 

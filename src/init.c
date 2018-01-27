@@ -47,12 +47,12 @@ void  init() {
 	*gyro.child = newGyro(2, true, 198);
 	notice("gyroscopes, ");
 	Sensor *mogoAngle = new(Sensor);
-	*mogoAngle       = newAnalog(8, true);
+	*mogoAngle        = newAnalog(8, true);
 	mogoAngle->child  = new(Sensor);
 	*mogoAngle->child = newAnalog(7, true);
 	notice("mobile goal angle, ");
 	Sensor *clawAngle = new(Sensor);
-	*clawAngle         = newAnalog(5, true);
+	*clawAngle          = newAnalog(5, true);
 	clawAngle->inverted = true;
 	notice("claw angle, ");
 
@@ -87,6 +87,7 @@ void  init() {
 	mogo        = motorCreate(1, false);
 	mogo.child  = new(Motor);
 	*mogo.child = motorCreate(10, true);
+	mogo.sensor = mogoAngle;
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);
@@ -100,11 +101,10 @@ void  init() {
 	drive[1].sensor = driveCoder[1];
 	notice("drive motors, ");
 
-	notice("done!");
 	lcdSetText(uart1, 1, "Ready!");
 	print("\n\n");
-	info();
 	setTeamName("709S");
+	notice("done!");
 
 	// Start the LCD task
 	LCDHandle = GO(lcdTask, NULL);

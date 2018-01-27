@@ -52,13 +52,16 @@ void autonLeftRed22() {
 
 	gyroSettings[0].tolerance--;
 	gyroSettings[1].tolerance--;
-	turnTo(-10, 500);                // Align to a left tilt
+	turnTo(-10, 575);                // Align to a left tilt
+	print("\n\\\\\\ \n \\\\\\\n");
 	gyroSettings[0].tolerance++;
 	gyroSettings[1].tolerance++;
 	driveSettings[1].max -= 40;      // Limit right side speed
 	driveToPosition(388, 788, 2200); // Back up
+	print("\n||| \n |||\n");
 	driveSettings[1].max += 40;      // Correct speed
 	turnTo(-158, 2000);              // Turn around
+	print("\n/// \n ///\n");
 	placeCone();                     // Place the cone
 
 	// Reset drive encoders & gyro
@@ -74,9 +77,9 @@ void autonLeftRed22() {
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	driveToPositionAngle(1400, 1400, 0, 1950); // Drive arc 13 degrees clockwise
+	driveToPositionAngle(1200, 1200, 0, 1550); // Drive straight
 
-	mogoP(MOGO_DOWN);
+	mogoP(MOGO_DOWN); // Drop mobile goal
 
 	// Wait a bit for the mobile goal to settle
 	delay(250);

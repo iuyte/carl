@@ -23,7 +23,7 @@
 
 #include "../include/robot.h"
 
-#define MAX_AUTON 8
+#define MAX_AUTON 9
 
 enum MOGO_POS {
 	MOGO_UP = 75,

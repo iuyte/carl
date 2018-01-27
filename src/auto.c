@@ -28,6 +28,7 @@ void autonSkills();
 void autonTest();
 
 void autonNone() {}
+void testMotors();
 
 int   selectedAuton         = 4;
 Auton autons[MAX_AUTON + 1] =
@@ -56,8 +57,11 @@ Auton autons[MAX_AUTON + 1] =
 		.name    = "<     none     >",
 		.execute = &autonNone,
 	},{
-		.name    = "<    test      >",
+		.name    = "<     test     >",
 		.execute = &autonTest,
+	},{
+		.name    = "< test motors  >",
+		.execute = &testMotors,
 	}, };
 
 void armToPosition(float pos, unsigned long until) {
@@ -199,7 +203,7 @@ void getMogo() {
 	driveToPosition(2300, 2300, 2200);
 
 	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
-	driveToPosition(2550, 2550, 450);
+	driveToPosition(2550, 2550, 475);
 
 	while (taskGetState(mogoUpHandle) != TASK_DEAD) {
 		delay(10);
@@ -229,7 +233,7 @@ void placeCone() {
 	delay(400);              // Give claw time to open
 	claw.power = 0;          // Stop claw
 	print("Cone placed!\n"); // Notify computer of cone state
-	delay(250);              // Wait a lil bit
+	delay(325);              // Wait a lil bit
 } /* placeCone */
 
 void autonomous() {
@@ -252,3 +256,13 @@ void autonomous() {
 		delay(10);
 	}
 } /* autonomous */
+
+void testMotors() {
+	while (isAutonomous()) {
+		for (int i = 1; i <= 10; i++) {
+			motorSet(i, 127);
+			delay(250);
+			motorStopAll();
+		}
+	}
+}
