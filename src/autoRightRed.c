@@ -22,27 +22,79 @@
 void autonRightRed12() {
 	getMogo();                       // Get the mobile goal
 
-	turnTo(5, 425);                  // Align to a right tilt
+	turnTo(5, 300);                 // Align to a right tilt
 	driveSettings[0].max -= 40;      // Limit left side speed
-	driveToPosition(800, 400, 1550); // Back up
+	driveToPosition(300, 700, 2200); // Back up
 	driveSettings[0].max += 40;      // Correct speed
-	turnTo(165, 2000);               // Turn around
-	placeCone();                     // Place the cone
+	turnTo(165, 2000);              // Turn around
+	delay(400);
 
 	// Reset drive encoders & gyro
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	driveToPositionAngle(840, 900, -6, 1350); // Drive arc -13 degrees
+	driveToPositionAngle(900, 1100, -13, 1850); // Drive arc -13 degrees
+	GO(placeConeT, NULL);                      // Place cone
 	mogoP(MOGO_DOWN);
 
-	driveSet(-127, -127);                     // Back up the drive
+	driveSet(-127, -127);                      // Back up the drive
 	delay(130);
-	mogoP(MOGO_DOWN - 300);                   // Bring the mobile goal up a bit
+	mogoP(MOGO_DOWN - 300);                    // Bring the mobile goal up a bit
 	delay(250);
-	driveSet(0, 0);                           // Stop the drive
+	driveSet(0, 0);                            // Stop the drive
 
-	armSettings.target = arm.sensor->average;    // Reset the arm position to
-	                                          // it's current position
-} /* autonRightRed12 */
+	armSettings.target = arm.sensor->average;  // Reset the arm position to it's
+	                                           // current position
+} /* autonLeftRed12 */
+
+void autonRightRed22() {
+	getMogo(); // Get the mobile goal
+
+	gyroSettings[0].tolerance--;
+	gyroSettings[1].tolerance--;
+	turnTo(10, 575);                // Align to a right tilt
+	gyroSettings[0].tolerance++;
+	gyroSettings[1].tolerance++;
+	driveSettings[0].max -= 40;      // Limit left side speed
+	GO(placeConeT, NULL);            // Place cone
+	driveToPosition(788, 388, 2200); // Back up
+	driveSettings[0].max += 40;      // Correct speed
+	turnTo(-158, 2000);              // Turn around
+
+	// Reset drive encoders & gyro
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+	sensorReset(&gyro);
+
+	driveToPositionAngle(1300, 1400, -13, 1800); // Drive arc -13 degrees
+
+	// turnTo(59, 750);
+
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+	sensorReset(&gyro);
+
+	driveToPositionAngle(1050, 1050, 0, 1425); // Drive straight
+
+	driveSet(30, 30);
+	mogoP(MOGO_DOWN);                          // Drop mobile goal
+
+	// Wait a bit for the mobile goal to settle
+	driveSet(100, 100);
+	delay(350);
+
+	driveSet(-127, -127); // Back up the drive
+	delay(650);
+	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
+	delay(500);           // Make sure that the robot isn't touching a field
+	                      // element
+	driveSet(0, 0);       // stop the robot
+
+	while (taskGetState(mogoUpHandle) != TASK_DEAD) {
+		delay(10);
+	}
+
+	armSettings.target = arm.sensor->average; // Reset the arm position to it's
+	                                          // current position
+} /* autonLeftRed22 */

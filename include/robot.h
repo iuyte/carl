@@ -83,9 +83,10 @@ extern Motor drive[2];
 
 /**
  * The arm, containing:
- *  left motor          @ port 5
- *    child right motor @ port 6
- *    sensor quad       @ digital 1, 2
+ *  left motor            @ port 5
+ *    child right motor   @ port 6
+ *      child upper motor @ port 8
+ *    sensor quad         @ digital 1, 2
  */
 extern Motor arm;
 

@@ -81,6 +81,8 @@ void  init() {
 	arm        = motorCreate(5,  false);
 	arm.child  = new(Motor);
 	*arm.child = motorCreate(6, true);
+	arm.child->child  = new(Motor);
+	*arm.child->child = motorCreate(8, false);
 	arm.sensor = armCoder;
 	notice("arm motors, ");
 

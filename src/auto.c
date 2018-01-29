@@ -22,34 +22,42 @@
 void autonLeftRed12();
 void autonLeftRed22();
 void autonRightRed12();
+void autonRightRed22();
 void autonLeftBlue12();
 void autonLeftBlue22();
 void autonSkills();
 void autonTest();
 
 void autonNone() {}
+
 void testMotors();
 
-int   selectedAuton         = 4;
+int   selectedAuton         = 3;
 Auton autons[MAX_AUTON + 1] =
 { {
 		.name    = "< red left 12  >",
 		.execute = &autonLeftRed12,
 	},{
+		.name    = "< red left 22  >",
+		.execute = &autonLeftRed22,
+	},{
 		.name    = "< red right 12 >",
 		.execute = &autonRightRed12,
 	},{
+		.name    = "< red right 22 >",
+		.execute = &autonRightRed22,
+	},{
 		.name    = "< blue left 12 >",
-		.execute = &autonLeftBlue12,
+		.execute = &autonLeftRed12,
+	},{
+		.name    = "< blue left 22  >",
+		.execute = &autonLeftRed22,
 	},{
 		.name    = "< blue right 12>",
 		.execute = &autonRightRed12,
 	},{
-		.name    = "< red left 22  >",
-		.execute = &autonLeftRed22,
-	},{
-		.name    = "< blue left 22 >",
-		.execute = &autonLeftBlue22,
+		.name    = "< blue right 22 >",
+		.execute = &autonRightRed22,
 	},{
 		.name    = "<    skills    >",
 		.execute = &autonSkills,
@@ -197,13 +205,13 @@ void getMogo() {
 	claw.power         = -50;
 	armSettings.target = ARM_QUARTER - 100;
 
-	GO(mogoPT, MOGO_DOWN + 50);
+	GO(mogoPT, MOGO_DOWN + 20);
 	delay(750);
 
-	driveToPosition(2300, 2300, 2200);
+	driveToPosition(2350, 2350, 2100);
 
 	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
-	driveToPosition(2550, 2550, 475);
+	driveToPosition(2600, 2600, 525);
 
 	while (taskGetState(mogoUpHandle) != TASK_DEAD) {
 		delay(10);
@@ -236,6 +244,19 @@ void placeCone() {
 	delay(325);              // Wait a lil bit
 } /* placeCone */
 
+Task placeConeT(void *none) {
+	// Arm down
+	armToPosition(ARM_DOWN + 35, 400);
+
+	// Drop cone
+	claw.power = 127;        // Open claw
+	motorUpdate(&claw);
+	delay(400);              // Give claw time to open
+	claw.power = 0;          // Stop claw
+	armToPosition(ARM_QUARTER, 400);
+	print("Cone placed!\n"); // Notify computer of cone state
+} /* placeCone */
+
 void autonomous() {
 	reset();
 	sensorReset(drive[0].sensor);
@@ -265,4 +286,4 @@ void testMotors() {
 			motorStopAll();
 		}
 	}
-}
+} /* testMotors */

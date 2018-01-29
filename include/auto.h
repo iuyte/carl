@@ -67,5 +67,6 @@ void placeCone();
 
 Task backUp(void *time);
 Task mogoPT(void *p);
+Task placeConeT(void *none);
 
 #endif // AUTO_ROBOT_H_

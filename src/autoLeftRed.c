@@ -27,7 +27,7 @@ void autonLeftRed12() {
 	driveToPosition(300, 700, 2200); // Back up
 	driveSettings[1].max += 40;      // Correct speed
 	turnTo(-165, 2000);              // Turn around
-	placeCone();                     // Place the cone
+	delay(400);
 
 	// Reset drive encoders & gyro
 	sensorReset(drive[0].sensor);
@@ -35,6 +35,7 @@ void autonLeftRed12() {
 	sensorReset(&gyro);
 
 	driveToPositionAngle(1000, 900, 13, 1850); // Drive arc 13 degrees clockwise
+	GO(placeConeT, NULL);                      // Place cone
 	mogoP(MOGO_DOWN);
 
 	driveSet(-127, -127);                      // Back up the drive
@@ -43,7 +44,7 @@ void autonLeftRed12() {
 	delay(250);
 	driveSet(0, 0);                            // Stop the drive
 
-	armSettings.target = arm.sensor->average;     // Reset the arm position to it's
+	armSettings.target = arm.sensor->average;  // Reset the arm position to it's
 	                                           // current position
 } /* autonLeftRed12 */
 
@@ -53,16 +54,13 @@ void autonLeftRed22() {
 	gyroSettings[0].tolerance--;
 	gyroSettings[1].tolerance--;
 	turnTo(-10, 575);                // Align to a left tilt
-	print("\n\\\\\\ \n \\\\\\\n");
 	gyroSettings[0].tolerance++;
 	gyroSettings[1].tolerance++;
 	driveSettings[1].max -= 40;      // Limit right side speed
+	GO(placeConeT, NULL);            // Place cone
 	driveToPosition(388, 788, 2200); // Back up
-	print("\n||| \n |||\n");
 	driveSettings[1].max += 40;      // Correct speed
 	turnTo(-158, 2000);              // Turn around
-	print("\n/// \n ///\n");
-	placeCone();                     // Place the cone
 
 	// Reset drive encoders & gyro
 	sensorReset(drive[0].sensor);
@@ -71,25 +69,25 @@ void autonLeftRed22() {
 
 	driveToPositionAngle(1400, 1300, 13, 1800); // Drive arc 13 degrees clockwise
 
-	turnTo(59, 750);
+	// turnTo(59, 750);
 
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	driveToPositionAngle(1200, 1200, 0, 1550); // Drive straight
+	driveToPositionAngle(1050, 1050, 0, 1425); // Drive straight
 
-	mogoP(MOGO_DOWN); // Drop mobile goal
+	driveSet(30, 30);
+	mogoP(MOGO_DOWN);                          // Drop mobile goal
 
 	// Wait a bit for the mobile goal to settle
-	delay(250);
+	delay(500);
 
 	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
+	driveSet(127, 127);
+	delay(300);
+
 	driveSet(-127, -127); // Back up the drive
-	delay(250);
-	driveSet(127, 127);   // Go forward to knock mobile goal off
-	delay(150);
-	driveSet(-127, -127); // Back up the drive again
 	delay(500);           // Make sure that the robot isn't touching a field
 	                      // element
 	driveSet(0, 0);       // stop the robot
@@ -99,5 +97,5 @@ void autonLeftRed22() {
 	}
 
 	armSettings.target = arm.sensor->average; // Reset the arm position to it's
-	                                       // current position
+	                                          // current position
 } /* autonLeftRed22 */
