@@ -38,14 +38,14 @@ void operatorControl() {
 	} /* drive */
 
 	void moveMogo() {
-		mogo.power = joystickGetDigital(1, 6, JOY_UP) * 127 +
-		             joystickGetDigital(1, 6, JOY_DOWN) * -127;
+		mogo.power = 127 * digital(1, 6, JOY_UP, JOY_DOWN) +
+		             127 * digital(2, 5, JOY_UP, JOY_DOWN);
 	} /* moveMogo */
 
 	void moveArm() {
 		static unsigned long lastPress;
 
-		if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 175)) {
+		if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 130)) {
 			arm.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
 
 			if (arm.power) {
@@ -57,7 +57,7 @@ void operatorControl() {
 				arm.power = clipNum(arm.power, 0, -127);
 			} else if (armLimit[1].value) {
 				arm.sensor->zero = arm.sensor->value - 1000;
-				arm.power     = clipNum(arm.power, 127, 0);
+				arm.power        = clipNum(arm.power, 127, 0);
 			}
 			armSettings.target = arm.sensor->value;
 		} else if (armLimit[0].value) {
@@ -65,7 +65,7 @@ void operatorControl() {
 			armSettings.target = 0;
 			arm.power          = 0;
 		} else if (armLimit[1].value) {
-			arm.sensor->zero      = arm.sensor->value - 1000;
+			arm.sensor->zero   = arm.sensor->value - 1000;
 			armSettings.target = 1000;
 			arm.power          = 0;
 		} else {
@@ -74,20 +74,10 @@ void operatorControl() {
 	} /* moveArm */
 
 	void moveClaw() {
-		static bool lastClose = false;
-
-		claw.power = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
-		             joystickGetDigital(2, 5, JOY_UP) * 127 +
-		             lastClose * 5;
-
-		if (joystickGetAnalog(2, 4)) {
-			claw.power = .85 * joystickGetAnalog(2, 4);
-		}
-
-		if (joystickGetDigital(2, 5, JOY_UP)) {
-			lastClose = true;
-		} else if  (joystickGetDigital(2, 5, JOY_DOWN)) {
-			lastClose = false;
+		if (deadBand(joystickGetAnalog(2, 4), 10)) {
+			claw.power = joystickGetAnalog(2, 4);
+		} else {
+			claw.power = 0;
 		}
 	} /* moveClaw */
 
@@ -96,7 +86,7 @@ void operatorControl() {
 		static int power;
 
 		power = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
-		             joystickGetDigital(2, 5, JOY_UP) * 127 +
+		        joystickGetDigital(2, 5, JOY_UP) * 127 +
 		        (millis() - lastPress < 225) ? power : 0;
 
 		if (power) {

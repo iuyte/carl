@@ -142,4 +142,6 @@ void reset();
  */
 void update();
 
+bool waitForDriveStall(unsigned long blockTime);
+
 #endif // CARL_ROBOT_H_

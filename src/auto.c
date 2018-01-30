@@ -257,6 +257,31 @@ Task placeConeT(void *none) {
 	print("Cone placed!\n"); // Notify computer of cone state
 } /* placeCone */
 
+/**
+ * Drop mobile goal into the point zone specified
+ *
+ * @param zone if zone < 15 then it's 10 point, otherwise 20
+ */
+void dropMogo(int zone) {
+	int p[2] = { drive[0].sensor->value, drive[1].sensor->value };
+
+	if (zone < 15) {
+		// 10 point zone
+		driveSet(30, 30);
+		waitForDriveStall(500);
+		mogoP(MOGO_DOWN - 100);
+	} else {
+		// 20 point zone
+		driveSet(30, 30);
+		waitForDriveStall(500);
+		driveSet(127, 127);
+		delay(250);
+		waitForDriveStall(500);
+		mogoP(MOGO_DOWN * .68);
+	}
+	driveToPosition(p[0] - 150, p[1] - 150, 2000);
+} /* dropMogo */
+
 void autonomous() {
 	reset();
 	sensorReset(drive[0].sensor);

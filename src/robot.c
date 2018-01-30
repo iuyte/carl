@@ -182,13 +182,23 @@ void info() {
 	}
 } /* info */
 
-bool initialized = false;
+bool takeDrive(unsigned long blockTime) {
+	if (!mutexTake(drive[0]._mutex, blockTime)) {
+		return false;
+	} else if (!mutexTake(drive[1]._mutex, blockTime)) {
+		mutexGive(drive[0]._mutex);
+		return false;
+	}
+	return true;
+} /* takeDrive */
+
+void giveDrive() {
+	  mutexGive(drive[0]._mutex);
+	  mutexGive(drive[1]._mutex);
+} /* giveDrive */
 
 void driveSet(int l, int r) {
-	if (!mutexTake(drive[0]._mutex, 5)) {
-		return;
-	} else if (!mutexTake(drive[1]._mutex, 5)) {
-		mutexGive(drive[0]._mutex);
+	if (!takeDrive(5)) {
 		return;
 	}
 
@@ -200,6 +210,8 @@ void driveSet(int l, int r) {
 		motorUpdate(&drive[i]);
 	}
 } /* driveSet */
+
+bool initialized = false;
 
 void initialize() {
 	// Call the init function to perform actions in init.c
@@ -213,3 +225,40 @@ void initialize() {
 		delay(15);
 	}
 } /* initialize */
+
+#define stallVel 10 / 100
+bool waitForDriveStall(unsigned long blockTime) {
+	unsigned long stop = millis() + blockTime;
+
+	int sV[2] = { drive[0].sensor->value, drive[1].sensor->value };
+	int dV[2] = { 100, 100 };
+	int p[2]  = { drive[0].power, drive[1].power };
+
+	unsigned long sT[2] = { millis(), millis() };
+	unsigned long dT[2] = { 1, 1 };
+
+	do {
+		delay(10);
+
+		for (int i = 0; i < 2; i++) {
+			sensorRefresh(drive[i].sensor);
+			dV[i] = abs(drive[i].sensor->value - sV[i]);
+			dT[i] = millis() - sT[i];
+
+			if (dV[i] / dT[i] > stallVel) {
+				sV[i] = drive[i].sensor->value;
+				sT[i] = millis();
+			} else {
+				p[i] = 0;
+			}
+		}
+
+		driveSet(p[0], p[1]);
+
+		if (millis() > stop) {
+			return false;
+		}
+	} while (p[0] != 0 || p[1] != 0);
+
+	return true;
+} /* waitForDriveStall */
