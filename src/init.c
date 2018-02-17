@@ -21,9 +21,9 @@
 
 float recalc(int p);
 
-void initializeIO() {}
+void  initializeIO() {}
 
-void init() {
+void  init() {
 	// LCD initialization
 	lcdInit(uart1);
 	lcdSetBacklight(uart1, true);
@@ -43,27 +43,27 @@ void init() {
 
 	// Set up the analog sensors
 	gyro        = newGyro(1, true, 199);
-	gyro.child  = (Sensor *)malloc(sizeof(Sensor));
-	*gyro.child = newGyro(2, true, 198);
+	gyro.child  = new(Sensor);
+	*gyro.child = newGyro(2, true, 199);
 	notice("gyroscopes, ");
-	mogoAngle        = newAnalog(8, true);
-	mogoAngle.child  = (Sensor *)(malloc(sizeof(Sensor)));
-	*mogoAngle.child = newAnalog(7, true);
-	notice("mobile goal angle, ");
-	clawAngle          = newAnalog(5, true);
-	clawAngle.inverted = true;
+	Sensor *clawAngle = new(Sensor);
+	*clawAngle          = newAnalog(5, true);
+	clawAngle->inverted = true;
 	notice("claw angle, ");
+	Sensor *mogoAngle = new(Sensor);
+	*mogoAngle        = newAnalog(3, true);
+	mogoAngle->child  = new(Sensor);
+	*mogoAngle->child = newAnalog(4, true);
+	notice("mobile goal angle, ");
 
 	// Set up the digital sensors
-	armCoder = newQuad(1, 2, false);
+	Sensor *armCoder = new(Sensor);
+	*armCoder = newQuad(1, 2, false);
 	notice("arm quad, ");
-	sonic = newSonic(3, 10);
-	ultrasonicShutdown(sonic.pros);
-	notice("ultrasonic sensor, ");
-	driveCoder[0] = newQuad(4, 5, true);
-	driveCoder[0].recalc = &recalc;
+	Sensor *driveCoder[2] = { new(Sensor), new(Sensor) };
+	*driveCoder[0]        = newQuad(4, 5, true);
 	notice("left drive quad, ");
-	driveCoder[1] = newQuad(8, 9, true);
+	*driveCoder[1] = newQuad(8, 9, true);
 	notice("right drive quad, ");
 	armLimit[0] = newDigital(12, true);
 	armLimit[1] = newDigital(11, true);
@@ -71,36 +71,38 @@ void init() {
 
 	// Initialize and set up all of the motors, servos, etc
 	claw        = motorCreate(3, false);
-	claw.sensor = &clawAngle;
+	claw.sensor = clawAngle;
 	notice("claw motor, ");
 
 	arm        = motorCreate(5,  false);
-	arm.child  = (Motor *)(malloc(sizeof(Motor)));
+	arm.child  = new(Motor);
 	*arm.child = motorCreate(6, true);
-	arm.sensor = &armCoder;
+	arm.child->child  = new(Motor);
+	*arm.child->child = motorCreate(8, false);
+	arm.sensor = armCoder;
 	notice("arm motors, ");
 
 	mogo        = motorCreate(1, false);
-	mogo.child  = (Motor *)(malloc(sizeof(Motor)));
+	mogo.child  = new(Motor);
 	*mogo.child = motorCreate(10, true);
+	mogo.sensor = mogoAngle;
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);
-	drive[0].child  = (Motor *)(malloc(sizeof(Motor)));
+	drive[0].child  = new(Motor);
 	*drive[0].child = motorCreate(4, true);
-	drive[0].sensor = &driveCoder[0];
+	drive[0].sensor = driveCoder[0];
 
 	drive[1]        = motorCreate(9, false);
-	drive[1].child  = (Motor *)(malloc(sizeof(Motor)));
+	drive[1].child  = new(Motor);
 	*drive[1].child = motorCreate(7, false);
-	drive[1].sensor = &driveCoder[1];
+	drive[1].sensor = driveCoder[1];
 	notice("drive motors, ");
 
-	notice("done!");
 	lcdSetText(uart1, 1, "Ready!");
 	print("\n\n");
-	info();
 	setTeamName("709S");
+	notice("done!");
 
 	// Start the LCD task
 	LCDHandle = GO(lcdTask, NULL);
@@ -108,4 +110,4 @@ void init() {
 
 float recalc(int p) {
 	return p * 8 / 5;
-}
+} /* recalc */

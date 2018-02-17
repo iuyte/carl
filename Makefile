@@ -85,6 +85,10 @@ upload: $(OUTBIN)
 	$(call echo,Uploading $^ to $(DEVICE) using PROS CLI,$(STEP_COLOR))
 	pros flash -f $^
 
+# Build, upload and start terminal
+mut: $(OUTBIN)
+	pros mut | tee $(ROOT)/.output
+
 # Alias to upload, more consistent with our terminology
 flash: upload
 

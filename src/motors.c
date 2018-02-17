@@ -21,16 +21,11 @@
 
 Motor motorCreate(unsigned char port, bool isInverted) {
 	Motor m = {
-		NULL,
-		NULL,
-		clipNum(port, 10, 1),
-		isInverted,
-		0,
-		0,
-		0,
-		millis(),
-		10,
-		mutexCreate(),
+		.isInverted = isInverted,
+		.deadband   = 10,
+		._lastTime  = millis(),
+		._mutex     = mutexCreate(),
+		.port       = clipNum(port, 10, 1),
 	};
 
 	return m;

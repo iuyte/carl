@@ -22,29 +22,29 @@
 
 float defaultRecalc(int n) {
 	return n;
-}
+} /* defaultRecalc */
 
 int readSensorValue(Sensor *s) {
-	switch (s->type) {
+	switch (s->_type) {
 		case Digital:
 			return digitalRead(s->port);
 
 		case Analog:
 			return (s->calibrate) ?
-						 analogReadCalibrated(s->port) :
-						 analogRead(s->port);
+			       analogReadCalibrated(s->port) :
+			       analogRead(s->port);
 
 		case AnalogHR:
 			return analogReadCalibratedHR(s->port);
 
 		case Sonic:
-			return ultrasonicGet(s->pros);
+			return ultrasonicGet(s->_pros);
 
 		case Quad:
-			return encoderGet(s->pros);
+			return encoderGet(s->_pros);
 
 		case Gyroscope:
-			return gyroGet(s->pros);
+			return gyroGet(s->_pros);
 
 		default:
 			return 0;
@@ -60,30 +60,30 @@ void sensorRefresh(Sensor *s) {
 		sensorRefresh(s->child);
 	}
 
-	if (!mutexTake(s->mutex, 5)) {
+	if (!mutexTake(s->_mutex, 5)) {
 		print("= Cannot take mutex =");
 		return;
 	}
 
-	int val = (s->type == Digital) ? readSensorValue(s) :
+	int val = (s->_type == Digital) ? readSensorValue(s) :
 	          (readSensorValue(s) - s->zero);
 
 	if (s->inverted) {
-		if (s->type == Digital) {
+		if (s->_type == Digital) {
 			val = !val;
-		} else if (s->type != Digital) {
+		} else {
 			val = -val;
 		}
 	}
 
-		if (s->recalc) {
-			val = round(s->recalc(val));
-		}
+	if (s->recalc) {
+		val = round(s->recalc(val));
+	}
 
 	s->value   = val;
 	s->average = s->child ? ((s->value + s->child->average) / 2) : s->value;
 
-	mutexGive(s->mutex);
+	mutexGive(s->_mutex);
 } /* sensorRefresh */
 
 void sensorReset(Sensor *s) {
@@ -91,21 +91,21 @@ void sensorReset(Sensor *s) {
 		sensorReset(s->child);
 	}
 
-	switch (s->type) {
+	switch (s->_type) {
 		case Gyroscope:
-			gyroReset(s->pros);
+			gyroReset(s->_pros);
 			s->zero = 0;
 			break;
 
 		case Quad:
-			encoderReset(s->pros);
+			encoderReset(s->_pros);
 			s->zero = 0;
 			break;
 
 		default:
 			s->zero = readSensorValue(s);
 			break;
-	}
+	} /* switch */
 } /* sensorReset */
 
 Sensor newSensor(SensorType     type,
@@ -116,19 +116,14 @@ Sensor newSensor(SensorType     type,
 		port = 1;
 	}
 
-	Sensor s;
-
-	s.child     = 0;
-	s.type      = type;
-	s.value     = 0;
-	s.recalc    = &defaultRecalc;
-	s.zero      = 0;
-	s.average   = 0;
-	s.port      = port;
-	s.inverted  = inverted;
-	s.calibrate = calibrate;
-	s.pros      = 0;
-	s.mutex     = mutexCreate();
+	Sensor s = {
+		._type     = type,
+		.recalc    = &defaultRecalc,
+		.port      = port,
+		.inverted  = inverted,
+		.calibrate = calibrate,
+		._mutex    = mutexCreate(),
+	};
 
 	switch (type) {
 		case Digital:
@@ -136,25 +131,26 @@ Sensor newSensor(SensorType     type,
 			break;
 
 		case Analog:
+
 			if (calibrate) {
 				analogCalibrate(port);
 			}
 			break;
 
 		case AnalogHR:
-				analogCalibrate(port);
+			  analogCalibrate(port);
 			break;
 
 		case Sonic:
-			s.pros = ultrasonicInit(port, (char)calibrate);
+			s._pros = ultrasonicInit(port, (char)calibrate);
 			break;
 
 		case Quad:
-			s.pros = encoderInit(port, (char)calibrate, false);
+			s._pros = encoderInit(port, (char)calibrate, false);
 			break;
 
 		case Gyroscope:
-			s.pros = gyroInit(port, calibrate);
+			s._pros = gyroInit(port, calibrate);
 			break;
 
 		default:
