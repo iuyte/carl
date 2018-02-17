@@ -23,30 +23,27 @@ TaskHandle LCDHandle;
 
 Task lcdTask(void *none) {
 	unsigned int lcdState = 0x000;
+	unsigned int newLcdState = 0x000;
 
 	while (true) {
-		if (lcdState == 0x100) {
-			if (selectedAuton < 1) {
-				selectedAuton = NUM_AUTON - 1;
-			} else {
-				selectedAuton -= 1;
+		newLcdState = lcdReadButtons(uart1);
+		if (lcdState != newLcdState) {
+			lcdState = newLcdState;
+			if (lcdState == 4) {
+				if (selectedAuton < 1) {
+					selectedAuton = MAX_AUTON;
+				} else {
+					selectedAuton -= 1;
+				}
+			} else if (lcdState == 1) {
+				if (selectedAuton == MAX_AUTON) {
+					selectedAuton = 0;
+				} else {
+					selectedAuton += 1;
+				}
+			} else if (lcdState == 7) {
+				exit(0);
 			}
-
-			while (lcdReadButtons(uart1) == 0x100) {
-				delay(15);
-			}
-		} else if (lcdState == 0x001) {
-			if (selectedAuton > NUM_AUTON - 1) {
-				selectedAuton = 0;
-			} else {
-				selectedAuton += 1;
-			}
-
-			while (lcdReadButtons(uart1) == 0x001) {
-				delay(15);
-			}
-		} else if (lcdState == 0x111) {
-			exit(0);
 		}
 
 		if (!isEnabled()) {
@@ -54,8 +51,11 @@ Task lcdTask(void *none) {
 		}
 
 		info();
-		lcdSetText(uart1, 1, autons[selectedAuton].name);
-		lcdState = lcdReadButtons(uart1);
+		lcdPrint(uart1, 1, "%5u %5d %s",
+		         powerLevelMain(),
+		         (*autons[selectedAuton].sensor)->average,
+		         autons[selectedAuton].sensorName);
+		lcdSetText(uart1, 2, autons[selectedAuton].name);
 		delay(25);
 	}
 } /* selectAuton */

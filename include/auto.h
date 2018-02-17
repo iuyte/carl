@@ -23,7 +23,7 @@
 
 #include "../include/robot.h"
 
-#define NUM_AUTON 5
+#define MAX_AUTON 11
 
 enum MOGO_POS {
 	MOGO_UP = 75,
@@ -40,6 +40,8 @@ enum ARM_POS {
 
 typedef struct Auton {
 	const char *name;
+	const char *sensorName;
+	Sensor **sensor;
 	void (*execute)();
 } Auton;
 
@@ -52,7 +54,7 @@ typedef enum Direction {
 	dOut,
 } Direction;
 
-extern Auton autons[NUM_AUTON];
+extern Auton autons[MAX_AUTON + 1];
 extern int   selectedAuton;
 
 void armToPosition(float pos, unsigned long until);
@@ -60,10 +62,20 @@ void driveToPosition(int l, int r, unsigned long until);
 void driveToPositionAngle(int l, int r, int a, unsigned long until);
 void mogoP(int p);
 void gyroPID(int target, int precision);
-void getMogo();
 void turnTo(int angle, unsigned long until);
 
+void getMogo();
+void placeCone();
+
+/**
+ * Drop mobile goal into the point zone specified
+ *
+ * @param zone if zone < 15 then it's 10 point, otherwise 20
+ */
+void dropMogo(int zone);
+
 Task backUp(void *time);
-Task placeCone(void *none);
+Task mogoPT(void *p);
+Task placeConeT(void *none);
 
 #endif // AUTO_ROBOT_H_

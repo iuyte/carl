@@ -1,6 +1,6 @@
 /**
- * @file autoLeftRed.c
- * @brief Left side red alliance autonomous routines
+ * @file autoSkills.c
+ * @brief Programming skills
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -19,46 +19,17 @@
 
 #include "../include/auto.h"
 
-void autonLeftRed12() {
-	getMogo();                       // Get the mobile goal
-
-	turnTo(-5, 300);                 // Align to a left tilt
-	driveSettings[1].max -= 40;      // Limit right side speed
-	driveToPosition(300, 700, 2200); // Back up
-	driveSettings[1].max += 40;      // Correct speed
-	turnTo(-165, 2000);              // Turn around
-	delay(400);
-
-	// Reset drive encoders & gyro
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
-	sensorReset(&gyro);
-
-	driveToPositionAngle(1000, 900, 13, 1850); // Drive arc 13 degrees clockwise
-	GO(placeConeT, NULL);                      // Place cone
-	mogoP(MOGO_DOWN);
-
-	driveSet(-127, -127);                      // Back up the drive
-	delay(130);
-	mogoP(MOGO_DOWN - 300);                    // Bring the mobile goal up a bit
-	delay(250);
-	driveSet(0, 0);                            // Stop the drive
-
-	armSettings.target = arm.sensor->average;  // Reset the arm position to it's
-	                                           // current position
-} /* autonLeftRed12 */
-
-void autonLeftRed22() {
+void autonSkills() {
 	getMogo(); // Get the mobile goal
 
 	gyroSettings[0].tolerance--;
 	gyroSettings[1].tolerance--;
-	turnTo(-10, 575);                // Align to a left tilt
+	turnTo(-10, 1000);                // Align to a left tilt
 	gyroSettings[0].tolerance++;
 	gyroSettings[1].tolerance++;
 	driveSettings[1].max -= 40;      // Limit right side speed
 	GO(placeConeT, NULL);            // Place cone
-	driveToPosition(388, 788, 2200); // Back up
+	driveToPosition(388, 788, 2600); // Back up
 	driveSettings[1].max += 40;      // Correct speed
 	turnTo(-158, 2000);              // Turn around
 
@@ -69,25 +40,27 @@ void autonLeftRed22() {
 
 	driveToPositionAngle(1400, 1300, 13, 1800); // Drive arc 13 degrees clockwise
 
-	// turnTo(59, 750);
+	dropMogo(20);
 
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	driveToPositionAngle(1050, 1050, 0, 1425); // Drive straight
+	driveToPositionAngle(1200, 1200, 0, 1550); // Drive straight
+	sensorReset(&gyro);
 
-	driveSet(30, 30);
 	mogoP(MOGO_DOWN);                          // Drop mobile goal
 
+	driveSet(50, 50);
 	// Wait a bit for the mobile goal to settle
-	delay(500);
+	delay(250);
 
 	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
-	driveSet(127, 127);
-	delay(300);
-
 	driveSet(-127, -127); // Back up the drive
+	delay(250);
+	driveSet(127, 127);   // Go forward to knock mobile goal off
+	delay(150);
+	driveSet(-127, -127); // Back up the drive again
 	delay(500);           // Make sure that the robot isn't touching a field
 	                      // element
 	driveSet(0, 0);       // stop the robot
@@ -96,6 +69,27 @@ void autonLeftRed22() {
 		delay(10);
 	}
 
-	armSettings.target = arm.sensor->average; // Reset the arm position to it's
-	                                          // current position
+	armSettings.target = arm.sensor->average;             // Reset the arm
+	                                                      // position to
+	                                                      // it's
+	                                                      // current position
+
+	turnTo(170, 2000);                                    // TURN AROUND,
+	mogoP(MOGO_DOWN);                                     // DROP A MOGO INTAKE
+	                                                      // AND
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+	driveToPositionAngle(1750, 1750, gyro.average, 2200); // DRIVE A LITTLE BIT,
+	mogoP(MOGO_UP);
+	driveToPosition(0, 0, 1200);                          // BACK UP.
+	turnTo(0, 2000);                                      // TUUUURN AROUUUUUNNND
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+	driveToPosition(400, 400, 1200);
+	mogoP(MOGO_DOWN);
+	driveSet(-127, -127);
+	delay(350);
+	mogoUpHandle = GO(mogoPT, MOGO_UP);
+	delay(350);
+	driveSet(0, 0);
 } /* autonLeftRed22 */
