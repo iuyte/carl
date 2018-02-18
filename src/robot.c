@@ -54,46 +54,39 @@ PIDSettings clawSettings = {
 	DEFAULT_PID_SETTINGS,
 	.kP   = .38f,
 	.kI   = .0f,
-	.kD   = .42f,
+	.kD   = 1.2f,
 	.root = &claw,
 };
 
+#define _DRIVE_SETTINGS_(index) \
+  DEFAULT_PID_SETTINGS,         \
+  .kP        = .145f,           \
+  .kI        = .047f,           \
+  .kD        = .22f,            \
+  .tolerance = 200,             \
+  .precision = 275,             \
+  .root      = &drive[index]
+
 PIDSettings driveSettings[2] = { {
-																	 DEFAULT_PID_SETTINGS,
-																	 .kP        = .16f,
-																	 .kI        = .043f,
-																	 .kD        = .15f,
-																	 .tolerance = 115,
-																	 .precision = 270,
-																	 .root      = &drive[0],
-																 }, {
-																	 DEFAULT_PID_SETTINGS,
-																	 .kP        = .16f,
-																	 .kI        = .043f,
-																	 .kD        = .15f,
-																	 .tolerance = 115,
-																	 .precision = 270,
-																	 .root      = &drive[1],
+																	 _DRIVE_SETTINGS_(0),
+																 },{
+																	 _DRIVE_SETTINGS_(1),
 																 }, };
 
+#define _GYRO_SETTINGS_(index, m) \
+  DEFAULT_PID_SETTINGS,           \
+  .kP        = m * 3.24f,         \
+  .kI        = m * 0.03f,         \
+  .kD        = m * 2.136f,        \
+  .tolerance = 3,                 \
+  .precision = 270,               \
+  .root      = &drive[index],     \
+  .sensor    = &gyro
+
 PIDSettings gyroSettings[2] = { {
-																	DEFAULT_PID_SETTINGS,
-																	.kP        = 3.17f,
-																	.kI        = 0.f,
-																	.kD        = 2.136f,
-																	.tolerance = 3,
-																	.precision = 270,
-																	.root      = &drive[0],
-																	.sensor    = &gyro,
+																	_GYRO_SETTINGS_(0, 1),
 																},{
-																	DEFAULT_PID_SETTINGS,
-																	.kP        = -3.17f,
-																	.kI        = -0.f,
-																	.kD        = -2.136f,
-																	.tolerance = 3,
-																	.precision = 270,
-																	.root      = &drive[1],
-																	.sensor    = &gyro,
+																	_GYRO_SETTINGS_(1, -1),
 																}, };
 
 void altRefresh(Sensor *s) {
@@ -162,7 +155,7 @@ void info() {
 
 	if (millis() - time >= 25) {
 		printf(
-		  RED " |  %4d     | " GREEN "%4d    | " YELLOW "%4d    | " \
+		  RED " |  %4d     | " GREEN "%4d    | " YELLOW "%4d    | "  \
 		  BLUE "%4d    | %4d    | " CYAN "%4d    | " RED "%3d    | " \
 		  YELLOW "%4u mv | " RESET "\n",
 		  drive[0].sensor->value,
@@ -180,6 +173,7 @@ void info() {
 
 bool takeDrive(unsigned long blockTime) {
 	blockTime /= 2;
+
 	if (!mutexTake(drive[0]._mutex, blockTime)) {
 		return false;
 	} else if (!mutexTake(drive[1]._mutex, blockTime)) {

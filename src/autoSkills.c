@@ -40,7 +40,7 @@ void autonSkills() {
 
 	driveToPositionAngle(1400, 1300, 13, 1800); // Drive arc 13 degrees clockwise
 
-	dropMogo(20);
+	dropMogo20();
 
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
