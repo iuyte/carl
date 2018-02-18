@@ -36,6 +36,7 @@ void operatorControl() {
 	reset();
 	update();
 
+	clawSettings.target = claw.sensor->value;
 	armSettings.target = 0;
 
 	if (armLimit[0].value) {
@@ -61,9 +62,11 @@ void operatorControl() {
 		if ((mogo.sensor->value <= MOGO_HOLD) &&
 		    !joystickGetDigital(1, 5, JOY_DOWN) &&
 		    !joystickGetDigital(2, 7, JOY_UP)) {
-			mogo.power = clipNum(mogo.power, 127, (MOGO_HOLD - mogo.sensor->value) * .9 + 13);
+			mogo.power = clipNum(mogo.power,
+			                     127,
+			                     (MOGO_HOLD - mogo.sensor->value) * .9 + 13);
 		}
-	}
+	} /* skillsMogo */
 
 	void moveArm() {
 		static unsigned long lastPress;
@@ -108,15 +111,13 @@ void operatorControl() {
 		static unsigned long lastPress;
 		static int power;
 
-		power = joystickGetDigital(2, 5, JOY_DOWN) * -127 +
-		        joystickGetDigital(2, 5, JOY_UP) * 127 +
-		        (millis() - lastPress < 225) ? power : 0;
+		power = joystickGetAnalog(2, 4);
 
 		if (power) {
 			claw.power          = power;
 			clawSettings.target = claw.sensor->value;
 			lastPress           = millis();
-		} else if (millis() - lastPress < 225) {
+		} else if (millis() - lastPress < 175) {
 			clawSettings.target = claw.sensor->value;
 		} else {
 			PID(&clawSettings);
@@ -124,6 +125,8 @@ void operatorControl() {
 	} /* clawPID */
 
 	print("Beginning driver control loop\n");
+
+	bool isSkills = strstr(autons[selectedAuton].name, "skills");
 
 	while (true) {
 		if (joystickGetDigital(1, 7, JOY_LEFT) &&
@@ -133,11 +136,12 @@ void operatorControl() {
 
 		moveDrive();
 		moveMogo();
-		if (strstr(autons[selectedAuton].name, "skills")) {
+
+		if (isSkills) {
 			skillsMogo();
 		}
 		moveArm();
-		moveClaw();
+		clawPID();
 		update();
 
 		delay(20);

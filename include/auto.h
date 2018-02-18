@@ -26,14 +26,15 @@
 #define MAX_AUTON 11
 
 enum MOGO_POS {
-	MOGO_UP = 75,
+	MOGO_UP   = 75,
+	MOGO_MID  = 1350,
 	MOGO_DOWN = 2125,
 };
 
 enum ARM_POS {
-	ARM_DOWN = 10,
-	ARM_QUARTER = 275,
-	ARM_HALF = 430,
+	ARM_DOWN      = 10,
+	ARM_QUARTER   = 275,
+	ARM_HALF      = 430,
 	ARM_3_QUARTER = 500,
 };
 
@@ -41,7 +42,7 @@ enum ARM_POS {
 typedef struct Auton {
 	const char *name;
 	const char *sensorName;
-	Sensor **sensor;
+	Sensor    **sensor;
 	void (*execute)();
 } Auton;
 
@@ -57,25 +58,33 @@ typedef enum Direction {
 extern Auton autons[MAX_AUTON + 1];
 extern int   selectedAuton;
 
-void armToPosition(float pos, unsigned long until);
-void driveToPosition(int l, int r, unsigned long until);
-void driveToPositionAngle(int l, int r, int a, unsigned long until);
-void mogoP(int p);
-void gyroPID(int target, int precision);
-void turnTo(int angle, unsigned long until);
+void armToPosition(float         pos,
+                   unsigned long until);
+void driveToPosition(int           l,
+                     int           r,
+                     unsigned long until);
+void driveToPositionAngle(int           l,
+                          int           r,
+                          int           a,
+                          unsigned long until);
+void       mogoP(int p);
+void       gyroPID(int target,
+                   int precision);
+void       turnTo(int           angle,
+                  unsigned long until);
 
-void getMogo();
-void placeCone();
+void       getMogo();
+void       placeCone();
 
 /**
- * Drop mobile goal into the point zone specified
+ * Drop mobile goal into the 20 point zone
  *
- * @param zone if zone < 15 then it's 10 point, otherwise 20
+ * @return a TaskHandle of the task bringing the intake back into the robot
  */
-void dropMogo(int zone);
+TaskHandle dropMogo20();
 
-Task backUp(void *time);
-Task mogoPT(void *p);
-Task placeConeT(void *none);
+Task       backUp(void *time);
+Task       mogoPT(void *p);
+Task       placeConeT(void *none);
 
 #endif // AUTO_ROBOT_H_

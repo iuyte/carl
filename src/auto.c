@@ -32,68 +32,68 @@ void autonNone() {}
 
 void testMotors();
 
-int   selectedAuton         = 0;
+int   selectedAuton         = 1;
 Auton autons[MAX_AUTON + 1] =
 { {
-		.name    = "< red left 12 >",
+		.name       = "< red left 12 >",
 		.sensorName = "arm",
-		.sensor  = &arm.sensor,
-		.execute = &autonLeftRed12,
+		.sensor     = &arm.sensor,
+		.execute    = &autonLeftRed12,
 	},{
-		.name    = "< red left 22  >",
+		.name       = "< red left 22  >",
 		.sensorName = "gyr2",
-		.sensor  = &gyro.child,
-		.execute = &autonLeftRed22,
+		.sensor     = &gyro.child,
+		.execute    = &autonLeftRed22,
 	},{
-		.name    = "< red right 12 >",
+		.name       = "< red right 12 >",
 		.sensorName = "claw",
-		.sensor  = &claw.sensor,
-		.execute = &autonRightRed12,
+		.sensor     = &claw.sensor,
+		.execute    = &autonRightRed12,
 	},{
-		.name    = "< red right 22 >",
+		.name       = "< red right 22 >",
 		.sensorName = "mgo",
-		.sensor  = &mogo.sensor,
-		.execute = &autonRightRed22,
+		.sensor     = &mogo.sensor,
+		.execute    = &autonRightRed22,
 	},{
-		.name    = "< blue left 12 >",
+		.name       = "< blue left 12 >",
 		.sensorName = "mgo",
-		.sensor  = &mogo.sensor,
-		.execute = &autonLeftRed12,
+		.sensor     = &mogo.sensor,
+		.execute    = &autonLeftRed12,
 	},{
-		.name    = "< blue left 22  >",
+		.name       = "< blue left 22  >",
 		.sensorName = "mgo",
-		.sensor  = &mogo.sensor,
-		.execute = &autonLeftRed22,
+		.sensor     = &mogo.sensor,
+		.execute    = &autonLeftRed22,
 	},{
-		.name    = "< blue right 12>",
+		.name       = "< blue right 12>",
 		.sensorName = "mgo",
-		.sensor  = &mogo.sensor,
-		.execute = &autonRightRed12,
+		.sensor     = &mogo.sensor,
+		.execute    = &autonRightRed12,
 	},{
-		.name    = "< blue right 22 >",
+		.name       = "< blue right 22 >",
 		.sensorName = "mgo",
-		.sensor  = &mogo.sensor,
-		.execute = &autonRightRed22,
+		.sensor     = &mogo.sensor,
+		.execute    = &autonRightRed22,
 	},{
-		.name    = "<    skills    >",
+		.name       = "<    skills    >",
 		.sensorName = "mgo",
-		.sensor  = &mogo.sensor,
-		.execute = &autonSkills,
+		.sensor     = &mogo.sensor,
+		.execute    = &autonSkills,
 	},{
-		.name    = "<     none     >",
+		.name       = "<     none     >",
 		.sensorName = "mgo",
-		.sensor  = &arm.sensor,
-		.execute = &autonNone,
+		.sensor     = &arm.sensor,
+		.execute    = &autonNone,
 	},{
-		.name    = "<     test     >",
+		.name       = "<     test     >",
 		.sensorName = "lef",
-		.sensor  = &drive[0].sensor,
-		.execute = &autonTest,
+		.sensor     = &drive[0].sensor,
+		.execute    = &autonTest,
 	},{
-		.name    = "< test motors  >",
+		.name       = "< test motors  >",
 		.sensorName = "rit",
-		.sensor  = &drive[1].sensor,
-		.execute = &testMotors,
+		.sensor     = &drive[1].sensor,
+		.execute    = &testMotors,
 	}, };
 
 void armToPosition(float pos, unsigned long until) {
@@ -230,12 +230,12 @@ void getMogo() {
 	armSettings.target = ARM_QUARTER;
 	PID(&armSettings);
 	motorUpdate(&arm);
-	delay(100);
+	delay(300);
 
 	GO(mogoPT, MOGO_DOWN + 10);
 	delay(750);
 
-	driveToPosition(2350, 2350, 2100);
+	driveToPosition(2350, 2350, 2300);
 
 	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
 	driveToPosition(2600, 2600, 525);
@@ -262,46 +262,48 @@ Task backUp(void *time) {
 } /* backUp */
 
 void placeCone() {
-	// Drop cone
-	claw.power = 127;        // Open claw
-	motorUpdate(&claw);
-	delay(400);              // Give claw time to open
-	claw.power = 0;          // Stop claw
-	print("Cone placed!\n"); // Notify computer of cone state
-	delay(325);              // Wait a lil bit
-} /* placeCone */
-
-Task placeConeT(void *none) {
 	// Arm down
 	armToPosition(ARM_DOWN + 35, 400);
 
 	// Drop cone
-	claw.power = 127;        // Open claw
+	claw.power = 127; // Open claw
 	motorUpdate(&claw);
-	delay(400);              // Give claw time to open
-	claw.power = 0;          // Stop claw
+	delay(400);       // Give claw time to open
+	claw.power = 0;   // Stop claw
 	armToPosition(ARM_QUARTER, 400);
+	arm.power = 10;
+	motorUpdate(&arm);
 	print("Cone placed!\n"); // Notify computer of cone state
+	delay(150);
 } /* placeCone */
 
-void dropMogo(int zone) {
+Task placeConeT(void *none) {
+	placeCone();
+} /* placeCone */
+
+TaskHandle dropMogo20() {
 	int p[2] = { drive[0].sensor->value, drive[1].sensor->value };
 
-	if (zone < 15) {
-		// 10 point zone
-		driveSet(30, 30);
-		delay(500);
-		mogoP(MOGO_DOWN - 100);
-	} else {
-		// 20 point zone
-		driveSet(30, 30);
-		delay(500);
-		driveSet(127, 127);
-		delay(250);
-		waitForDriveStall(500);
-		mogoP(MOGO_DOWN * .68);
+	// Start the mogo intake down
+	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID + 125);
+	driveToPosition(p[0] + 250, p[1] + 250, 600);
+	driveSet(30, 30);
+
+	// Wait until the mogo intake is up
+	while (taskGetState(mogoHandle) != TASK_DEAD) {
+		delay(10);
 	}
-	driveToPosition(p[0] - 150, p[1] - 150, 2000);
+
+	// Wait a bit for the mobile goal to settle
+	mogo.power = 64;
+	motorUpdate(&mogo);
+	driveSet(64, 64);
+	delay(200);
+	driveSet(127, 127);
+	delay(300);
+
+	driveToPosition(p[0] - 300, p[1] - 300, 2200);
+	return GO(mogoPT, MOGO_UP);
 } /* dropMogo */
 
 void autonomous() {
