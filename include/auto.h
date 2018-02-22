@@ -23,10 +23,11 @@
 
 #include "../include/robot.h"
 
-#define MAX_AUTON 11
+#define MAX_AUTON 12
 
 enum MOGO_POS {
 	MOGO_UP   = 75,
+	MOGO_PART = 550,
 	MOGO_MID  = 1350,
 	MOGO_DOWN = 2125,
 };
@@ -55,14 +56,22 @@ typedef enum Direction {
 	dOut,
 } Direction;
 
+typedef struct Triple {
+	int a;
+	int b;
+	int c;
+} Triple;
+
 extern Auton autons[MAX_AUTON + 1];
 extern int   selectedAuton;
 
 void armToPosition(float         pos,
                    unsigned long until);
+
 void driveToPosition(int           l,
                      int           r,
                      unsigned long until);
+
 void driveToPositionAngle(int           l,
                           int           r,
                           int           a,
@@ -86,5 +95,7 @@ TaskHandle dropMogo20();
 Task       backUp(void *time);
 Task       mogoPT(void *p);
 Task       placeConeT(void *none);
+
+void moveTo(int leftV, int rightV, int armV, int mogoV, int clawV, int gyroV);
 
 #endif // AUTO_ROBOT_H_

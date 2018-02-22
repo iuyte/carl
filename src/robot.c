@@ -30,15 +30,11 @@
 double inch =
   (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
 
-Sensor gyro;
-Sensor armLimit[2];
-Sensor powerExpander;
+// Sensors
+Sensor gyro, powerExpander, armLimit[2];
 
 // Motors and servos
-Motor claw;
-Motor drive[2];
-Motor arm;
-Motor mogo;
+Motor claw, arm, mogo, drive[2];
 
 // PID settings
 PIDSettings armSettings = {
@@ -56,38 +52,38 @@ PIDSettings clawSettings = {
 	.kI   = .0f,
 	.kD   = 1.2f,
 	.root = &claw,
+	.tolerance = 35,
+	.precision = 175,
 };
 
 #define _DRIVE_SETTINGS_(index) \
   DEFAULT_PID_SETTINGS,         \
-  .kP        = .145f,           \
-  .kI        = .047f,           \
-  .kD        = .22f,            \
+  .kP        = .170f,           \
+  .kI        = .043f,           \
+  .kD        = .253f,           \
   .tolerance = 200,             \
   .precision = 275,             \
   .root      = &drive[index]
 
-PIDSettings driveSettings[2] = { {
-																	 _DRIVE_SETTINGS_(0),
-																 },{
-																	 _DRIVE_SETTINGS_(1),
-																 }, };
+PIDSettings driveSettings[2] = {
+	{ _DRIVE_SETTINGS_(0) },
+	{ _DRIVE_SETTINGS_(1) },
+};
 
 #define _GYRO_SETTINGS_(index, m) \
   DEFAULT_PID_SETTINGS,           \
-  .kP        = m * 3.24f,         \
-  .kI        = m * 0.03f,         \
-  .kD        = m * 2.136f,        \
+  .kP        = m * 3.963f,        \
+  .kI        = m * 0.4874f,         \
+  .kD        = m * 2.1541f,        \
   .tolerance = 3,                 \
   .precision = 270,               \
   .root      = &drive[index],     \
   .sensor    = &gyro
 
-PIDSettings gyroSettings[2] = { {
-																	_GYRO_SETTINGS_(0, 1),
-																},{
-																	_GYRO_SETTINGS_(1, -1),
-																}, };
+PIDSettings gyroSettings[2] = {
+	{ _GYRO_SETTINGS_(0,  1) },
+	{ _GYRO_SETTINGS_(1, -1) },
+};
 
 void altRefresh(Sensor *s) {
 	mutexTake(s->_mutex, 5);
@@ -154,18 +150,16 @@ void info() {
 	static unsigned long time = 0;
 
 	if (millis() - time >= 25) {
-		printf(
-		  RED " |  %4d     | " GREEN "%4d    | " YELLOW "%4d    | "  \
-		  BLUE "%4d    | %4d    | " CYAN "%4d    | " RED "%3d    | " \
-		  YELLOW "%4u mv | " RESET "\n",
-		  drive[0].sensor->value,
-		  drive[1].sensor->value,
-		  arm.sensor->value,
-		  mogo.sensor->value,
-		  mogo.sensor->child->value,
-		  claw.sensor->value,
-		  gyro.average,
-		  powerLevelMain());
+		printf(RESET "\r"                                                    \
+		       RED "moveTo(%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
+		       "%d, " RED "%d); " YELLOW "// %u mv" RESET "\r",
+		       drive[0].sensor->value,
+		       drive[1].sensor->value,
+		       arm.sensor->value,
+		       mogo.sensor->average,
+		       claw.sensor->value,
+		       gyro.average,
+		       powerLevelMain());
 		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
 		time = millis();
 	}
