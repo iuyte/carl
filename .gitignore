@@ -237,3 +237,4 @@ tags
 CMakeLists.txt
 .output
 bin
+compile_commands.json
