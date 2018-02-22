@@ -32,68 +32,88 @@ void autonNone() {}
 
 void testMotors();
 
-int   selectedAuton         = 1;
+void autonRehuh();
+
+int   selectedAuton         = 8;
 Auton autons[MAX_AUTON + 1] =
 { {
+		// index 0
 		.name       = "< red left 12 >",
 		.sensorName = "arm",
 		.sensor     = &arm.sensor,
 		.execute    = &autonLeftRed12,
 	},{
+		// index 1
 		.name       = "< red left 22  >",
 		.sensorName = "gyr2",
 		.sensor     = &gyro.child,
 		.execute    = &autonLeftRed22,
 	},{
+		// index 2
 		.name       = "< red right 12 >",
 		.sensorName = "claw",
 		.sensor     = &claw.sensor,
 		.execute    = &autonRightRed12,
 	},{
+		// index 3
 		.name       = "< red right 22 >",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
 		.execute    = &autonRightRed22,
 	},{
+		// index 4
 		.name       = "< blue left 12 >",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
 		.execute    = &autonLeftRed12,
 	},{
+		// index 5
 		.name       = "< blue left 22  >",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
 		.execute    = &autonLeftRed22,
 	},{
+		// index 6
 		.name       = "< blue right 12>",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
 		.execute    = &autonRightRed12,
 	},{
+		// index 7
 		.name       = "< blue right 22 >",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
 		.execute    = &autonRightRed22,
 	},{
+		// index 8
 		.name       = "<    skills    >",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
 		.execute    = &autonSkills,
 	},{
+		// index 9
 		.name       = "<     none     >",
 		.sensorName = "mgo",
 		.sensor     = &arm.sensor,
 		.execute    = &autonNone,
 	},{
+		// index 10
 		.name       = "<     test     >",
 		.sensorName = "lef",
 		.sensor     = &drive[0].sensor,
 		.execute    = &autonTest,
 	},{
+		// index 11
 		.name       = "< test motors  >",
 		.sensorName = "rit",
 		.sensor     = &drive[1].sensor,
 		.execute    = &testMotors,
+	},{
+		// index 12
+		.name       = "<    rehuh?    >",
+		.sensorName = "rit",
+		.sensor     = &drive[1].sensor,
+		.execute    = &autonRehuh,
 	}, };
 
 void armToPosition(float pos, unsigned long until) {
@@ -102,7 +122,8 @@ void armToPosition(float pos, unsigned long until) {
 
 	do {
 		PID(&armSettings);
-		update();
+		motorUpdate(&arm);
+		sensorRefresh(arm.sensor);
 		delay(10);
 	} while (!armSettings.isTargetReached && millis() < until);
 } /* armToPosition */
@@ -117,7 +138,15 @@ void driveToPosition(int l, int r, unsigned long until) {
 		PID(&driveSettings[1]);
 		PID(&armSettings);
 
-		update();
+		motorUpdate(&arm);
+		sensorRefresh(arm.sensor);
+		sensorRefresh(&gyro);
+
+		for (int i = 0; i < 2; i++) {
+			motorUpdate(&drive[i]);
+			sensorRefresh(drive[i].sensor);
+		}
+
 		delay(10);
 	} while ((!driveSettings[0].isTargetReached ||
 	          !driveSettings[1].isTargetReached) &&
@@ -140,7 +169,15 @@ void driveToPositionAngle(int l, int r, int a, unsigned long until) {
 		drive[0].power += (a - gyro.average) * 1.5;
 		drive[1].power -= (a - gyro.average) * 1.5;
 
-		update();
+		motorUpdate(&arm);
+		sensorRefresh(arm.sensor);
+		sensorRefresh(&gyro);
+
+		for (int i = 0; i < 2; i++) {
+			motorUpdate(&drive[i]);
+			sensorRefresh(drive[i].sensor);
+		}
+
 		delay(10);
 	} while ((!driveSettings[0].isTargetReached ||
 	          !driveSettings[1].isTargetReached) &&
@@ -240,7 +277,7 @@ void getMogo() {
 	TaskHandle mogoUpHandle = GO(mogoPT, MOGO_UP);
 	driveToPosition(2600, 2600, 525);
 
-	while (taskGetState(mogoUpHandle) != TASK_DEAD) {
+	while (taskGetState(mogoUpHandle)) {
 		delay(10);
 	}
 } /* getMogo */
@@ -281,16 +318,17 @@ Task placeConeT(void *none) {
 	placeCone();
 } /* placeCone */
 
-TaskHandle dropMogo20() {
+TaskHandle dropMogo20(TaskHandle mogoHandle) {
 	int p[2] = { drive[0].sensor->value, drive[1].sensor->value };
 
 	// Start the mogo intake down
-	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID + 125);
+	if (!mogoHandle && taskGetState(mogoHandle))
+		mogoHandle = GO(mogoPT, MOGO_MID + 125);
 	driveToPosition(p[0] + 250, p[1] + 250, 600);
 	driveSet(30, 30);
 
 	// Wait until the mogo intake is up
-	while (taskGetState(mogoHandle) != TASK_DEAD) {
+	while (taskGetState(mogoHandle)) {
 		delay(10);
 	}
 
@@ -299,10 +337,9 @@ TaskHandle dropMogo20() {
 	motorUpdate(&mogo);
 	driveSet(64, 64);
 	delay(200);
-	driveSet(127, 127);
-	delay(300);
+	mogo.power = 30;
 
-	driveToPosition(p[0] - 300, p[1] - 300, 2200);
+	driveToPosition(p[0] - 400, p[1] - 400, 3000);
 	return GO(mogoPT, MOGO_UP);
 } /* dropMogo */
 
@@ -336,3 +373,99 @@ void testMotors() {
 		}
 	}
 } /* testMotors */
+
+Task driveToPositionAngleT(void *triple) {
+	Triple *t = (Triple *)triple;
+
+	driveSettings[0].target = t->a;
+	driveSettings[1].target = t->b;
+	unsigned long until = millis() + (t->a + t->b) * 2;
+
+	do {
+		PID(&driveSettings[0]);
+		PID(&driveSettings[1]);
+		drive[0].power += (t->c - gyro.average) * 2.3;
+		drive[1].power -= (t->c - gyro.average) * 2.3;
+
+		motorUpdate(&arm);
+		sensorRefresh(arm.sensor);
+		sensorRefresh(&gyro);
+
+		for (int i = 0; i < 2; i++) {
+			motorUpdate(&drive[i]);
+			sensorRefresh(drive[i].sensor);
+		}
+
+		delay(10);
+	} while ((!driveSettings[0].isTargetReached ||
+	          !driveSettings[1].isTargetReached));
+
+	drive[0].power = 0;
+	drive[1].power = 0;
+	delete(triple);
+	taskDelete(NULL);
+} /* driveToPositionAngleT */
+
+Task armToPositionT(void *pos) {
+	int p = (int)pos;
+
+	armToPosition(p, p * 1.34);
+	taskDelete(NULL);
+} /* armToPositionT */
+
+Task clawToPositionT(void *pos) {
+	clawSettings.target = (int)pos;
+
+	do {
+		PID(&clawSettings);
+		motorUpdate(&claw);
+		sensorRefresh(claw.sensor);
+		delay(10);
+	} while (!clawSettings.isTargetReached);
+
+	taskDelete(NULL);
+} /* clawToPositionT */
+
+Task die(void *none) {
+	taskDelete(NULL);
+}
+
+void moveTo(int leftV, int rightV, int armV, int mogoV, int clawV, int gyroV) {
+	TaskHandle driveHandle, armHandle, mogoHandle, clawHandle = NULL;
+	update();
+
+	if ((abs(leftV - drive[0].sensor->value) > driveSettings[0].tolerance) ||
+	    (abs(rightV - drive[1].sensor->value) > driveSettings[1].tolerance) || 
+			(abs(gyroV - gyro.average) > gyroSettings[0].tolerance)) {
+		Triple *t = new(Triple);
+		t->a        = leftV;
+		t->b        = rightV;
+		t->c        = gyroV;
+		driveHandle = GO(driveToPositionAngleT, t);
+	}
+
+	if (abs(armV - arm.sensor->value) > armSettings.tolerance)
+		armHandle = GO(armToPositionT, armV);
+
+	if (abs(mogoV - mogo.sensor->average) > 90)
+		mogoHandle = GO(mogoPT, mogoV);
+
+	if (abs(clawV - claw.sensor->value) > clawSettings.tolerance)
+		clawHandle = GO(clawToPositionT, clawV);
+
+	if (driveHandle)
+		while (taskGetState(driveHandle))
+			delay(10);
+
+	if (armHandle)
+		while (taskGetState(armHandle))
+			delay(10);
+
+	if (mogoHandle)
+		while (taskGetState(mogoHandle))
+			delay(10);
+
+	if (clawHandle)
+		while (taskGetState(clawHandle))
+			delay(10);
+} /* moveTo */

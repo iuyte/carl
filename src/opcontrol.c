@@ -126,7 +126,7 @@ void operatorControl() {
 
 	print("Beginning driver control loop\n");
 
-	bool isSkills = strstr(autons[selectedAuton].name, "skills");
+	bool isSkills = false; // strstr(autons[selectedAuton].name, "skills");
 
 	while (true) {
 		if (joystickGetDigital(1, 7, JOY_LEFT) &&

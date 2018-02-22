@@ -90,7 +90,7 @@ mut: $(OUTBIN)
 	pros mut | tee $(ROOT)/.output
 
 # Just start terminal
-terminal: $(OUTBIN)
+terminal:
 	pros terminal | tee $(ROOT)/.output
 
 # Alias to upload, more consistent with our terminology

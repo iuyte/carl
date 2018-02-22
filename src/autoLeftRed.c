@@ -49,23 +49,24 @@ void autonLeftRed12() {
 } /* autonLeftRed12 */
 
 void autonLeftRed22() {
-	getMogo();                       // Get the mobile goal
+	getMogo();                         // Get the mobile goal
 
-	turnTo(-12, 1000);               // Align to a left tilt
-	driveSettings[1].max -= 40;      // Limit right side speed
-	GO(placeConeT, NULL);            // Place cone
-	driveToPosition(-145, 130, 5000); // Back up
-	driveSettings[1].max += 40;      // Correct speed
-	turnTo(-158, 2000);              // Turn around
+	turnTo(-12, 1000);                 // Align to a left tilt
+	driveSettings[1].max -= 40;        // Limit right side speed
+	GO(placeConeT, NULL);              // Place cone
+	driveToPosition(-425, -150, 5500); // Back up
+	driveSettings[1].max += 40;        // Correct speed
+	turnTo(-160, 2300);                // Turn around
 
 	// Reset drive encoders & gyro
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	driveToPositionAngle(1575, 1475, 13, 1675); // Drive arc 13 degrees clockwise
+	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID - 300);
+	driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
 
-	TaskHandle mogoHandle = dropMogo20();
+	mogoHandle = dropMogo20(mogoHandle);
 
 	while (taskGetState(mogoHandle) != TASK_DEAD) {
 		delay(10);
