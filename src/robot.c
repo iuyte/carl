@@ -74,7 +74,7 @@ PIDSettings driveSettings[2] = {
   DEFAULT_PID_SETTINGS,           \
   .kP        = m * 3.963f,        \
   .kI        = m * 0.4874f,         \
-  .kD        = m * 2.1541f,        \
+  .kD        = m * 2.1554f,        \
   .tolerance = 3,                 \
   .precision = 270,               \
   .root      = &drive[index],     \

@@ -54,7 +54,7 @@ void autonLeftRed22() {
 	turnTo(-12, 1000);                 // Align to a left tilt
 	driveSettings[1].max -= 40;        // Limit right side speed
 	GO(placeConeT, NULL);              // Place cone
-	driveToPosition(-425, -150, 5500); // Back up
+	driveToPosition(-455, -180, 5500); // Back up
 	driveSettings[1].max += 40;        // Correct speed
 	turnTo(-160, 2300);                // Turn around
 
@@ -63,12 +63,22 @@ void autonLeftRed22() {
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID - 300);
+	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID + 125);
 	driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
+	
+	mogo.power = 127;
+	motorUpdate(&mogo);
+	driveSet(64, 64);
+	delay(200);
+	driveSet(-80, -80);
+	delay(150);
+	
+	if (taskGetState(mogoHandle))
+		taskDelete(mogoHandle);
+	mogoHandle = GO(mogoPT, MOGO_MID - 100);
+	driveToPosition(890, 890, 2000);
 
-	mogoHandle = dropMogo20(mogoHandle);
-
-	while (taskGetState(mogoHandle) != TASK_DEAD) {
+	while (taskGetState(mogoHandle)) {
 		delay(10);
 	}
 

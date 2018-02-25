@@ -90,7 +90,7 @@ void       placeCone();
  *
  * @return a TaskHandle of the task bringing the intake back into the robot
  */
-TaskHandle dropMogo20();
+TaskHandle dropMogo20(TaskHandle mogoHandle);
 
 Task       backUp(void *time);
 Task       mogoPT(void *p);
