@@ -23,20 +23,20 @@ float recalc(int p);
 
 void  initializeIO() {}
 
-void  init() {
+/**
+ * Notify both through the terminal and an lcd
+ *
+ * @param buffer the text to display
+ */
+void  notice(const char *buffer) {
+	print(buffer);
+	lcdSetText(uart1, 2, buffer);
+} /* notice */
+
+void init() {
 	// LCD initialization
 	lcdInit(uart1);
 	lcdSetBacklight(uart1, true);
-
-	/**
-	 * Notify both through the terminal and an lcd
-	 *
-	 * @param buffer the text to display
-	 */
-	void notice(const char *buffer) {
-		print(buffer);
-		lcdSetText(uart1, 2, buffer);
-	} /* notice */
 
 	print("\nInitializing... ");
 	lcdSetText(uart1, 1, "Initializing...");
@@ -61,7 +61,7 @@ void  init() {
 	*armCoder = newQuad(1, 2, false);
 	notice("arm quad, ");
 	Sensor *driveCoder[2] = { new(Sensor), new(Sensor) };
-	*driveCoder[0]        = newQuad(4, 5, true);
+	*driveCoder[0] = newQuad(4, 5, true);
 	notice("left drive quad, ");
 	*driveCoder[1] = newQuad(8, 9, true);
 	notice("right drive quad, ");
@@ -74,12 +74,12 @@ void  init() {
 	claw.sensor = clawAngle;
 	notice("claw motor, ");
 
-	arm        = motorCreate(5,  false);
-	arm.child  = new(Motor);
-	*arm.child = motorCreate(6, true);
+	arm               = motorCreate(5,  false);
+	arm.child         = new(Motor);
+	*arm.child        = motorCreate(6, true);
 	arm.child->child  = new(Motor);
 	*arm.child->child = motorCreate(8, false);
-	arm.sensor = armCoder;
+	arm.sensor        = armCoder;
 	notice("arm motors, ");
 
 	mogo        = motorCreate(1, false);

@@ -333,10 +333,10 @@ TaskHandle dropMogo20(TaskHandle mogoHandle) {
 	}
 
 	// Wait a bit for the mobile goal to settle
-	mogo.power = 64;
+	mogo.power = 127;
 	motorUpdate(&mogo);
-	driveSet(64, 64);
-	delay(200);
+	driveSet(-64, -64);
+	delay(315);
 	mogo.power = 30;
 
 	driveToPosition(p[0] - 400, p[1] - 400, 3000);
@@ -379,7 +379,6 @@ Task driveToPositionAngleT(void *triple) {
 
 	driveSettings[0].target = t->a;
 	driveSettings[1].target = t->b;
-	unsigned long until = millis() + (t->a + t->b) * 2;
 
 	do {
 		PID(&driveSettings[0]);
@@ -431,11 +430,11 @@ Task die(void *none) {
 }
 
 void moveTo(int leftV, int rightV, int armV, int mogoV, int clawV, int gyroV) {
-	TaskHandle driveHandle, armHandle, mogoHandle, clawHandle = NULL;
+	TaskHandle driveHandle, armHandle, mogoHandle, clawHandle;
 	update();
 
 	if ((abs(leftV - drive[0].sensor->value) > driveSettings[0].tolerance) ||
-	    (abs(rightV - drive[1].sensor->value) > driveSettings[1].tolerance) || 
+	    (abs(rightV - drive[1].sensor->value) > driveSettings[1].tolerance) ||
 			(abs(gyroV - gyro.average) > gyroSettings[0].tolerance)) {
 		Triple *t = new(Triple);
 		t->a        = leftV;

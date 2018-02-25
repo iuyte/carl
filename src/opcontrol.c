@@ -30,6 +30,13 @@ int digital(unsigned char joyNum,
 	       joystickGetDigital(joyNum, channel, b1) * 1;
 } /* digital */
 
+void moveDrive();
+void moveMogo();
+void skillsMogo();
+void moveArm();
+void moveClaw();
+void clawPID();
+
 void operatorControl() {
 	printf("Starting Driver Control...\n");
 	// ultrasonicShutdown(sonic._pros);
@@ -37,92 +44,12 @@ void operatorControl() {
 	update();
 
 	clawSettings.target = claw.sensor->value;
-	armSettings.target = 0;
+	armSettings.target  = 0;
 
 	if (armLimit[0].value) {
 		armSettings.target = ARM_QUARTER;
 		PID(&armSettings);
 	}
-
-	void moveDrive() {
-		drive[0].power = deadBand(joystickGetAnalog(1, 3), 10) +
-		                 127 * digital(1, 7, JOY_UP, JOY_DOWN) +
-		                 127 * digital(1, 7, JOY_RIGHT, JOY_LEFT);
-		drive[1].power = deadBand(joystickGetAnalog(1, 2), 10) +
-		                 127 * digital(1, 8, JOY_UP, JOY_DOWN) +
-		                 127 * digital(1, 8, JOY_LEFT, JOY_RIGHT);
-	} /* drive */
-
-	void moveMogo() {
-		mogo.power = 127 * digital(1, 6, JOY_UP, JOY_DOWN) +
-		             127 * digital(2, 5, JOY_UP, JOY_DOWN);
-	} /* moveMogo */
-
-	void skillsMogo() {
-		if ((mogo.sensor->value <= MOGO_HOLD) &&
-		    !joystickGetDigital(1, 5, JOY_DOWN) &&
-		    !joystickGetDigital(2, 7, JOY_UP)) {
-			mogo.power = clipNum(mogo.power,
-			                     127,
-			                     (MOGO_HOLD - mogo.sensor->value) * .9 + 13);
-		}
-	} /* skillsMogo */
-
-	void moveArm() {
-		static unsigned long lastPress;
-
-		if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 90)) {
-			arm.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
-
-			if (arm.power) {
-				lastPress = millis();
-			}
-
-			if (armLimit[0].value) {
-				sensorReset(arm.sensor);
-				arm.power = clipNum(arm.power, 0, -127);
-			} else if (armLimit[1].value) {
-				arm.sensor->zero = arm.sensor->value - 1000;
-				arm.power        = clipNum(arm.power, 127, 0);
-			}
-			armSettings.target = arm.sensor->value;
-		} else if (armLimit[0].value) {
-			  sensorReset(arm.sensor);
-			armSettings.target = 0;
-			arm.power          = 0;
-		} else if (armLimit[1].value) {
-			arm.sensor->zero   = arm.sensor->value - 1000;
-			armSettings.target = 1000;
-			arm.power          = 0;
-		} else {
-			PID(&armSettings);
-		}
-	} /* moveArm */
-
-	void moveClaw() {
-		if (deadBand(joystickGetAnalog(2, 4), 10)) {
-			claw.power = joystickGetAnalog(2, 4);
-		} else {
-			claw.power = 0;
-		}
-	} /* moveClaw */
-
-	void clawPID() {
-		static unsigned long lastPress;
-		static int power;
-
-		power = joystickGetAnalog(2, 4);
-
-		if (power) {
-			claw.power          = power;
-			clawSettings.target = claw.sensor->value;
-			lastPress           = millis();
-		} else if (millis() - lastPress < 175) {
-			clawSettings.target = claw.sensor->value;
-		} else {
-			PID(&clawSettings);
-		}
-	} /* clawPID */
 
 	print("Beginning driver control loop\n");
 
@@ -147,3 +74,83 @@ void operatorControl() {
 		delay(20);
 	}
 } /* operatorControl */
+
+void moveDrive() {
+	drive[0].power = deadBand(joystickGetAnalog(1, 3), 10) +
+	                 127 * digital(1, 7, JOY_UP, JOY_DOWN) +
+	                 127 * digital(1, 7, JOY_RIGHT, JOY_LEFT);
+	drive[1].power = deadBand(joystickGetAnalog(1, 2), 10) +
+	                 127 * digital(1, 8, JOY_UP, JOY_DOWN) +
+	                 127 * digital(1, 8, JOY_LEFT, JOY_RIGHT);
+} /* moveDrive */
+
+void moveMogo() {
+	mogo.power = 127 * digital(1, 6, JOY_UP, JOY_DOWN) +
+	             127 * digital(2, 5, JOY_UP, JOY_DOWN);
+} /* moveMogo */
+
+void skillsMogo() {
+	if ((mogo.sensor->value <= MOGO_HOLD) &&
+	    !joystickGetDigital(1, 5, JOY_DOWN) &&
+	    !joystickGetDigital(2, 7, JOY_UP)) {
+		mogo.power = clipNum(mogo.power,
+		                     127,
+		                     (MOGO_HOLD - mogo.sensor->value) * .9 + 13);
+	}
+} /* skillsMogo */
+
+void moveArm() {
+	static unsigned long lastPress;
+
+	if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 90)) {
+		arm.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
+
+		if (arm.power) {
+			lastPress = millis();
+		}
+
+		if (armLimit[0].value) {
+			sensorReset(arm.sensor);
+			arm.power = clipNum(arm.power, 0, -127);
+		} else if (armLimit[1].value) {
+			arm.sensor->zero = arm.sensor->value - 1000;
+			arm.power        = clipNum(arm.power, 127, 0);
+		}
+		armSettings.target = arm.sensor->value;
+	} else if (armLimit[0].value) {
+		  sensorReset(arm.sensor);
+		armSettings.target = 0;
+		arm.power          = 0;
+	} else if (armLimit[1].value) {
+		arm.sensor->zero   = arm.sensor->value - 1000;
+		armSettings.target = 1000;
+		arm.power          = 0;
+	} else {
+		PID(&armSettings);
+	}
+} /* moveArm */
+
+void moveClaw() {
+	if (deadBand(joystickGetAnalog(2, 4), 10)) {
+		claw.power = joystickGetAnalog(2, 4);
+	} else {
+		claw.power = 0;
+	}
+} /* moveClaw */
+
+void clawPID() {
+	static unsigned long lastPress;
+	static int power;
+
+	power = joystickGetAnalog(2, 4);
+
+	if (power) {
+		claw.power          = power;
+		clawSettings.target = claw.sensor->value;
+		lastPress           = millis();
+	} else if (millis() - lastPress < 175) {
+		clawSettings.target = claw.sensor->value;
+	} else {
+		PID(&clawSettings);
+	}
+} /* clawPID */
