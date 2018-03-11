@@ -22,7 +22,9 @@
 float recalc(int p);
 float lMogoRecalc(int p);
 
-void  initializeIO() {}
+void  initializeIO() {
+	watchdogInit();
+}
 
 /**
  * Notify both through the terminal and an lcd
