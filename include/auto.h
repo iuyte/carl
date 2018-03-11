@@ -29,7 +29,7 @@ enum MOGO_POS {
 	MOGO_UP   = 75,
 	MOGO_PART = 550,
 	MOGO_MID  = 1350,
-	MOGO_DOWN = 2125,
+	MOGO_DOWN = 2200,
 };
 
 enum ARM_POS {
@@ -76,14 +76,14 @@ void driveToPositionAngle(int           l,
                           int           r,
                           int           a,
                           unsigned long until);
-void       mogoP(int p);
-void       gyroPID(int target,
-                   int precision);
-void       turnTo(int           angle,
-                  unsigned long until);
+void mogoP(int p);
+void gyroPID(int target,
+             int precision);
+void turnTo(int           angle,
+            unsigned long until);
 
-void       getMogo();
-void       placeCone();
+void getMogo();
+void placeCone();
 
 /**
  * Drop mobile goal into the 20 point zone
@@ -92,10 +92,16 @@ void       placeCone();
  */
 TaskHandle dropMogo20(TaskHandle mogoHandle);
 
-Task       backUp(void *time);
-Task       mogoPT(void *p);
-Task       placeConeT(void *none);
+Task backUp(void *time);
+Task mogoPT(void *p);
+Task placeConeT(void *none);
+Task armPID(void *none);
 
-void moveTo(int leftV, int rightV, int armV, int mogoV, int clawV, int gyroV);
+void moveTo(int leftV,
+            int rightV,
+            int armV,
+            int mogoV,
+            int clawV,
+            int gyroV);
 
 #endif // AUTO_ROBOT_H_

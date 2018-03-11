@@ -20,6 +20,7 @@
 #include "../include/robot.h"
 
 float recalc(int p);
+float lMogoRecalc(int p);
 
 void  initializeIO() {}
 
@@ -31,6 +32,7 @@ void  initializeIO() {}
 void  notice(const char *buffer) {
 	print(buffer);
 	lcdSetText(uart1, 2, buffer);
+	delay(5);
 } /* notice */
 
 void init() {
@@ -44,7 +46,7 @@ void init() {
 	// Set up the analog sensors
 	gyro        = newGyro(1, true, 199);
 	gyro.child  = new(Sensor);
-	*gyro.child = newGyro(2, true, 199);
+	*gyro.child = newGyro(2, true, 196);
 	notice("gyroscopes, ");
 	Sensor *clawAngle = new(Sensor);
 	*clawAngle          = newAnalog(5, true);
@@ -67,7 +69,10 @@ void init() {
 	notice("right drive quad, ");
 	armLimit[0] = newDigital(12, true);
 	armLimit[1] = newDigital(11, true);
-	notice("arm limit switch, ");
+	notice("arm limit switches, ");
+	sonic = new(Sensor);
+	*sonic = newSonic(6,7);
+	notice("ultrasonic, ");
 
 	// Initialize and set up all of the motors, servos, etc
 	claw        = motorCreate(3, false);
@@ -82,10 +87,13 @@ void init() {
 	arm.sensor        = armCoder;
 	notice("arm motors, ");
 
-	mogo        = motorCreate(1, false);
-	mogo.child  = new(Motor);
-	*mogo.child = motorCreate(10, true);
-	mogo.sensor = mogoAngle;
+	mogo                 = motorCreate(1, false);
+	mogo.recalc          = &lMogoRecalc;
+	mogo.deadband        = 6;
+	mogo.child           = new(Motor);
+	mogo.child->deadband = 6;
+	*mogo.child          = motorCreate(10, true);
+	mogo.sensor          = mogoAngle;
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);
@@ -111,3 +119,7 @@ void init() {
 float recalc(int p) {
 	return p * 8 / 5;
 } /* recalc */
+
+float lMogoRecalc(int p) {
+	return p * 1.1;
+} /* lMogoRecalc */

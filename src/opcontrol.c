@@ -22,6 +22,8 @@
 
 #define MOGO_HOLD 300
 
+extern bool isAuto;
+
 int digital(unsigned char joyNum,
             unsigned char channel,
             unsigned char b1,
@@ -37,23 +39,28 @@ void moveArm();
 void moveClaw();
 void clawPID();
 
+void autonLeftRed22();
+void autonLeftRed22T();
+
 void operatorControl() {
 	printf("Starting Driver Control...\n");
-	// ultrasonicShutdown(sonic._pros);
 	reset();
 	update();
+	isAuto = false;
 
 	clawSettings.target = claw.sensor->value;
-	armSettings.target  = 0;
+	armSettings.target  = arm.sensor->value;
 
+	/*
 	if (armLimit[0].value) {
 		armSettings.target = ARM_QUARTER;
 		PID(&armSettings);
 	}
+	*/
 
 	print("Beginning driver control loop\n");
 
-	bool isSkills = false; // strstr(autons[selectedAuton].name, "skills");
+	bool isSkills = strstr(autons[selectedAuton].name, "skills");
 
 	while (true) {
 		if (joystickGetDigital(1, 7, JOY_LEFT) &&
@@ -65,7 +72,42 @@ void operatorControl() {
 		moveMogo();
 
 		if (isSkills) {
-			skillsMogo();
+			// skillsMogo();
+			if (joystickGetDigital(2, 7, JOY_DOWN)) {
+				reset();
+				sensorReset(drive[0].sensor);
+				sensorReset(drive[1].sensor);
+				sensorReset(arm.sensor);
+				sensorReset(mogo.sensor);
+				sensorReset(&gyro);
+				autonLeftRed22();
+				/*
+				TaskHandle autoHandle = GO(autonLeftRed22T, NULL);
+				while (joystickGetDigital(2, 7, JOY_DOWN))
+					delay(20);
+				while (!joystickGetDigital(2, 7, JOY_DOWN))
+					delay(20);
+				if (taskGetState(autoHandle)) {
+					taskDelete(autoHandle);
+					mutexGive(gyro._mutex);
+					mutexGive(gyro.child->_mutex);
+					mutexGive(arm.sensor->_mutex);
+					mutexGive(mogo.sensor->child->_mutex);
+
+					mutexGive(claw._mutex);
+					mutexGive(arm._mutex);
+					mutexGive(arm.child->_mutex);
+					mutexGive(mogo.child->_mutex);
+
+					for (int i = 0; i < 2; i++) {
+						mutexGive(drive[i]._mutex);
+
+						mutexGive(drive[i].sensor->_mutex);
+						mutexGive(armLimit[i]._mutex);
+					}
+				}
+				*/
+			}
 		}
 		moveArm();
 		clawPID();
@@ -85,8 +127,11 @@ void moveDrive() {
 } /* moveDrive */
 
 void moveMogo() {
-	mogo.power = 127 * digital(1, 6, JOY_UP, JOY_DOWN) +
+	int power = 127 * digital(1, 6, JOY_UP, JOY_DOWN) +
 	             127 * digital(2, 5, JOY_UP, JOY_DOWN);
+	if ((mogo.power == 127 || mogo.power == 9) && !power)
+		power = 9;
+	mogo.power = power;
 } /* moveMogo */
 
 void skillsMogo() {
@@ -154,3 +199,8 @@ void clawPID() {
 		PID(&clawSettings);
 	}
 } /* clawPID */
+
+void autonLeftRed22T(void *none) {
+	autonLeftRed22();
+	taskDelete(NULL);
+}

@@ -31,7 +31,7 @@ double inch =
   (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
 
 // Sensors
-Sensor gyro, powerExpander, armLimit[2];
+Sensor gyro, powerExpander, *sonic, armLimit[2];
 
 // Motors and servos
 Motor claw, arm, mogo, drive[2];
@@ -48,10 +48,10 @@ PIDSettings armSettings = {
 
 PIDSettings clawSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP   = .38f,
-	.kI   = .0f,
-	.kD   = 1.2f,
-	.root = &claw,
+	.kP        = .38f,
+	.kI        = .0f,
+	.kD        = 1.2f,
+	.root      = &claw,
 	.tolerance = 35,
 	.precision = 175,
 };
@@ -72,9 +72,9 @@ PIDSettings driveSettings[2] = {
 
 #define _GYRO_SETTINGS_(index, m) \
   DEFAULT_PID_SETTINGS,           \
-  .kP        = m * 3.963f,        \
-  .kI        = m * 0.4874f,         \
-  .kD        = m * 2.1554f,        \
+  .kP        = m * 3.9625f,        \
+  .kI        = m * 0.4877f,       \
+  .kD        = m * 2.1563f,       \
   .tolerance = 3,                 \
   .precision = 270,               \
   .root      = &drive[index],     \
@@ -95,15 +95,15 @@ void init();
 
 void reset() {
 	// free mutexes
-	  mutexGive(gyro._mutex);
-	  mutexGive(gyro.child->_mutex);
-	  mutexGive(arm.sensor->_mutex);
-	  mutexGive(mogo.sensor->child->_mutex);
+	mutexGive(gyro._mutex);
+	mutexGive(gyro.child->_mutex);
+	mutexGive(arm.sensor->_mutex);
+	mutexGive(mogo.sensor->child->_mutex);
 
-	  mutexGive(claw._mutex);
-	  mutexGive(arm._mutex);
-	  mutexGive(arm.child->_mutex);
-	  mutexGive(mogo.child->_mutex);
+	mutexGive(claw._mutex);
+	mutexGive(arm._mutex);
+	mutexGive(arm.child->_mutex);
+	mutexGive(mogo.child->_mutex);
 
 	for (int i = 0; i < 2; i++) {
 		mutexGive(drive[i]._mutex);
@@ -113,14 +113,9 @@ void reset() {
 	}
 
 	// Reset sensors
-	  sensorReset(&gyro);
-	  sensorReset(drive[0].sensor);
-	  sensorReset(drive[1].sensor);
-
-	if (!isAutonomous()) {
-		sensorReset(arm.sensor);
-		sensorReset(mogo.sensor);
-	}
+	sensorReset(&gyro);
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
 
 	// Reset PID times
 	armSettings._time      = millis();
@@ -138,6 +133,7 @@ void update() {
 	sensorRefresh(mogo.sensor);
 
 	sensorRefresh(&gyro);
+	sensorRefresh(sonic);
 
 	for (size_t i = 0; i < 2; i++) {
 		motorUpdate(&drive[i]);
@@ -148,18 +144,21 @@ void update() {
 
 void info() {
 	static unsigned long time = 0;
+	char *en = isEnabled() ? "\n" : "\r";
 
-	if (millis() - time >= 25) {
+	if (millis() - time >= 20) {
 		printf(RESET "\r"                                                    \
 		       RED "moveTo(%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
-		       "%d, " RED "%d); " YELLOW "// %u mv" RESET "\r",
+		       "%d, " RED "%d, " GREEN "%d); " YELLOW "// %u mv" RESET "%s",
 		       drive[0].sensor->value,
 		       drive[1].sensor->value,
 		       arm.sensor->value,
 		       mogo.sensor->average,
 		       claw.sensor->value,
 		       gyro.average,
-		       powerLevelMain());
+					 sonic->value,
+		       powerLevelMain(),
+					 en);
 		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
 		time = millis();
 	}

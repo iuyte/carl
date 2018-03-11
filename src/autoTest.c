@@ -20,19 +20,10 @@
 #include "../include/auto.h"
 
 void autonTest() {
-	print("Starting autonomous...\n");
+	armToPosition(ARM_QUARTER, 750);
 
-	armToPosition(ARM_QUARTER, 500);
-	mogoP(MOGO_DOWN);
-
-	unsigned long t = millis();
-	driveToPosition(1900, 1900, 10000);
-
-	printf("Autonomous complete - %lu\n", millis() - t);
-
-	while (isAutonomous()) {
-		PID(&armSettings);
-		update();
-		delay(10);
+	while (true) {
+		mogoP(MOGO_DOWN);
+		mogoP(MOGO_UP);
 	}
 } /* autonLeftRed12 */

@@ -86,12 +86,11 @@ upload: $(OUTBIN)
 	pros flash -f $^
 
 # Build, upload and start terminal
-mut: $(OUTBIN)
-	pros mut | tee $(ROOT)/.output
+ut: $(OUTBIN) upload terminal
 
 # Just start terminal
 terminal:
-	pros terminal | tee $(ROOT)/.output
+	pros terminal | tee -a $(ROOT)/.output
 
 # Alias to upload, more consistent with our terminology
 flash: upload
