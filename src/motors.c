@@ -21,11 +21,12 @@
 
 Motor motorCreate(unsigned char port, bool isInverted) {
 	Motor m = {
+		.port       = clipNum(port, 10, 1),
 		.isInverted = isInverted,
 		.deadband   = 10,
+		.recalc     = NULL,
 		._lastTime  = millis(),
 		._mutex     = mutexCreate(),
-		.port       = clipNum(port, 10, 1),
 	};
 
 	return m;
@@ -40,11 +41,14 @@ void motorUpdate(Motor *m) {
 		return;
 	}
 
-	m->power = deadBand(m->power, 10);
+	int power = deadBand(m->power, m->deadband);
 
-	if (m->_lastPower != m->power) {
+	if (m->recalc)
+		power = m->recalc(power);
+
+	if (m->_lastPower != power) {
 		motorSet(m->port,
-		         m->isInverted ? m->power : -m->power);
+		         m->isInverted ? power : -power);
 	}
 
 	m->_lastPower = m->power;

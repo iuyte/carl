@@ -20,6 +20,8 @@
 #include "../include/auto.h"
 
 void autonLeftRed22();
+void resetDrive();
+void armPID(void *none);
 
 void autonSkills() {
 	// Get the mobile goal using the left red 22 point auton routine
@@ -27,148 +29,249 @@ void autonSkills() {
 
 	// ///////////////////////////////////////////////////////////////// 22 POINTS
 
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	resetDrive();
 
-	// Back up a small amount
-	driveToPosition(-325, -325, 500);
-	driveSet(35, 35);
-	delay(450);
-	sensorReset(&gyro);
-
-	driveToPosition(-500, -500, 750);
-	turnTo(132, 2500);     // TURN AROUND,
+	driveToPosition(-200, -200, 750);
+	turnTo(136, 2500);     // TURN AROUND,
 	GO(mogoPT, MOGO_DOWN); // DROP A MOGO INTAKE;
-	delay(450);
+	delay(350);
 
 	// Reset sensors
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
-	driveToPositionAngle(600, 600, 135, 1250);
-	turnTo(202, 2500);     // TURN AROUND,
+	resetDrive();
+	driveToPositionAngle(685, 675, 135, 1550);
+	sensorRefresh(sonic);
+	printf("\n\n%d\n\n", sonic->value);
+	turnTo(206, 2500); // TURN AROUND,
 
 	// Reset sensors
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	resetDrive();
 
-	driveToPositionAngle(1650, 1650, 209, 2900);
+	driveToPositionAngle(1650, 1650, 209, 3200);
 
 	// Mogo intake up
-	mogoP(MOGO_UP);
-	turnTo(373, 2000); // TUUUURN AROUUUND
+	mogoP(MOGO_UP + 100);
+	turnTo(380, 2900); // TUUUURN AROUUUND
 
 	// Reset sensors
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	resetDrive();
 
-	driveToPositionAngle(1300, 1400, 368, 1876);
+	driveToPositionAngle(1300, 1400, 373, 1875);
 	// Bring mogo intake to middle
 	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID);
-	driveToPositionAngle(2375, 2475, 361, 2750);
-	sensorReset(&gyro);
+	driveToPositionAngle(2375, 2475, 371, 2750);
+
 	if (taskGetState(mogoHandle))
 		taskDelete(mogoHandle);
+
 	mogoP(MOGO_DOWN);
 	driveSet(-64, -64);
-	delay(250);
-	mogoHandle = GO(mogoPT, MOGO_MID);
-	driveToPosition(2250, 2250, 1800);
+	delay(150);
 
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	GO(mogoPT, MOGO_MID - 100);
+	delay(150);
+
+	driveSet(70, 70);
+	delay(200);
+	driveSet(28, 28);
+	delay(300);
+	driveSet(10, 10);
+	delay(125);
+	sensorReset(&gyro);
+
+	static const float driveChange = .76;
+	driveSettings[0].kP *= driveChange;
+	driveSettings[1].kP *= driveChange;
+	driveToPosition(2325, 2325, 1800);
+	driveSettings[0].kP /= driveChange;
+	driveSettings[1].kP /= driveChange;
+
 
 	// ///////////////////////////////////////////////////////////////// 32 POINTS
 
-	turnTo(-120, 3400);
-	// Reset sensors
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
-	driveToPositionAngle(900, 900, -120, 1850);
-	turnTo(-176, 2500);     // TURN AROUND,
+	turnTo(-104, 3400);
+
+	sensorRefresh(sonic);
+	printf("\n\n%d\n\n", sonic->value);
+
+	driveSet(44, 44);
+	int sonicGoal = 62;
+	do {
+		sensorRefresh(sonic);
+		info();
+		delay(20);
+	} while (sonic->value == 0 || sonic->value > sonicGoal);
+	driveSet(-35, -35);
+	delay(175);
+	driveSet(0, 0);
+
+	turnTo(-201, 2900); // TURN AROUND,
 
 	// Reset sensors
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	resetDrive();
 
 	mogoHandle = GO(mogoPT, MOGO_DOWN);
 	delay(300);
-	driveToPositionAngle(1430, 1430, -175, 2600);
+	driveToPositionAngle(1430, 1430, -205, 2600);
 
 	// Mogo intake up
 	mogoP(MOGO_UP);
-	driveToPositionAngle(750, 750, -176, 1200);
-	turnTo(-361, 2000); // TUUUURN AROUUUND
+	driveToPositionAngle(750, 750, -204, 1200);
+	turnTo(-362, 2000); // TUUUURN AROUUUND
 
 	// Reset sensors
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	resetDrive();
 
-	driveToPositionAngle(900, 800, -357, 1876);
+	driveToPositionAngle(900, 800, -354, 1876);
 	// Bring mogo intake to middle
 	mogoHandle = GO(mogoPT, MOGO_MID);
-	driveToPositionAngle(1400, 1300, -351, 2200);
-	sensorReset(&gyro);
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	driveToPositionAngle(1325, 1225, -343, 2200);
+	driveSet(17, 17);
+	delay(250);
+
 	if (taskGetState(mogoHandle))
 		taskDelete(mogoHandle);
 	mogoP(MOGO_DOWN);
-	driveSet(72, 72);
-	delay(300);
+	driveSet(10, 10);
+	delay(250);
+
+	// Reset drive and gyro sensors
+	resetDrive();
 	sensorReset(&gyro);
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+
 	driveSet(-64, -64);
 	delay(250);
 	mogoHandle = GO(mogoPT, MOGO_MID);
-	driveToPosition(-200, -200, 750);
-
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	// Back up a small amount
+	driveToPosition(-450, -450, 750);
 
 	// ///////////////////////////////////////////////////////////////// 42 POINTS
 
-	// Back up a small amount
-	driveToPositionAngle(-200, -235, 5, 800);
-	GO(mogoPT, MOGO_MID); // Bring mogo intake to middle
+	// Turn around to aim for the red mogo across the field
+	turnTo(175, 3000);
+	resetDrive();
 
-	//  Turn around to aim for the red mogo across the field
-	turnTo(184, 3000);
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
 	// Drive across the field
-	driveToPositionAngle(600,  600,  188, 1200);
+	driveToPositionAngle(600,  600,  176, 1200);
 	// Mogo intake down to pick it up
 	mogoHandle = GO(mogoPT, MOGO_DOWN);
-	driveToPositionAngle(3300, 3200, 184, 3900);
-	mogoHandle = GO(mogoPT, MOGO_MID + 100);
-	turnTo(174, 750);
-	driveToPositionAngle(4050, 3750, 172, 3400);
+	driveToPositionAngle(3300, 3200, 174, 3900);
+	mogoHandle = GO(mogoPT, MOGO_MID - 200);
+	driveToPosition(3700, 3600, 1200);
+	turnTo(173, 600);
 
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	resetDrive();
 
-	// Reset drive encoders & gyro
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	driveToPosition(100, 500, 1000);
+	driveToPosition(830, 1180, 800);
+	driveToPosition(1380, 1280, 1000);
+	driveToPositionAngle(1600, 1500, 185, 1700);
 
 	mogoHandle = GO(mogoPT, MOGO_MID + 125);
-	driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
-	
+	driveSet(127, 127);
+	delay(450);
+
+	// Reset drive encoders & gyro
+	// resetDrive();
+
+	if (taskGetState(mogoHandle))
+		taskDelete(mogoHandle);
+
 	mogo.power = 127;
 	motorUpdate(&mogo);
 	driveSet(64, 64);
-	delay(200);
-	driveSet(-80, -80);
-	delay(150);
-	
+
+	delay(175);
+	sensorReset(&gyro);
+
+	mogo.power = 30;
+	motorUpdate(&mogo);
+	driveSet(-127, -127);
+
+	delay(125);
+
 	if (taskGetState(mogoHandle))
 		taskDelete(mogoHandle);
-	mogoHandle = GO(mogoPT, MOGO_MID - 100);
-	driveToPosition(935, 935, 1800);
+	mogoHandle = GO(mogoPT, MOGO_MID);
 
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
+	driveToPosition(1100, 1000, 2095);
+
+	driveSet(70, 70);
+	delay(250);
+	driveSet(28, 28);
+	delay(300);
+	driveSet(10, 10);
+	delay(150);
+	sensorReset(&gyro);
+	resetDrive();
 
 	// ///////////////////////////////////////////////////////////////// 62 POINTS
+
+	// driveSettings[0].kP *= driveChange;
+	// driveSettings[1].kP *= driveChange;
+	driveToPosition(-100, -100, 750);
+	// driveSettings[0].kP /= driveChange;
+	// driveSettings[1].kP /= driveChange;
+
+	turnTo(-102, 3400);
+
+	sensorRefresh(sonic);
+	printf("\n\n%d\n\n", sonic->value);
+
+	driveSet(44, 44);
+	sonicGoal = 84;
+	do {
+		sensorRefresh(sonic);
+		info();
+		delay(20);
+	} while (sonic->value == 0 || sonic->value > sonicGoal);
+	driveSet(-35, -35);
+	delay(175);
+	driveSet(0, 0);
+
+	turnTo(-216, 2900); // TURN AROUND,
+
+	// Reset sensors
+	resetDrive();
+
+	mogoHandle = GO(mogoPT, MOGO_DOWN);
+	delay(300);
+	driveToPositionAngle(1430, 1430, -220, 2600);
+
+	// Mogo intake up
+	mogoP(MOGO_UP);
+	driveToPositionAngle(750, 750, -219, 1200);
+	turnTo(-355, 2000); // TUUUURN AROUUUND
+
+	// Reset sensors
+	resetDrive();
+
+	driveToPositionAngle(900, 800, -347, 1876);
+	// Bring mogo intake to middle
+	mogoHandle = GO(mogoPT, MOGO_MID);
+	driveToPositionAngle(1325, 1225, -336, 2200);
+
+	// Reset sensors
+	resetDrive();
+
+	if (taskGetState(mogoHandle))
+		taskDelete(mogoHandle);
+	mogoP(MOGO_DOWN);
+	driveSet(17, 17);
+	delay(250);
+
+	resetDrive();
+	sensorReset(&gyro);
+
+	driveSet(-64, -64);
+	delay(250);
+	mogoHandle = GO(mogoPT, MOGO_MID);
+	// Back up a small amount
+	driveToPosition(-450, -450, 750);
+
+	// ///////////////////////////////////////////////////////////////// 72 POINTS
 } /* autonLeftRed22 */
+
+void resetDrive() {
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+} /* resetDrive */

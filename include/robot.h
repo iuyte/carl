@@ -30,6 +30,7 @@
 #define DRIVE_WHEEL_DIAMETER 4.10
 #define DRIVE_ENCODER_RATIO 1.6
 #define LCD_PORT uart1
+#define drivePos(index) drive[index].sensor->value
 
 #define GO(task, arg)                 \
   taskCreate(&task,                   \
@@ -60,6 +61,13 @@ extern Sensor armLimit[2];
  * plugged in @ analog 3
  */
 extern Sensor powerExpander;
+
+/**
+ * Ultrasonic sensor
+ *  orange @ port 6,
+ *	yellow @ port 7
+ */
+extern Sensor *sonic;
 
 // Motors and servos
 

@@ -49,34 +49,91 @@ void autonLeftRed12() {
 } /* autonLeftRed12 */
 
 void autonLeftRed22() {
-	getMogo();                         // Get the mobile goal
+	getMogo(); // Get the mobile goal
 
-	turnTo(-12, 1000);                 // Align to a left tilt
-	driveSettings[1].max -= 40;        // Limit right side speed
-	GO(placeConeT, NULL);              // Place cone
-	driveToPosition(-455, -180, 5500); // Back up
-	driveSettings[1].max += 40;        // Correct speed
-	turnTo(-160, 2300);                // Turn around
+	turnTo(-2, 550);
+	driveToPosition(1650, 1650, 3500);
+	turnTo(-17, 1850); // Align to a left tilt of 12 degrees
+
+	// driveSettings[1].max -= 40;        // Limit right side speed
+	GO(placeConeT, NULL); // Place cone
+	// driveToPosition(-485, -210, 5500); // Back up
+	driveToPosition(-850, -850, 5500);    // Back up
+	// driveSettings[1].max += 40;        // Correct speed
+	GO(armPID, NULL);
+	turnTo(-144, 2500); // Turn around
 
 	// Reset drive encoders & gyro
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID + 125);
-	driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
+	mutexGive(mogo._mutex);
+	while (!mutexTake(mogo._mutex, 1)) 
+		mutexGive(mogo._mutex);
+
+	mogo.power = 127;
+	mogo.child->power = 127;
+	motorSet(mogo.port, 127 * mogo.isInverted);
+	motorSet(mogo.child->port, 127 * mogo.child->isInverted);
+
+	driveSet(70, 70);
+	delay(250);
+	mutexGive(mogo._mutex);
+
 	
 	mogo.power = 127;
 	motorUpdate(&mogo);
+	// TaskHandle mogoHandle = GO(mogoPT, MOGO_MID + 125);
+	// driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
+	driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
+
+	// if (taskGetState(mogoHandle))
+	// 	taskDelete(mogoHandle);
+
+	driveSet(70, 70);
+	// mogo.power = 127;
+	// motorUpdate(&mogo);
+
+	delay(350);
+	sensorReset(&gyro);
+
+	mogo.power = 19;
+	motorUpdate(&mogo);
+	driveSet(-127, -127);
+
+	delay(150);
+
+	// if (taskGetState(mogoHandle))
+	// 	taskDelete(mogoHandle);
+	TaskHandle mogoHandle = GO(mogoPT, MOGO_MID);
+
+	/*
+	mutexGive(mogo._mutex);
+	while (!mutexTake(mogo._mutex, 1)) 
+		mutexGive(mogo._mutex);
+
+	mogo.power = 127;
+	mogo.child->power = 127;
+	motorSet(mogo.port, 127 * mogo.isInverted);
+	motorSet(mogo.child->port, 127 * mogo.child->isInverted);
+
 	driveSet(64, 64);
 	delay(200);
 	driveSet(-80, -80);
+
+	mogo.power = 0;
+	mogo.child->power = 0;
+	motorSet(mogo.port, 0);
+	motorSet(mogo.child->port, 0);
+
 	delay(150);
+	mutexGive(mogo._mutex);
 	
-	if (taskGetState(mogoHandle))
-		taskDelete(mogoHandle);
 	mogoHandle = GO(mogoPT, MOGO_MID - 100);
-	driveToPosition(890, 890, 2000);
+	// */
+
+	driveToPosition(775, 775, 2495);
 
 	while (taskGetState(mogoHandle)) {
 		delay(10);

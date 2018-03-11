@@ -59,6 +59,9 @@ typedef struct Motor {
 	/** Deadband for the Motor power */
 	int deadband;
 
+	/** Recalculation function */
+	float (*recalc)(int);
+
 	int           _power;
 	int           _lastPower;
 	unsigned long _lastTime;
