@@ -44,14 +44,12 @@ void autonLeftRed12() {
 	delay(250);
 	driveSet(0, 0);                            // Stop the drive
 
-	armSettings.target = arm.sensor->average;  // Reset the arm position to it's
-	                                           // current position
 } /* autonLeftRed12 */
 
 void autonLeftRed22() {
 	getMogo(); // Get the mobile goal
 
-	turnTo(-2, 550);
+	turnTo(-1, 550);
 	driveToPosition(1650, 1650, 3500);
 	turnTo(-17, 1850); // Align to a left tilt of 12 degrees
 
@@ -68,10 +66,7 @@ void autonLeftRed22() {
 	sensorReset(drive[1].sensor);
 	sensorReset(&gyro);
 
-	mutexGive(mogo._mutex);
-	while (!mutexTake(mogo._mutex, 1)) 
-		mutexGive(mogo._mutex);
-
+	/*
 	mogo.power = 127;
 	mogo.child->power = 127;
 	motorSet(mogo.port, 127 * mogo.isInverted);
@@ -80,9 +75,9 @@ void autonLeftRed22() {
 	driveSet(70, 70);
 	delay(250);
 	mutexGive(mogo._mutex);
-
+	*/
 	
-	mogo.power = 127;
+	mogo.power = 70;
 	motorUpdate(&mogo);
 	// TaskHandle mogoHandle = GO(mogoPT, MOGO_MID + 125);
 	// driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
@@ -91,14 +86,14 @@ void autonLeftRed22() {
 	// if (taskGetState(mogoHandle))
 	// 	taskDelete(mogoHandle);
 
-	driveSet(70, 70);
+	driveSet(-10, -10);
 	// mogo.power = 127;
 	// motorUpdate(&mogo);
 
 	delay(350);
 	sensorReset(&gyro);
 
-	mogo.power = 19;
+	mogo.power = 127;
 	motorUpdate(&mogo);
 	driveSet(-127, -127);
 
@@ -133,7 +128,7 @@ void autonLeftRed22() {
 	mogoHandle = GO(mogoPT, MOGO_MID - 100);
 	// */
 
-	driveToPosition(775, 775, 2495);
+	driveToPosition(200, 200, 2495);
 
 	while (taskGetState(mogoHandle)) {
 		delay(10);

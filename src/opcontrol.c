@@ -193,8 +193,8 @@ void clawPID() {
 		claw.power          = power;
 		clawSettings.target = claw.sensor->value;
 		lastPress           = millis();
-	} else if (millis() - lastPress < 175) {
-		clawSettings.target = claw.sensor->value;
+	} else if (millis() - lastPress < 230) {
+		clawSettings.target = claw.sensor->value + 25;
 	} else {
 		PID(&clawSettings);
 	}

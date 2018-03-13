@@ -41,12 +41,12 @@ void autonSkills() {
 	driveToPositionAngle(685, 675, 135, 1550);
 	sensorRefresh(sonic);
 	printf("\n\n%d\n\n", sonic->value);
-	turnTo(206, 2500); // TURN AROUND,
+	turnTo(203, 2500); // TURN AROUND,
 
 	// Reset sensors
 	resetDrive();
 
-	driveToPositionAngle(1650, 1650, 209, 3200);
+	driveToPositionAngle(1650, 1650, 206, 3200);
 
 	// Mogo intake up
 	mogoP(MOGO_UP + 100);
@@ -94,7 +94,7 @@ void autonSkills() {
 	printf("\n\n%d\n\n", sonic->value);
 
 	driveSet(44, 44);
-	int sonicGoal = 62;
+	int sonicGoal = 43; // 62;
 	do {
 		sensorRefresh(sonic);
 		info();
