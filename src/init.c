@@ -48,7 +48,7 @@ void init() {
 	// Set up the analog sensors
 	gyro        = newGyro(1, true, 199);
 	gyro.child  = new(Sensor);
-	*gyro.child = newGyro(2, true, 196);
+	*gyro.child = newGyro(2, true, 197);
 	notice("gyroscopes, ");
 	Sensor *clawAngle = new(Sensor);
 	*clawAngle          = newAnalog(5, true);

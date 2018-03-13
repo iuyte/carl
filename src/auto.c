@@ -193,10 +193,12 @@ void mogoP(int p) {
 	mutexGive(mogo.child->_mutex);
 	mutexGive(mogo.sensor->_mutex);
 	mutexGive(mogo.sensor->child->_mutex);
+	int pow;
 
 	do {
+		pow = sgn(p - mogo.sensor->average);
 		sensorRefresh(mogo.sensor);
-		mogo.power = sgn(p - mogo.sensor->average) * 127;
+		mogo.power = (pow ? pow : 1) * 127;
 		motorUpdate(&mogo);
 		delay(10);
 	} while ((isAutonomous() || !isAuto) && abs(p - mogo.sensor->average) > 78);
@@ -269,7 +271,7 @@ void turnTo(int angle, unsigned long until) {
 } /* turnTo */
 
 void getMogo() {
-	claw.power         = -50;
+	claw.power         = -25;
 	armSettings.target = ARM_QUARTER + 20;
 	arm.power = -70;
 	motorUpdate(&arm);
@@ -281,6 +283,7 @@ void getMogo() {
 	delay(600);
 
 	driveToPosition(2075, 2075, 2300);
+	driveSet(15, 15);
 
 	while (taskGetState(mogoHandle))
 		delay(10);
@@ -292,17 +295,16 @@ void getMogo() {
 
 	driveSet(18, 18);
 
-	while (mogo.sensor->average > MOGO_UP + 200 && taskGetState(mogoHandle)) {
+	while (mogo.sensor->average > MOGO_MID) {
 		sensorRefresh(mogo.sensor);
 		delay(10);
 	}
 
-	if (taskGetState(mogoHandle))
-		taskDelete(mogoHandle);
-
 	if (taskGetState(armHandle))
 		taskDelete(armHandle);
 	driveSet(0, 0);
+	mogo.power = 6;
+	motorUpdate(&mogo);
 } /* getMogo */
 
 Task backUp(void *time) {

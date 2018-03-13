@@ -48,9 +48,9 @@ PIDSettings armSettings = {
 
 PIDSettings clawSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP        = .38f,
+	.kP        = -.29f,
 	.kI        = .0f,
-	.kD        = 1.2f,
+	.kD        = -2.3f,
 	.root      = &claw,
 	.tolerance = 35,
 	.precision = 175,
