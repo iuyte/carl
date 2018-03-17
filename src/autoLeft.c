@@ -1,6 +1,6 @@
 /**
- * @file autoLeftRed.c
- * @brief Left side red alliance autonomous routines
+ * @file autoLeft.c
+ * @brief Left side autonomous routines
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -19,7 +19,7 @@
 
 #include "../include/auto.h"
 
-void autonLeftRed12() {
+void autonLeft12() {
 	getMogo();                       // Get the mobile goal
 
 	turnTo(-6, 500);                 // Align to a left tilt
@@ -44,9 +44,9 @@ void autonLeftRed12() {
 	delay(250);
 	driveSet(0, 0);                            // Stop the drive
 
-} /* autonLeftRed12 */
+} /* autonLeft12 */
 
-void autonLeftRed22() {
+void autonLeft22() {
 	getMogo(); // Get the mobile goal
 
 	turnTo(-1, 550);
@@ -136,4 +136,4 @@ void autonLeftRed22() {
 
 	armSettings.target = arm.sensor->average; // Reset the arm position to it's
 	                                          // current position
-} /* autonLeftRed22 */
+} /* autonLeft22 */

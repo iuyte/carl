@@ -31,7 +31,7 @@ double inch =
   (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
 
 // Sensors
-Sensor gyro, powerExpander, *sonic, armLimit[2];
+Sensor gyro, *sonic, armLimit[2], line[3];
 
 // Motors and servos
 Motor claw, arm, mogo, drive[2];
@@ -134,11 +134,13 @@ void update() {
 
 	sensorRefresh(&gyro);
 	sensorRefresh(sonic);
+	sensorRefresh(&line[2]);
 
 	for (size_t i = 0; i < 2; i++) {
 		motorUpdate(&drive[i]);
 		sensorRefresh(drive[i].sensor);
 		sensorRefresh(&armLimit[i]);
+		sensorRefresh(&line[i]);
 	}
 } /* update */
 
@@ -148,8 +150,8 @@ void info() {
 
 	if (millis() - time >= 20) {
 		printf(RESET "\r"                                                    \
-		       RED "moveTo(%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
-		       "%d, " RED "%d, " GREEN "%d); " YELLOW "// %u mv" RESET "%s",
+		       RED "%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
+		       "%d, " RED "%d, " GREEN "%d" YELLOW "%d, %d, %d" BLUE " // %u mv" RESET "%s",
 		       drive[0].sensor->value,
 		       drive[1].sensor->value,
 		       arm.sensor->value,
@@ -157,6 +159,9 @@ void info() {
 		       claw.sensor->value,
 		       gyro.average,
 					 sonic->value,
+					 line[0].value,
+					 line[1].value,
+					 line[2].value,
 		       powerLevelMain(),
 					 en);
 		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
@@ -246,3 +251,8 @@ bool waitForDriveStall(unsigned long blockTime) {
 
 	return true;
 } /* waitForDriveStall */
+
+void resetDrive() {
+	sensorReset(drive[0].sensor);
+	sensorReset(drive[1].sensor);
+} /* resetDrive */

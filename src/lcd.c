@@ -41,6 +41,9 @@ Task lcdTask(void *none) {
 				} else {
 					selectedAuton += 1;
 				}
+			} else if (lcdState == 3) {
+				if (autons[selectedAuton].sensor != NULL)
+					sensorReset(*(autons[selectedAuton].sensor));
 			} else if (lcdState == 7) {
 				exit(0);
 			}
@@ -51,11 +54,12 @@ Task lcdTask(void *none) {
 		}
 
 		info();
-		lcdPrint(uart1, 1, "%5u %5d %s",
+		lcdPrint(uart1, 1, "b:%u, a:%s",
 		         powerLevelMain(),
-		         (*autons[selectedAuton].sensor)->average,
-		         autons[selectedAuton].sensorName);
-		lcdSetText(uart1, 2, autons[selectedAuton].name);
+						 autons[selectedAuton].name);
+		lcdPrint(uart1, 2, "%s: %d",
+		         autons[selectedAuton].sensorName,
+		         (*autons[selectedAuton].sensor)->average);
 		delay(25);
 	}
 } /* selectAuton */

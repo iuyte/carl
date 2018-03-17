@@ -57,17 +57,16 @@ extern Sensor gyro;
 extern Sensor armLimit[2];
 
 /**
- * The power expander voltage sensor
- * plugged in @ analog 3
- */
-extern Sensor powerExpander;
-
-/**
  * Ultrasonic sensor
  *  orange @ port 6,
  *	yellow @ port 7
  */
 extern Sensor *sonic;
+
+/**
+ * The three line sensors, from left->right, in ports 6, 7, and 8
+ */
+extern Sensor line[3];
 
 // Motors and servos
 
@@ -148,6 +147,11 @@ void reset();
  * Update motors and refresh sensors
  */
 void update();
+
+/**
+ * Reset the left and right drive encoders
+ */
+void resetDrive();
 
 bool waitForDriveStall(unsigned long blockTime);
 

@@ -21,10 +21,10 @@
 
 bool isAuto = true;
 
-void autonLeftRed12();
-void autonLeftRed22();
-void autonRightRed12();
-void autonRightRed22();
+void autonLeft12();
+void autonLeft22();
+void autonRight12();
+void autonRight22();
 void autonSkills();
 void autonTest();
 
@@ -34,86 +34,56 @@ void testMotors();
 
 void autonRehuh();
 
-int   selectedAuton         = 8;
+int   selectedAuton         = 4;
 Auton autons[MAX_AUTON + 1] =
 { {
 		// index 0
-		.name       = "< red left 12 >",
+		.name       = "left 12",
 		.sensorName = "arm",
 		.sensor     = &arm.sensor,
-		.execute    = &autonLeftRed12,
+		.execute    = &autonLeft12,
 	},{
 		// index 1
-		.name       = "< red left 22  >",
+		.name       = "left 22",
 		.sensorName = "gyr2",
 		.sensor     = &gyro.child,
-		.execute    = &autonLeftRed22,
+		.execute    = &autonLeft22,
 	},{
 		// index 2
-		.name       = "< red right 12 >",
+		.name       = "right 12",
 		.sensorName = "claw",
 		.sensor     = &claw.sensor,
-		.execute    = &autonRightRed12,
+		.execute    = &autonRight12,
 	},{
 		// index 3
-		.name       = "< red right 22 >",
+		.name       = "right 22",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
-		.execute    = &autonRightRed22,
+		.execute    = &autonRight22,
 	},{
 		// index 4
-		.name       = "< blue left 12 >",
-		.sensorName = "mgo",
-		.sensor     = &mogo.sensor,
-		.execute    = &autonLeftRed12,
-	},{
-		// index 5
-		.name       = "< blue left 22  >",
-		.sensorName = "mgo",
-		.sensor     = &mogo.sensor,
-		.execute    = &autonLeftRed22,
-	},{
-		// index 6
-		.name       = "< blue right 12>",
-		.sensorName = "mgo",
-		.sensor     = &mogo.sensor,
-		.execute    = &autonRightRed12,
-	},{
-		// index 7
-		.name       = "< blue right 22 >",
-		.sensorName = "mgo",
-		.sensor     = &mogo.sensor,
-		.execute    = &autonRightRed22,
-	},{
-		// index 8
-		.name       = "<    skills    >",
+		.name       = "skills",
 		.sensorName = "snc",
 		.sensor     = &sonic,
 		.execute    = &autonSkills,
 	},{
-		// index 9
-		.name       = "<     none     >",
+		// index 5
+		.name       = "none",
 		.sensorName = "arm",
 		.sensor     = &arm.sensor,
 		.execute    = &autonNone,
 	},{
-		// index 10
-		.name       = "<     test     >",
+		// index 6
+		.name       = "test",
 		.sensorName = "lef",
 		.sensor     = &drive[0].sensor,
 		.execute    = &autonTest,
 	},{
-		// index 11
-		.name       = "< test motors  >",
+		// index 7
+		.name       = "test motors",
 		.sensorName = "rit",
 		.sensor     = &drive[1].sensor,
 		.execute    = &testMotors,
-	},{
-		// index 12
-		.name       = "<    rehuh?    >",
-		.sensorName = "rit",
-		.sensor     = &drive[1].sensor,
-		.execute    = &autonRehuh,
 	}, };
 
 void armToPosition(float pos, unsigned long until) {

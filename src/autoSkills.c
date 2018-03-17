@@ -19,13 +19,12 @@
 
 #include "../include/auto.h"
 
-void autonLeftRed22();
-void resetDrive();
+void autonLeft22();
 void armPID(void *none);
 
 void autonSkills() {
 	// Get the mobile goal using the left red 22 point auton routine
-	autonLeftRed22();
+	autonLeft22();
 
 	// ///////////////////////////////////////////////////////////////// 22 POINTS
 
@@ -269,9 +268,4 @@ void autonSkills() {
 	driveToPosition(-450, -450, 750);
 
 	// ///////////////////////////////////////////////////////////////// 72 POINTS
-} /* autonLeftRed22 */
-
-void resetDrive() {
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
-} /* resetDrive */
+} /* autonSkills */

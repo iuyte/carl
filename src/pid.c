@@ -49,7 +49,7 @@ void PID(PIDSettings *settings) {
 	settings->root->power = round(power);
 	mutexGive(settings->root->_mutex);
 
-	if (abs(error) <= settings->tolerance) {
+	if (abs((int)error) <= settings->tolerance) {
 		if (settings->_reached) {
 			if (millis() - settings->_reached >= settings->precision) {
 				settings->isTargetReached = true;

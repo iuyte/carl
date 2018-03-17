@@ -1,6 +1,6 @@
 /**
- * @file autoRightRed.c
- * @brief Right side red alliance autonomous routines
+ * @file autoRight.c
+ * @brief Right side autonomous routines
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -19,7 +19,7 @@
 
 #include "../include/auto.h"
 
-void autonRightRed12() {
+void autonRight12() {
 	getMogo();                       // Get the mobile goal
 
 	turnTo(5, 300);                 // Align to a right tilt
@@ -46,9 +46,9 @@ void autonRightRed12() {
 
 	armSettings.target = arm.sensor->average;  // Reset the arm position to it's
 	                                           // current position
-} /* autonLeftRed12 */
+} /* autonRight12 */
 
-void autonRightRed22() {
+void autonRight22() {
 	getMogo(); // Get the mobile goal
 
 	gyroSettings[0].tolerance--;
@@ -97,4 +97,4 @@ void autonRightRed22() {
 
 	armSettings.target = arm.sensor->average; // Reset the arm position to it's
 	                                          // current position
-} /* autonLeftRed22 */
+} /* autonRight22 */

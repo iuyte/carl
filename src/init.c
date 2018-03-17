@@ -50,15 +50,19 @@ void init() {
 	gyro.child  = new(Sensor);
 	*gyro.child = newGyro(2, true, 197);
 	notice("gyroscopes, ");
-	Sensor *clawAngle = new(Sensor);
-	*clawAngle          = newAnalog(5, true);
-	clawAngle->inverted = true;
-	notice("claw angle, ");
 	Sensor *mogoAngle = new(Sensor);
 	*mogoAngle        = newAnalog(3, true);
 	mogoAngle->child  = new(Sensor);
 	*mogoAngle->child = newAnalog(4, true);
 	notice("mobile goal angle, ");
+	Sensor *clawAngle = new(Sensor);
+	*clawAngle          = newAnalog(5, true);
+	clawAngle->inverted = true;
+	notice("claw angle, ");
+	for (int i = 0; i < 3; i++) {
+		line[i] = newAnalog(i + 6, false);
+	}
+	notice("line sensors");
 
 	// Set up the digital sensors
 	Sensor *armCoder = new(Sensor);

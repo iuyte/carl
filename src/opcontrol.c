@@ -39,8 +39,8 @@ void moveArm();
 void moveClaw();
 void clawPID();
 
-void autonLeftRed22();
-void autonLeftRed22T();
+void autonLeft22();
+void autonLeft22T();
 
 void operatorControl() {
 	printf("Starting Driver Control...\n");
@@ -80,9 +80,9 @@ void operatorControl() {
 				sensorReset(arm.sensor);
 				sensorReset(mogo.sensor);
 				sensorReset(&gyro);
-				autonLeftRed22();
+				autonLeft22();
 				/*
-				TaskHandle autoHandle = GO(autonLeftRed22T, NULL);
+				TaskHandle autoHandle = GO(autonLeft22T, NULL);
 				while (joystickGetDigital(2, 7, JOY_DOWN))
 					delay(20);
 				while (!joystickGetDigital(2, 7, JOY_DOWN))
@@ -200,7 +200,7 @@ void clawPID() {
 	}
 } /* clawPID */
 
-void autonLeftRed22T(void *none) {
-	autonLeftRed22();
+void autonLeft22T(void *none) {
+	autonLeft22();
 	taskDelete(NULL);
 }
