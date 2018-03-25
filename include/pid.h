@@ -116,6 +116,9 @@ typedef struct PIDSettings {
 	float _derivative;
 } PIDSettings;
 
+/**
+ * The default PID settings
+ */
 #define DEFAULT_PID_SETTINGS \
   .kP            = 1,        \
   .kI            = 0,        \

@@ -34,7 +34,7 @@ void testMotors();
 
 void autonRehuh();
 
-int   selectedAuton         = 4;
+int   selectedAuton         = 6;
 Auton autons[MAX_AUTON + 1] =
 { {
 		// index 0

@@ -28,7 +28,7 @@
 #define RESET   "\x1b[0m"
 
 double inch =
-  (1 / (PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
+  (1 / (M_PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
 
 // Sensors
 Sensor gyro, *sonic, armLimit[2], line[3];
@@ -72,7 +72,7 @@ PIDSettings driveSettings[2] = {
 
 #define _GYRO_SETTINGS_(index, m) \
   DEFAULT_PID_SETTINGS,           \
-  .kP        = m * 3.9625f,        \
+  .kP        = m * 3.9625f,       \
   .kI        = m * 0.4877f,       \
   .kD        = m * 2.1563f,       \
   .tolerance = 3,                 \
@@ -95,15 +95,15 @@ void init();
 
 void reset() {
 	// free mutexes
-	mutexGive(gyro._mutex);
-	mutexGive(gyro.child->_mutex);
-	mutexGive(arm.sensor->_mutex);
-	mutexGive(mogo.sensor->child->_mutex);
+	  mutexGive(gyro._mutex);
+	  mutexGive(gyro.child->_mutex);
+	  mutexGive(arm.sensor->_mutex);
+	  mutexGive(mogo.sensor->child->_mutex);
 
-	mutexGive(claw._mutex);
-	mutexGive(arm._mutex);
-	mutexGive(arm.child->_mutex);
-	mutexGive(mogo.child->_mutex);
+	  mutexGive(claw._mutex);
+	  mutexGive(arm._mutex);
+	  mutexGive(arm.child->_mutex);
+	  mutexGive(mogo.child->_mutex);
 
 	for (int i = 0; i < 2; i++) {
 		mutexGive(drive[i]._mutex);
@@ -146,24 +146,26 @@ void update() {
 
 void info() {
 	static unsigned long time = 0;
-	char *en = isEnabled() ? "\n" : "\r";
+	char *en                  = isEnabled() ? "\n" : "\r";
 
 	if (millis() - time >= 20) {
-		printf(RESET "\r"                                                    \
-		       RED "%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
-		       "%d, " RED "%d, " GREEN "%d" YELLOW "%d, %d, %d" BLUE " // %u mv" RESET "%s",
-		       drive[0].sensor->value,
-		       drive[1].sensor->value,
-		       arm.sensor->value,
-		       mogo.sensor->average,
-		       claw.sensor->value,
-		       gyro.average,
-					 sonic->value,
-					 line[0].value,
-					 line[1].value,
-					 line[2].value,
-		       powerLevelMain(),
-					 en);
+		printf(
+		  RESET "\r"                                             \
+		  RED "%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
+		  "%d, " RED "%d, " GREEN "%d, " YELLOW "%d, %d, %d" BLUE " // %u mv"
+		  RESET "%s",
+		  drive[0].sensor->value,
+		  drive[1].sensor->value,
+		  arm.sensor->value,
+		  mogo.sensor->average,
+		  claw.sensor->value,
+		  gyro.average,
+		  sonic->value,
+		  line[0].value,
+		  line[1].value,
+		  line[2].value,
+		  powerLevelMain(),
+		  en);
 		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
 		time = millis();
 	}

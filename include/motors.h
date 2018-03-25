@@ -22,8 +22,8 @@
 #include "API.h"
 #include "sensors.h"
 
-#define clipNum(input, high, low) ((input > high) ? high : (input < \
-                                                            low) ? low : input)
+#define clipNum(input, high, low) \
+  ((input > high) ? high : (input < low) ? low : input)
 #define sgn(input) ((input > 0) ? 1 : (input < 0) ? -1 : 0)
 #define deadBand(input, \
                  dead) ((input - dead > 0 || input + dead < 0) ? input : 0)

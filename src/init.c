@@ -19,8 +19,13 @@
 
 #include "../include/robot.h"
 
-float recalc(int p);
-float lMogoRecalc(int p);
+static inline float lMogoRecalc(int p) {
+	return p * 1.1;
+} /* lMogoRecalc */
+
+static inline float lineRecalc(int v) {
+	return (float)(v > 10);
+}
 
 void  initializeIO() {
 	watchdogInit();
@@ -61,6 +66,8 @@ void init() {
 	notice("claw angle, ");
 	for (int i = 0; i < 3; i++) {
 		line[i] = newAnalog(i + 6, false);
+		line[i].inverted = true;
+		line[i].recalc = &lineRecalc;
 	}
 	notice("line sensors");
 
@@ -121,11 +128,3 @@ void init() {
 	// Start the LCD task
 	LCDHandle = GO(lcdTask, NULL);
 } /* init */
-
-float recalc(int p) {
-	return p * 8 / 5;
-} /* recalc */
-
-float lMogoRecalc(int p) {
-	return p * 1.1;
-} /* lMogoRecalc */

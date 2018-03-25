@@ -24,8 +24,14 @@
 #include "motors.h"
 #include "auto.h"
 
+/**
+ * @brief The lcd task *function*
+ */
 Task lcdTask(void *none);
 
+/**
+ * The LCD task
+ */
 extern TaskHandle LCDHandle;
 
 #endif // CARL_LCD_H_

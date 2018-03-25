@@ -62,27 +62,73 @@ typedef struct Triple {
 	int c;
 } Triple;
 
+/**
+ * A list of the autonomouses/LCD menus
+ */
 extern Auton autons[MAX_AUTON + 1];
+/**
+ * The autonomous, as selected by the LCD menu, to run
+ */
 extern int   selectedAuton;
 
+/*
+ * @breif Bring the arm to the specified position
+ *
+ * @param pos the position to bring the arm to
+ * @param until the maximum amount of time this can take in ms
+ */
 void armToPosition(float         pos,
                    unsigned long until);
 
+/**
+ * @brief Bring the drive to a specific position
+ *
+ * @param l the left position
+ * @param r the right position
+ * @param until the maximum amount of time this can take
+ */
 void driveToPosition(int           l,
                      int           r,
                      unsigned long until);
 
+/**
+ * @brief Bring the drive to a specific position while attempting to maintain an angle
+ *
+ * @param l the left position
+ * @param r the right position
+ * @param a the angle to maintain
+ * @param until the maximum amount of time this can take
+ */
 void driveToPositionAngle(int           l,
                           int           r,
                           int           a,
                           unsigned long until);
+
+/**
+ * @brief Bring the mobile goal intake to a position
+ *
+ * @param p the position to go to
+ */
 void mogoP(int p);
-void gyroPID(int target,
-             int precision);
+
+/**
+ * Use PID to turn to a specific angle
+ *
+ * @param angle the angle to turn to
+ * @param until the max amount of time this can take
+ */
 void turnTo(int           angle,
             unsigned long until);
 
+/**
+ * @breif Go forward and get the mobile goal! (the beginning of nearly any
+ * autonomous here)
+ */
 void getMogo();
+
+/**
+ * @brief Place the cone on dat goal!
+ */
 void placeCone();
 
 /**
@@ -92,11 +138,29 @@ void placeCone();
  */
 TaskHandle dropMogo20(TaskHandle mogoHandle);
 
+/**
+ * @brief Back up at a certain time for about half a second
+ */
 Task backUp(void *time);
+
+/**
+ * @brief bring the mobile goal intake to a position in a task
+ */
 Task mogoPT(void *p);
+
+/**
+ * @brief task for placing a cone
+ */
 Task placeConeT(void *none);
+
+/**
+ * @brief Task for armToPosition
+ */
 Task armPID(void *none);
 
+/**
+ * @brief don't use, it doesn't work
+ */
 void moveTo(int leftV,
             int rightV,
             int armV,

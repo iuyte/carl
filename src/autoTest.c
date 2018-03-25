@@ -20,10 +20,14 @@
 #include "../include/auto.h"
 
 void autonTest() {
-	armToPosition(ARM_QUARTER, 750);
+	driveSet(35, 35);
+	int angle;
+	
+	Mutex m = angleFromUpcomingLine(&angle, NULL, 5000);
+	mutexTakeDelete(m, -1);
 
-	while (true) {
-		mogoP(MOGO_DOWN);
-		mogoP(MOGO_UP);
-	}
+	printf("\n\n//\n\rA:%d\n\\\\\n\n", angle);
+
+	delay(300);
+	driveSet(0, 0);
 } /* autonLeftRed12 */

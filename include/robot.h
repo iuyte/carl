@@ -20,13 +20,14 @@
 #ifndef CARL_ROBOT_H_
 #define CARL_ROBOT_H_
 
+#include <math.h>
+
 #include "motors.h"
 #include "sensors.h"
 #include "pid.h"
 #include "lcd.h"
+#include "line.h"
 
-#define PI \
-  3.1415926535897932384626433832795028841971693993751058209749445923078
 #define DRIVE_WHEEL_DIAMETER 4.10
 #define DRIVE_ENCODER_RATIO 1.6
 #define LCD_PORT uart1
