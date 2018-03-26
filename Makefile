@@ -95,6 +95,11 @@ terminal:
 # Alias to upload, more consistent with our terminology
 flash: upload
 
+# Make pdfs
+pdfs:
+	cd $(ROOT)
+	tools/pdfMaker.sh
+
 # Uploads program to device using legacy uniflasher JAR file
 upload-legacy: $(OUTBIN)
 	$(call echo,Uploading $^ to $(DEVICE) using uniflasher,$(STEP_COLOR))
