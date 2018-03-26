@@ -1,0 +1,14 @@
+#!/bin/bash
+
+make all -j4
+make clean
+make pdfs website -j2
+
+git add .
+git add -u
+
+if [ $# -eq 1 ]
+  then git commit -Sm "$1"
+else
+  git commit -S
+fi

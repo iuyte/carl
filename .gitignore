@@ -1,5 +1,5 @@
 
-# Created by https://www.gitignore.io/api/c,git,vim,c++,cmake,nanoc,emacs,intellij
+# Created by https://www.gitignore.io/api/c,git,vim,c++,cmake,nanoc,emacs,intellij,python3
 
 ### C ###
 # Prerequisites
@@ -71,6 +71,20 @@ dkms.conf
 
 # Compiled Static libraries
 *.lai
+
+# Executables
+
+### CMake ###
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+build
 
 ### Emacs ###
 # -*- mode: gitignore; -*-
@@ -149,7 +163,6 @@ anaconda-mode/
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries
-.idea
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/
@@ -219,12 +232,12 @@ tmp/
 # Crash Log
 crash.log
 
+#!! ERROR: python3 is undefined. Use list command to see defined gitignore types !!#
+
 ### Vim ###
 # swap
-[._]*.s[a-v][a-z]
-[._]*.sw[a-p]
-[._]s[a-v][a-z]
-[._]sw[a-p]
+.sw[a-p]
+.*.sw[a-p]
 # session
 Session.vim
 # temporary
@@ -232,9 +245,10 @@ Session.vim
 # auto-generated tag files
 tags
 
-# End of https://www.gitignore.io/api/c,git,vim,c++,cmake,nanoc,emacs,intellij
+# End of https://www.gitignore.io/api/c,git,vim,c++,cmake,nanoc,emacs,intellij,python3
 
 CMakeLists.txt
 .output
 bin
 compile_commands.json
+*/__pycache__

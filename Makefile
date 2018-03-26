@@ -100,6 +100,11 @@ pdfs:
 	cd $(ROOT)
 	tools/pdfMaker.sh
 
+# Build the website log
+website:
+	cd $(ROOT)
+	tools/buildSite.sh
+
 # Uploads program to device using legacy uniflasher JAR file
 upload-legacy: $(OUTBIN)
 	$(call echo,Uploading $^ to $(DEVICE) using uniflasher,$(STEP_COLOR))
