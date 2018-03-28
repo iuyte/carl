@@ -22,12 +22,12 @@
 void autonTest() {
 	driveSet(35, 35);
 	int angle;
-	
+
 	Mutex m = angleFromUpcomingLine(&angle, NULL, 5000);
 	mutexTakeDelete(m, -1);
-
 	printf("\n\n//\n\rA:%d\n\\\\\n\n", angle);
 
-	delay(300);
-	driveSet(0, 0);
+	gyro.zero = angle;
+	gyro.child->zero = angle;
+	turnTo(0, 2500);
 } /* autonLeftRed12 */

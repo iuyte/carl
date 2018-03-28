@@ -72,11 +72,11 @@ PIDSettings driveSettings[2] = {
 
 #define _GYRO_SETTINGS_(index, m) \
   DEFAULT_PID_SETTINGS,           \
-  .kP        = m * 3.9625f,       \
-  .kI        = m * 0.4877f,       \
-  .kD        = m * 2.1563f,       \
-  .tolerance = 3,                 \
-  .precision = 270,               \
+  .kP        = m * 2.8625f,       \
+  .kI        = m * 0.5877f,       \
+  .kD        = m * 2.3363f,       \
+  .tolerance = 2,                 \
+  .precision = 425,               \
   .root      = &drive[index],     \
   .sensor    = &gyro
 

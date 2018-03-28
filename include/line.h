@@ -22,7 +22,7 @@
 
 #include "robot.h"
 
-static const double lineDistance = 1.5;
+static const double lineDistance = 1.38;
 
 typedef enum {
 	LEFT,

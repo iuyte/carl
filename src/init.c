@@ -51,9 +51,9 @@ void init() {
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
-	gyro        = newGyro(1, true, 199);
+	gyro        = newGyro(1, true, 200);
 	gyro.child  = new(Sensor);
-	*gyro.child = newGyro(2, true, 197);
+	*gyro.child = newGyro(2, true, 195);
 	notice("gyroscopes, ");
 	Sensor *mogoAngle = new(Sensor);
 	*mogoAngle        = newAnalog(3, true);

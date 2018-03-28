@@ -28,6 +28,8 @@ void PID(PIDSettings *settings) {
 	                            settings->sensor->average :
 	                            settings->root->sensor->average);
 
+	if (sgn(error) != sgn(settings->_error))
+		settings->_integral = 0;
 	settings->_integral  += error / (millis() - settings->_time);
 	settings->_time       = millis();
 	settings->_derivative = error - settings->_error;
@@ -49,7 +51,7 @@ void PID(PIDSettings *settings) {
 	settings->root->power = round(power);
 	mutexGive(settings->root->_mutex);
 
-	if (abs((int)error) <= settings->tolerance) {
+	if (abs((int)(error + .5)) <= settings->tolerance) {
 		if (settings->_reached) {
 			if (millis() - settings->_reached >= settings->precision) {
 				settings->isTargetReached = true;
