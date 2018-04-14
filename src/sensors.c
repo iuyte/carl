@@ -61,7 +61,9 @@ void sensorRefresh(Sensor *s) {
 	}
 
 	if (!mutexTake(s->_mutex, 5)) {
-		print("= Cannot take mutex =");
+		#ifdef DEBUG_MODE
+			print("= Cannot take mutex =");
+		#endif
 		return;
 	}
 

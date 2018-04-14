@@ -21,6 +21,7 @@
 #define CARL_MOTORS_H_
 #include "API.h"
 #include "sensors.h"
+#include "debug.h"
 
 #define clipNum(input, high, low) \
   ((input > high) ? high : (input < low) ? low : input)

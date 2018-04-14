@@ -48,7 +48,7 @@ PIDSettings armSettings = {
 
 PIDSettings clawSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP        = -.29f,
+	.kP        = -.22f,
 	.kI        = .0f,
 	.kD        = -2.3f,
 	.root      = &claw,
@@ -145,6 +145,10 @@ void update() {
 } /* update */
 
 void info() {
+	#ifndef DEBUG_MODE
+		return;
+	#endif
+
 	static unsigned long time = 0;
 	char *en                  = isEnabled() ? "\n" : "\r";
 

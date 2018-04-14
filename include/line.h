@@ -22,11 +22,21 @@
 
 #include "robot.h"
 
-static const double lineDistance = 1.38;
+#define gline(index) (line[index].value)
+
+/*
+ * The distance between line sensors, the first number is inches and everything
+ * else converts -> ticks
+ */
+static const double lineDistance /*= (1.28 / ((M_PI * 4.125) / 360)) * (8/5);
+															   *///= (M_PI * 4.125 / (360 * (8/5))) / 1.9;
+														//	= 50.625;
+														//	= 50.00693952646796;
+																= 80.25791219881197;
 
 typedef enum {
-	LEFT,
-	RIGHT,
+	LEFT = 0,
+	RIGHT = 1,
 } Side;
 
 /**

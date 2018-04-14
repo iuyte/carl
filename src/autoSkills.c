@@ -39,7 +39,9 @@ void autonSkills() {
 	resetDrive();
 	driveToPositionAngle(685, 675, 135, 1550);
 	sensorRefresh(sonic);
-	printf("\n\n%d\n\n", sonic->value);
+	#ifdef DEBUG_MODE
+		printf("\n\n%d\n\n", sonic->value);
+	#endif
 	turnTo(203, 2500); // TURN AROUND,
 
 	// Reset sensors
@@ -90,7 +92,9 @@ void autonSkills() {
 	turnTo(-104, 3400);
 
 	sensorRefresh(sonic);
-	printf("\n\n%d\n\n", sonic->value);
+	#ifdef DEBUG_MODE
+		printf("\n\n%d\n\n", sonic->value);
+	#endif
 
 	driveSet(44, 44);
 	int sonicGoal = 43; // 62;
@@ -214,7 +218,9 @@ void autonSkills() {
 	turnTo(-102, 3400);
 
 	sensorRefresh(sonic);
-	printf("\n\n%d\n\n", sonic->value);
+	#ifdef DEBUG_MODE
+		printf("\n\n%d\n\n", sonic->value);
+	#endif
 
 	driveSet(44, 44);
 	sonicGoal = 84;

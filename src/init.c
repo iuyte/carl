@@ -24,7 +24,7 @@ static inline float lMogoRecalc(int p) {
 } /* lMogoRecalc */
 
 static inline float lineRecalc(int v) {
-	return (float)(v > 10);
+	return (float)(v > 16);
 }
 
 void  initializeIO() {
@@ -37,7 +37,9 @@ void  initializeIO() {
  * @param buffer the text to display
  */
 void  notice(const char *buffer) {
-	print(buffer);
+	#ifdef DEBUG_MODE
+		print(buffer);
+	#endif
 	lcdSetText(uart1, 2, buffer);
 	delay(5);
 } /* notice */
@@ -47,7 +49,9 @@ void init() {
 	lcdInit(uart1);
 	lcdSetBacklight(uart1, true);
 
-	print("\nInitializing... ");
+	#ifdef DEBUG_MODE
+		print("\nInitializing... ");
+	#endif
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
@@ -121,7 +125,9 @@ void init() {
 	notice("drive motors, ");
 
 	lcdSetText(uart1, 1, "Ready!");
-	print("\n\n");
+	#ifdef DEBUG_MODE
+		print("\n\n");
+	#endif
 	setTeamName("709S");
 	notice("done!");
 

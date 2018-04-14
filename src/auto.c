@@ -27,6 +27,7 @@ void autonRight12();
 void autonRight22();
 void autonSkills();
 void autonTest();
+void autonStack();
 
 void autonNone() {}
 
@@ -84,6 +85,12 @@ Auton autons[MAX_AUTON + 1] =
 		.sensorName = "rit",
 		.sensor     = &drive[1].sensor,
 		.execute    = &testMotors,
+	},{
+		// index 8
+		.name       = "drive and autostack",
+		.sensorName = "arm",
+		.sensor     = &arm.sensor,
+		.execute    = &autonStack,
 	}, };
 
 void armToPosition(float pos, unsigned long until) {
@@ -209,7 +216,9 @@ void gyroPID(int target, int precision) {
 			delay(100);
 		}
 		info();
-		printf("%f\n", gyroPIDC[0]);
+		#ifdef DEBUG_MODE
+			printf("%f\n", gyroPIDC[0]);
+		#endif
 		lcdPrint(uart1, 1, "%f", ((float)(powerLevelMain())) / 1000.0);
 		lcdPrint(uart1, 2, "%f", gyroPIDC[0]);
 		update();
@@ -305,7 +314,9 @@ void placeCone() {
 	armToPosition(ARM_QUARTER, 400);
 	arm.power = 10; // Keep arm up
 	motorUpdate(&arm);
-	print("Cone placed!\n"); // Notify computer of cone state
+	#ifdef DEBUG_MODE
+		print("Cone placed!\n"); // Notify computer of cone state
+	#endif
 	delay(150);
 } /* placeCone */
 
@@ -348,14 +359,15 @@ void autonomous() {
 	sensorReset(mogo.sensor);
 	sensorReset(&gyro);
 
-	selectedAuton = clipNum(selectedAuton, MAX_AUTON - 1, 0);
+	selectedAuton = clipNum(selectedAuton, MAX_AUTON, 0);
 	if (autons[selectedAuton].execute != NULL)
 		autons[selectedAuton].execute();
 
-	armSettings.target = arm.sensor->average; // Reset the arm position to it's
-	                                          // current position
+	armSettings.target = arm.sensor->average; // Set target to current pos
 
-	printf("\n\n\rFinished autonomous in %ldms\n\n", millis() - startTime);
+	#ifdef DEBUG_MODE
+		printf("\n\n\rFinished autonomous in %ldms\n\n", millis() - startTime);
+	#endif
 	while (isAutonomous()) {
 		PID(&armSettings);                      // Hold the arm position
 		update();

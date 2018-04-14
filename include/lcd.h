@@ -23,6 +23,7 @@
 #include "sensors.h"
 #include "motors.h"
 #include "auto.h"
+#include "debug.h"
 
 /**
  * @brief The lcd task *function*

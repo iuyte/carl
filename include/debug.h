@@ -1,6 +1,6 @@
 /**
- * @file autoTest.c
- * @brief autonomous mode for testing
+ * @file debug.h
+ * @brief Whether or not debug mode is enabled
  * Copyright (C) 2017 Ethan Wells
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -17,21 +17,5 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#include "../include/auto.h"
-
-void autonTest() {
-	update();
-	driveSet(35, 35);
-	int angle;
-
-	Mutex m = angleFromUpcomingLine(&angle, NULL, 5000);
-	mutexTakeDelete(m, -1);
-	#ifdef DEBUG_MODE
-		printf("\n\n//\n\rA:%d\n\\\\\n\n", angle);
-	#endif
-
-	gyro.zero = angle;
-	gyro.child->zero = angle;
-	driveSet(0, 0);
-	// turnTo(0, 2500);
-} /* autonLeftRed12 */
+// Comment out or uncomment this line to toggle debugging
+// #define DEBUG_MODE

@@ -23,7 +23,7 @@
 
 #include "../include/robot.h"
 
-#define MAX_AUTON 7
+#define MAX_AUTON 8
 
 enum MOGO_POS {
 	MOGO_UP   = 75,
@@ -36,7 +36,7 @@ enum ARM_POS {
 	ARM_DOWN      = 10,
 	ARM_QUARTER   = 275,
 	ARM_HALF      = 430,
-	ARM_3_QUARTER = 500,
+	ARM_3_QUARTER = 540,
 };
 
 

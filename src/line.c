@@ -30,8 +30,11 @@ Side getSide() {
 } /* getSide */
 
 int getAngleFP(int p[4], Side s) {
-	return atan((double)(s ? p[3] - p[1] : p[4] - p[2]) / lineDistance)
-	       * 180 / M_PI / 2 / (s ? -1 : 1);
+	#ifdef DEBUG_MODE
+		printf("\n\n\r(%d, %d)\n(%d, %d)\n\n", p[0], p[1], p[2], p[3]);
+	#endif
+	return atan2(lineDistance, (double)(s ? p[3] - p[1] : p[2] - p[0]))
+	       * 180 / M_PI;
 } /* getAngleFP */
 
 void updateLinesDrive() {

@@ -43,7 +43,9 @@ void autonLeft22();
 void autonLeft22T();
 
 void operatorControl() {
-	printf("Starting Driver Control...\n");
+	#ifdef DEBUG_MODE
+		printf("Starting Driver Control...\n");
+	#endif
 	reset();
 	update();
 	isAuto = false;
@@ -57,8 +59,6 @@ void operatorControl() {
 		PID(&armSettings);
 	}
 	*/
-
-	print("Beginning driver control loop\n");
 
 	bool isSkills = strstr(autons[selectedAuton].name, "skills");
 
@@ -81,32 +81,6 @@ void operatorControl() {
 				sensorReset(mogo.sensor);
 				sensorReset(&gyro);
 				autonLeft22();
-				/*
-				TaskHandle autoHandle = GO(autonLeft22T, NULL);
-				while (joystickGetDigital(2, 7, JOY_DOWN))
-					delay(20);
-				while (!joystickGetDigital(2, 7, JOY_DOWN))
-					delay(20);
-				if (taskGetState(autoHandle)) {
-					taskDelete(autoHandle);
-					mutexGive(gyro._mutex);
-					mutexGive(gyro.child->_mutex);
-					mutexGive(arm.sensor->_mutex);
-					mutexGive(mogo.sensor->child->_mutex);
-
-					mutexGive(claw._mutex);
-					mutexGive(arm._mutex);
-					mutexGive(arm.child->_mutex);
-					mutexGive(mogo.child->_mutex);
-
-					for (int i = 0; i < 2; i++) {
-						mutexGive(drive[i]._mutex);
-
-						mutexGive(drive[i].sensor->_mutex);
-						mutexGive(armLimit[i]._mutex);
-					}
-				}
-				*/
 			}
 		}
 		moveArm();
@@ -185,16 +159,20 @@ void moveClaw() {
 
 void clawPID() {
 	static unsigned long lastPress;
+	static bool lastDir;
 	static int power;
 
 	power = joystickGetAnalog(2, 4);
 
 	if (power) {
-		claw.power          = power;
+		lastDir             = power > 0;
+		claw.power          = -power;
 		clawSettings.target = claw.sensor->value;
 		lastPress           = millis();
-	} else if (millis() - lastPress < 230) {
-		clawSettings.target = claw.sensor->value + 25;
+	} else if (millis() - lastPress < 275) {
+		clawSettings.target = claw.sensor->value + 50;
+	} else if (lastDir) {
+		claw.power = 0;
 	} else {
 		PID(&clawSettings);
 	}
