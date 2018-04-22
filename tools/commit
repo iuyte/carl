@@ -12,3 +12,7 @@ if [ $# -eq 1 ]
 else
   git commit -S
 fi
+
+cd docs
+git commit -m "`date`"
+git push
