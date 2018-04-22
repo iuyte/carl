@@ -13,6 +13,8 @@ else
   git commit -S
 fi
 
+make website
+
 cd docs
 git add .
 git commit -m "`date`"

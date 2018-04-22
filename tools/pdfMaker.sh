@@ -8,10 +8,10 @@
 if [ -e "project.pros" ]
 then
 
-	rm -rf "print"
+	rm -rf "docs/print"
 	rm -rf "tmp"
-	mkdir -p "print/src"
-	mkdir -p "print/include"
+	mkdir -p "docs/print/src"
+	mkdir -p "docs/print/include"
 	mkdir -p "tmp/src"
 	mkdir -p "tmp/include"
 
@@ -34,7 +34,7 @@ then
 		rm *.log
 		rm *.aux
 		rm -r _minted*
-		mv *.pdf "print/include/"
+		mv *.pdf "docs/print/include/"
 	else
 		echo "'include' directory not found. PDFs of header files won't be created"
 	fi
@@ -58,7 +58,7 @@ then
 		rm *.log
 		rm *.aux
 		rm -r _minted*
-		mv *.pdf "print/src/"
+		mv *.pdf "docs/print/src/"
 	else
 		echo "'src' directory not found. PDFs of source files won't be created"
 	fi
