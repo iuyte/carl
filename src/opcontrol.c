@@ -162,7 +162,7 @@ void manipPID() {
 	power = 127 * digital(2, 8, JOY_UP, JOY_DOWN);
 
 	if (power) {
-		if (manip.sensor->value < MANIP_PLACE && power > 0) {
+		if (manip.sensor->value < MANIP_PLACE - 50 && power > 0) {
 			manipSettings.target = MANIP_PLACE;
 			PID(&manipSettings);
 		} else {

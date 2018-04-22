@@ -29,7 +29,14 @@ cat log.json | python -m json.tool > tmp.json
 mv tmp.json log.json
 cat log.json | md-table > table.md
 
-# Add files and commit with the message of the current time
+# Replace all of the commas without spaces after them with commas *with* spaces
+# becuase it will format better
+cd ..
+tools/formatTable.py
+
+# Go into docs (gh-pages ) and add files and commit with the message of the
+# current time
+cd docs
 git add .
 git commit -m "`date`"
 
