@@ -155,8 +155,10 @@ void moveManip() {
 }
 
 void moveIntake() {
-	intake.power = .75f * (float)(joystickGetAnalog(2, 4) +
-																joystickGetAnalog(2, 3));
+	intake.power = .75f * (float)(joystickGetAnalog(2, 1) +
+																joystickGetAnalog(2, 2) +
+																joystickGetAnalog(2, 3) +
+																joystickGetAnalog(2, 4));
 } /* moveIntake */
 
 void manipPID() {
@@ -173,9 +175,14 @@ void manipPID() {
 	power = 127 * digital(2, 5, JOY_UP, JOY_DOWN);
 
 	if (power) {
-		manip.power          = power;
-		manipSettings.target = manip.sensor->averageVal;
-		lastPress             = millis();
+		if (manip.sensor->value < MANIP_PLACE && power > 0) {
+			manipSettings.target = MANIP_PLACE;
+			PID(&manipSettings);
+		} else {
+			manip.power          = power;
+			manipSettings.target = manip.sensor->averageVal;
+			lastPress             = millis();
+		}
 	} else if (millis() - lastPress < 190) {
 		manip.power = 0;
 	} else {

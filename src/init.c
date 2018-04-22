@@ -96,7 +96,7 @@ void init() {
 		exit(0);
 	}
 	Sensor *manipS = new(Sensor);
-	*manipS = newIME(0, false);
+	*manipS = newIME(0, true);
 	sensorReset(manipS);
 
 	// Initialize and set up all of the motors, servos, etc

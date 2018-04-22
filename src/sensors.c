@@ -71,11 +71,12 @@ void sensorRefresh(Sensor *s) {
 	}
 
 	int val;
-	if (s->_type == IME)
-		 imeGet(s->port, &val);
-	else
+	if (s->_type == IME) {
+		imeGet(s->port, &val);
+	} else {
 		val = (s->_type == Digital) ? readSensorValue(s) :
 							(readSensorValue(s) - s->zero);
+	}
 
 	if (s->inverted) {
 		if (s->_type == Digital) {
@@ -140,7 +141,7 @@ Sensor newSensor(SensorType     type,
                  unsigned char  port,
                  bool           inverted,
                  unsigned short calibrate) {
-	if (port < 1) {
+	if (port < 1 && type != IME) {
 		port = 1;
 	}
 
