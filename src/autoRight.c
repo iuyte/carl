@@ -22,11 +22,11 @@
 void autonRight12() {
 	getMogo();                       // Get the mobile goal
 
-	turnTo(5, 300);                 // Align to a right tilt
+	turnTo(5, 300);                  // Align to a right tilt
 	driveSettings[0].max -= 40;      // Limit left side speed
 	driveToPosition(300, 700, 2200); // Back up
 	driveSettings[0].max += 40;      // Correct speed
-	turnTo(165, 2000);              // Turn around
+	turnTo(165, 2000);               // Turn around
 	delay(400);
 
 	// Reset drive encoders & gyro
@@ -35,17 +35,17 @@ void autonRight12() {
 	sensorReset(&gyro);
 
 	driveToPositionAngle(900, 1100, -13, 1850); // Drive arc -13 degrees
-	GO(placeConeT, NULL);                      // Place cone
+	GO(placeConeT, NULL);                       // Place cone
 	mogoP(MOGO_DOWN);
 
-	driveSet(-127, -127);                      // Back up the drive
+	driveSet(-127, -127);                       // Back up the drive
 	delay(130);
-	mogoP(MOGO_DOWN - 300);                    // Bring the mobile goal up a bit
+	mogoP(MOGO_DOWN - 300);                     // Bring the mobile goal up a bit
 	delay(250);
-	driveSet(0, 0);                            // Stop the drive
+	driveSet(0, 0);                             // Stop the drive
 
-	armSettings.target = arm.sensor->average;  // Reset the arm position to it's
-	                                           // current position
+	liftSettings.target = lift.sensor->averageVal; // Reset the lift position to it's
+	                                            // current position
 } /* autonRight12 */
 
 void autonRight22() {
@@ -53,7 +53,7 @@ void autonRight22() {
 
 	gyroSettings[0].tolerance--;
 	gyroSettings[1].tolerance--;
-	turnTo(10, 575);                // Align to a right tilt
+	turnTo(10, 575);                 // Align to a right tilt
 	gyroSettings[0].tolerance++;
 	gyroSettings[1].tolerance++;
 	driveSettings[0].max -= 40;      // Limit left side speed
@@ -95,6 +95,6 @@ void autonRight22() {
 		delay(10);
 	}
 
-	armSettings.target = arm.sensor->average; // Reset the arm position to it's
-	                                          // current position
+	liftSettings.target = lift.sensor->averageVal; // Reset the lift position to it's
+	                                            // current position
 } /* autonRight22 */

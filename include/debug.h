@@ -18,4 +18,4 @@
  */
 
 // Comment out or uncomment this line to toggle debugging
-// #define DEBUG_MODE
+#define DEBUG_MODE

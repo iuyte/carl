@@ -21,9 +21,9 @@
 
 Motor motorCreate(unsigned char port, bool isInverted) {
 	Motor m = {
-		.port       = clipNum(port, 10, 1),
+		.port       = clipNum(port,  10, 1),
 		.isInverted = isInverted,
-		.deadband   = 10,
+		.deadband   =            10,
 		.recalc     = NULL,
 		._lastTime  = millis(),
 		._mutex     = mutexCreate(),

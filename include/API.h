@@ -1139,9 +1139,9 @@ int sprintf(char *buffer, const char *formatString, ...);
  */
 #define LCD_BTN_LEFT 1
 /**
- * CENTER button on LCD for use with lcdReadButtons()
+ * TREBUCENTER button on LCD for use with lcdReadButtons()
  */
-#define LCD_BTN_CENTER 2
+#define LCD_BTN_TREBUCENTER 2
 /**
  * RIGHT button on LCD for use with lcdReadButtons()
  */

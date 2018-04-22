@@ -20,7 +20,7 @@
 #include "../include/auto.h"
 
 void autonLeft22();
-void armPID(void *none);
+void liftPID(void *none);
 
 void autonSkills() {
 	// Get the mobile goal using the left red 22 point auton routine
@@ -63,7 +63,6 @@ void autonSkills() {
 
 	if (taskGetState(mogoHandle))
 		taskDelete(mogoHandle);
-
 	mogoP(MOGO_DOWN);
 	driveSet(-64, -64);
 	delay(150);
@@ -98,6 +97,7 @@ void autonSkills() {
 
 	driveSet(44, 44);
 	int sonicGoal = 43; // 62;
+
 	do {
 		sensorRefresh(sonic);
 		info();
@@ -124,7 +124,7 @@ void autonSkills() {
 	// Reset sensors
 	resetDrive();
 
-	driveToPositionAngle(900, 800, -354, 1876);
+	driveToPositionAngle(900,  800,  -354, 1876);
 	// Bring mogo intake to middle
 	mogoHandle = GO(mogoPT, MOGO_MID);
 	driveToPositionAngle(1325, 1225, -343, 2200);
@@ -132,8 +132,7 @@ void autonSkills() {
 	delay(250);
 
 	if (taskGetState(mogoHandle))
-		taskDelete(mogoHandle);
-	mogoP(MOGO_DOWN);
+		taskDelete(mogoHandle); mogoP(MOGO_DOWN);
 	driveSet(10, 10);
 	delay(250);
 
@@ -164,8 +163,8 @@ void autonSkills() {
 
 	resetDrive();
 
-	driveToPosition(100, 500, 1000);
-	driveToPosition(830, 1180, 800);
+	driveToPosition(100,  500,  1000);
+	driveToPosition(830,  1180, 800);
 	driveToPosition(1380, 1280, 1000);
 	driveToPositionAngle(1600, 1500, 185, 1700);
 
@@ -178,7 +177,6 @@ void autonSkills() {
 
 	if (taskGetState(mogoHandle))
 		taskDelete(mogoHandle);
-
 	mogo.power = 127;
 	motorUpdate(&mogo);
 	driveSet(64, 64);
@@ -193,8 +191,7 @@ void autonSkills() {
 	delay(125);
 
 	if (taskGetState(mogoHandle))
-		taskDelete(mogoHandle);
-	mogoHandle = GO(mogoPT, MOGO_MID);
+		taskDelete(mogoHandle); mogoHandle = GO(mogoPT, MOGO_MID);
 
 	driveToPosition(1100, 1000, 2095);
 
@@ -224,6 +221,7 @@ void autonSkills() {
 
 	driveSet(44, 44);
 	sonicGoal = 84;
+
 	do {
 		sensorRefresh(sonic);
 		info();
@@ -250,7 +248,7 @@ void autonSkills() {
 	// Reset sensors
 	resetDrive();
 
-	driveToPositionAngle(900, 800, -347, 1876);
+	driveToPositionAngle(900,  800,  -347, 1876);
 	// Bring mogo intake to middle
 	mogoHandle = GO(mogoPT, MOGO_MID);
 	driveToPositionAngle(1325, 1225, -336, 2200);
@@ -259,8 +257,7 @@ void autonSkills() {
 	resetDrive();
 
 	if (taskGetState(mogoHandle))
-		taskDelete(mogoHandle);
-	mogoP(MOGO_DOWN);
+		taskDelete(mogoHandle); mogoP(MOGO_DOWN);
 	driveSet(17, 17);
 	delay(250);
 

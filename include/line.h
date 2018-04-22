@@ -28,14 +28,10 @@
  * The distance between line sensors, the first number is inches and everything
  * else converts -> ticks
  */
-static const double lineDistance /*= (1.28 / ((M_PI * 4.125) / 360)) * (8/5);
-															   *///= (M_PI * 4.125 / (360 * (8/5))) / 1.9;
-														//	= 50.625;
-														//	= 50.00693952646796;
-																= 80.25791219881197;
+static const double lineDistance = 80.25791219881197;
 
 typedef enum {
-	LEFT = 0,
+	LEFT  = 0,
 	RIGHT = 1,
 } Side;
 
@@ -44,7 +40,7 @@ typedef enum {
  *
  * @return the current Side, LEFT or RIGHT
  */
-Side getSide();
+Side        getSide();
 
 /**
  * @brief Take and delete a mutex. If it can't be taken, don't delete it.
@@ -61,7 +57,7 @@ inline bool mutexTakeDelete(Mutex m, unsigned long blockTime) {
 
 	mutexDelete(m);
 	return true;
-}
+} // mutexTakeDelete
 
 /**
  * @brief Calculate the angle of the robot based on the positions of the left
@@ -84,6 +80,8 @@ int getAngleFP(int p[4], Side o);
  *
  * @return A Mutex that will be released when the angle is stored
  */
-Mutex angleFromUpcomingLine(int *store, Mutex mutex, unsigned long maxTime);
+Mutex angleFromUpcomingLine(int          *store,
+                            Mutex         mutex,
+                            unsigned long maxTime);
 
-#endif
+#endif // ifndef CARL_LINE_H_

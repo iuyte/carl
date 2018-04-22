@@ -33,12 +33,19 @@ enum MOGO_POS {
 };
 
 enum ARM_POS {
-	ARM_DOWN      = 10,
-	ARM_QUARTER   = 275,
-	ARM_HALF      = 430,
-	ARM_3_QUARTER = 540,
+	ARM_DOWN      = 290,
+	ARM_QUARTER   = 1000,
+	ARM_HALF      = 1850,
+	ARM_3_QUARTER = 2350,
+	ARM_UP        = 3400,
 };
 
+enum MANIP_POS {
+	MANIP_DOWN   = 50,
+	MANIP_PLACE  = 200,
+	MANIP_HOVER  = 940,
+	MANIP_INTAKE = 1350,
+};
 
 typedef struct Auton {
 	const char *name;
@@ -72,12 +79,12 @@ extern Auton autons[MAX_AUTON + 1];
 extern int   selectedAuton;
 
 /*
- * @breif Bring the arm to the specified position
+ * @breif Bring the lift to the specified position
  *
- * @param pos the position to bring the arm to
+ * @param pos the position to bring the lift to
  * @param until the maximum amount of time this can take in ms
  */
-void armToPosition(float         pos,
+void liftToPosition(float         pos,
                    unsigned long until);
 
 /**
@@ -154,18 +161,18 @@ Task mogoPT(void *p);
 Task placeConeT(void *none);
 
 /**
- * @brief Task for armToPosition
+ * @brief Task for liftToPosition
  */
-Task armPID(void *none);
+Task liftPID(void *none);
 
 /**
  * @brief don't use, it doesn't work
  */
 void moveTo(int leftV,
             int rightV,
-            int armV,
+            int liftV,
             int mogoV,
-            int clawV,
+            int intakeV,
             int gyroV);
 
 #endif // AUTO_ROBOT_H_

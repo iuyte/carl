@@ -36,13 +36,13 @@ void autonStack() {
 	#endif
 	sensorRefresh(&gyro);
 	#ifdef DEBUG_MODE
-		printf("\n\n\r%d\n\n", gyro.average);
+		printf("\n\n\r%d\n\n", gyro.averageVal);
 	#endif
 	gyro.zero = angle;
 	gyro.child->zero = angle;
 	sensorRefresh(&gyro);
 	#ifdef DEBUG_MODE
-		printf("\n\n\r%d\n\n", gyro.average);
+		printf("\n\n\r%d\n\n", gyro.averageVal);
 	#endif
 
 	driveToPositionAngle(drivePos(0) - 300, drivePos(1) - 300, 0, 2000);
@@ -59,32 +59,32 @@ void autonStack() {
 		delay(10);
 	}
 
-	claw.power = 50;
-	motorUpdate(&claw);
-	armSettings.target = ARM_3_QUARTER;
-	TaskHandle delet = GO(armPID, NULL);
+	intake.power = 50;
+	motorUpdate(&intake);
+	liftSettings.target = ARM_3_QUARTER;
+	TaskHandle delet = GO(liftPID, NULL);
 
 	driveToPositionAngle(drivePos(0) + 350, drivePos(1) + 350, 90, 1600);
 
 	taskDelete(delet);
-	armToPosition(ARM_3_QUARTER, 750);
+	liftToPosition(ARM_3_QUARTER, 750);
 
 	#ifdef DEBUG_MODE
 		print("\n\n\rready to stack\n\n");
 	#endif
 
 	for (int i = 0; i < 5; i++) {
-		claw.power = -75;
+		intake.power = -75;
 		update();
 		delay(500);
-		claw.power = -30;
+		intake.power = -30;
 		update();
-		armToPosition(ARM_QUARTER / 2 + (ARM_QUARTER * .25 * i), 3000);
-		claw.power = 127;
+		liftToPosition(ARM_QUARTER / 2 + (ARM_QUARTER * .25 * i), 3000);
+		intake.power = 127;
 		update();
 		delay(400);
-		claw.power = 10;
+		intake.power = 10;
 		update();
-		armToPosition(ARM_3_QUARTER, 3000);
+		liftToPosition(ARM_3_QUARTER, 3000);
 	}
 } /* autonLeftRed12 */

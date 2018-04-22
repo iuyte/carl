@@ -30,7 +30,7 @@ void autonTest() {
 		printf("\n\n//\n\rA:%d\n\\\\\n\n", angle);
 	#endif
 
-	gyro.zero = angle;
+	gyro.zero        = angle;
 	gyro.child->zero = angle;
 	driveSet(0, 0);
 	// turnTo(0, 2500);

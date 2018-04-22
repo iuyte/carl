@@ -51,11 +51,11 @@ extern double inch;
 extern Sensor gyro;
 
 /**
- * The limit switch on the arm
- *  in  @ digital 12
- *  out @ digital 11
+ * The limit switch on the lift
+ *  down  @ digital 12
+ *  up @ digital 11
  */
-extern Sensor armLimit[2];
+extern Sensor liftLimit[2];
 
 /**
  * Ultrasonic sensor
@@ -72,44 +72,48 @@ extern Sensor line[3];
 // Motors and servos
 
 /**
- * The claw, a motor @ port 3
- *  sensor pot       @ analog 5
+ * The intake, a motor @ port 3, and the potentiometer @ analog 5
  */
-extern Motor claw;
+extern Motor intake;
+
+/**
+ * The manipulator,
+ * 	left @ port 8,
+ * 	right & port 4
+ */
+extern Motor manip;
 
 /**
  * The two sides of the drive:
- *  left  @ index 0 in power expander @ port 2
- *    child center motor              @ port 4
- *    sensor                          @ digital 4, 5
- *  right @ index 1 in power expander @ port 9
- *    child center motor              @ port 7
+ *  left  @ index 0 in power expander @ port 2,
+ *    sensor quad                     @ digital 4, 5,
+ *  right @ index 1 in power expander @ port 9,
  *    sensor                          @ digital 8, 9
  */
 extern Motor drive[2];
 
 /**
- * The arm, containing:
- *  left motor            @ port 5
- *    child right motor   @ port 6
- *      child upper motor @ port 8
- *    sensor quad         @ digital 1, 2
+ * The lift, containing:
+ *  bottom left  motor @ port 5,
+ *  top    left  motor @ port 6,
+ *  bottom right motor @ port 7,
+ *  pot         sensor @ analog 5
  */
-extern Motor arm;
+extern Motor lift;
 
 /**
  * The mogo manipulator, consisting of:
- *  left  motor  @ port 1
+ *  left  motor  @ port   1
  *    sensor pot @ analog 3
- *  right motor  @ port 10
+ *  right motor  @ port   10
  *    sensor pot @ analog 4
  */
 extern Motor mogo;
 
 /**
- * PID settings for the arm
+ * PID settings for the lift
  */
-extern PIDSettings armSettings;
+extern PIDSettings liftSettings;
 
 /**
  * PID settings for the drive
@@ -126,9 +130,9 @@ extern PIDSettings driveSettings[2];
 extern PIDSettings gyroSettings[2];
 
 /**
- * PID settings for the claw
+ * PID settings for the manipulator
  */
-extern PIDSettings clawSettings;
+extern PIDSettings manipSettings;
 
 /**
  * Prints information and sets the LCD line 2 to display battery voltage

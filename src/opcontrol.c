@@ -35,9 +35,10 @@ int digital(unsigned char joyNum,
 void moveDrive();
 void moveMogo();
 void skillsMogo();
-void moveArm();
-void moveClaw();
-void clawPID();
+void moveIntake();
+void moveLift();
+void manipPID();
+void moveManip();
 
 void autonLeft22();
 void autonLeft22T();
@@ -50,15 +51,15 @@ void operatorControl() {
 	update();
 	isAuto = false;
 
-	clawSettings.target = claw.sensor->value;
-	armSettings.target  = arm.sensor->value;
+	manipSettings.target = manip.sensor->value;
+	liftSettings.target   = lift.sensor->value;
 
 	/*
-	if (armLimit[0].value) {
-		armSettings.target = ARM_QUARTER;
-		PID(&armSettings);
-	}
-	*/
+	 *   if (liftLimit[0].value) {
+	 *        liftSettings.target = ARM_QUARTER;
+	 *        PID(&liftSettings);
+	 *   }
+	 */
 
 	bool isSkills = strstr(autons[selectedAuton].name, "skills");
 
@@ -68,23 +69,24 @@ void operatorControl() {
 			exit(0);
 		}
 
-		moveDrive();
-		moveMogo();
-
 		if (isSkills) {
 			// skillsMogo();
 			if (joystickGetDigital(2, 7, JOY_DOWN)) {
 				reset();
 				sensorReset(drive[0].sensor);
 				sensorReset(drive[1].sensor);
-				sensorReset(arm.sensor);
+				sensorReset(lift.sensor);
 				sensorReset(mogo.sensor);
 				sensorReset(&gyro);
 				autonLeft22();
 			}
 		}
-		moveArm();
-		clawPID();
+
+		moveDrive();
+		moveMogo();
+		moveIntake();
+		moveLift();
+		manipPID();
 		update();
 
 		delay(20);
@@ -101,11 +103,10 @@ void moveDrive() {
 } /* moveDrive */
 
 void moveMogo() {
-	int power = 127 * digital(1, 6, JOY_UP, JOY_DOWN) +
-	             127 * digital(2, 5, JOY_UP, JOY_DOWN);
-	if ((mogo.power == 127 || mogo.power == 9) && !power)
-		power = 9;
-	mogo.power = power;
+	int power = 127 * digital(1, 6, JOY_UP, JOY_DOWN);
+
+	if (((mogo.power == 127) || (mogo.power == 9)) && !power)
+		power = 9; mogo.power = power;
 } /* moveMogo */
 
 void skillsMogo() {
@@ -118,67 +119,71 @@ void skillsMogo() {
 	}
 } /* skillsMogo */
 
-void moveArm() {
+void moveLift() {
 	static unsigned long lastPress;
 
-	if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 90)) {
-		arm.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
+	if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 150)) {
+		lift.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
 
-		if (arm.power) {
+		if (lift.power) {
 			lastPress = millis();
 		}
 
-		if (armLimit[0].value) {
-			sensorReset(arm.sensor);
-			arm.power = clipNum(arm.power, 0, -127);
-		} else if (armLimit[1].value) {
-			arm.sensor->zero = arm.sensor->value - 1000;
-			arm.power        = clipNum(arm.power, 127, 0);
+		if (liftLimit[0].value) {
+			sensorReset(lift.sensor);
+			lift.power = clipNum(lift.power, 0, -127);
+		} else if (liftLimit[1].value) {
+			lift.sensor->zero = lift.sensor->value - 1000;
+			lift.power        = clipNum(lift.power, 127, 0);
 		}
-		armSettings.target = arm.sensor->value;
-	} else if (armLimit[0].value) {
-		  sensorReset(arm.sensor);
-		armSettings.target = 0;
-		arm.power          = 0;
-	} else if (armLimit[1].value) {
-		arm.sensor->zero   = arm.sensor->value - 1000;
-		armSettings.target = 1000;
-		arm.power          = 0;
+		liftSettings.target = lift.sensor->value;
+	} else if (liftLimit[0].value) {
+		  sensorReset(lift.sensor);
+		liftSettings.target = 0;
+		lift.power          = 0;
+	} else if (liftLimit[1].value) {
+		lift.sensor->zero   = lift.sensor->value - 1000;
+		liftSettings.target = 1000;
+		lift.power          = 0;
 	} else {
-		PID(&armSettings);
+		PID(&liftSettings);
 	}
-} /* moveArm */
+} /* moveLift */
 
-void moveClaw() {
-	if (deadBand(joystickGetAnalog(2, 4), 10)) {
-		claw.power = joystickGetAnalog(2, 4);
-	} else {
-		claw.power = 0;
-	}
-} /* moveClaw */
+void moveManip() {
+	manip.power = 127 * digital(2, 5, JOY_UP, JOY_DOWN);
+}
 
-void clawPID() {
+void moveIntake() {
+	intake.power = .75f * (float)(joystickGetAnalog(2, 4) +
+																joystickGetAnalog(2, 3));
+} /* moveIntake */
+
+void manipPID() {
 	static unsigned long lastPress;
-	static bool lastDir;
-	static int power;
+	static int  power;
 
-	power = joystickGetAnalog(2, 4);
+	if (joystickGetDigital(2, 7, JOY_UP))
+		manipSettings.target = MANIP_PLACE;
+	else if (joystickGetDigital(2, 7, JOY_RIGHT))
+		manipSettings.target = MANIP_HOVER;
+	else if (joystickGetDigital(2, 7, JOY_DOWN))
+		manipSettings.target = MANIP_INTAKE;
+
+	power = 127 * digital(2, 5, JOY_UP, JOY_DOWN);
 
 	if (power) {
-		lastDir             = power > 0;
-		claw.power          = -power;
-		clawSettings.target = claw.sensor->value;
-		lastPress           = millis();
-	} else if (millis() - lastPress < 275) {
-		clawSettings.target = claw.sensor->value + 50;
-	} else if (lastDir) {
-		claw.power = 0;
+		manip.power          = power;
+		manipSettings.target = manip.sensor->averageVal;
+		lastPress             = millis();
+	} else if (millis() - lastPress < 190) {
+		manip.power = 0;
 	} else {
-		PID(&clawSettings);
+		PID(&manipSettings);
 	}
-} /* clawPID */
+} /* manipPID */
 
 void autonLeft22T(void *none) {
 	autonLeft22();
 	taskDelete(NULL);
-}
+} /* autonLeft22T */

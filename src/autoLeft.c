@@ -58,7 +58,7 @@ void autonLeft22() {
 	// driveToPosition(-485, -210, 5500); // Back up
 	driveToPosition(-850, -850, 5500);    // Back up
 	// driveSettings[1].max += 40;        // Correct speed
-	GO(armPID, NULL);
+	GO(liftPID, NULL);
 	turnTo(-144, 2500); // Turn around
 
 	// Reset drive encoders & gyro
@@ -134,6 +134,6 @@ void autonLeft22() {
 		delay(10);
 	}
 
-	armSettings.target = arm.sensor->average; // Reset the arm position to it's
+	liftSettings.target = lift.sensor->averageVal; // Reset the lift position to it's
 	                                          // current position
 } /* autonLeft22 */

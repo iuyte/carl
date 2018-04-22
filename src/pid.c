@@ -25,8 +25,8 @@ void PID(PIDSettings *settings) {
 	float power;
 
 	error = settings->target - (settings->sensor ?
-	                            settings->sensor->average :
-	                            settings->root->sensor->average);
+	                            settings->sensor->averageVal :
+	                            settings->root->sensor->averageVal);
 
 	if (sgn(error) != sgn(settings->_error))
 		settings->_integral = 0;

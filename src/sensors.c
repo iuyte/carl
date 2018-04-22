@@ -20,9 +20,12 @@
 #include "../include/sensors.h"
 #include <math.h>
 
-float defaultRecalc(int n) {
+static inline float defaultRecalc(int n) {
 	return n;
 } /* defaultRecalc */
+
+unsigned char imeNum = 0;
+bool isImeInit = false;
 
 int readSensorValue(Sensor *s) {
 	switch (s->_type) {
@@ -67,8 +70,12 @@ void sensorRefresh(Sensor *s) {
 		return;
 	}
 
-	int val = (s->_type == Digital) ? readSensorValue(s) :
-	          (readSensorValue(s) - s->zero);
+	int val;
+	if (s->_type == IME)
+		 imeGet(s->port, &val);
+	else
+		val = (s->_type == Digital) ? readSensorValue(s) :
+							(readSensorValue(s) - s->zero);
 
 	if (s->inverted) {
 		if (s->_type == Digital) {
@@ -83,7 +90,22 @@ void sensorRefresh(Sensor *s) {
 	}
 
 	s->value   = val;
-	s->average = s->child ? ((s->value + s->child->average) / 2) : s->value;
+	s->averageVal = s->child ? ((s->value + s->child->averageVal) / 2) : s->value;
+
+	// int lastVel = s->velocity;
+
+	if (s->_type == IME && imeGetVelocity(s->port, &s->velocity))
+		s->_lastUpdate = millis();
+	else if (s->_type != IME) {
+		s->velocity    = ((float)(val - s->_lastValue) /
+											(float)(millis() - s->_lastUpdate)) * 1000.f;
+		s->_lastValue  = val;
+		s->_lastUpdate = millis();
+	} else
+		s->velocity = 0;
+
+	s->averageVel = s->child ? ((s->velocity + s->child->averageVel) / 2)
+		                         : s->velocity;
 
 	mutexGive(s->_mutex);
 } /* sensorRefresh */
@@ -102,6 +124,10 @@ void sensorReset(Sensor *s) {
 		case Quad:
 			encoderReset(s->_pros);
 			s->zero = 0;
+			break;
+
+		case IME:
+			imeReset(s->port);
 			break;
 
 		default:
@@ -133,7 +159,6 @@ Sensor newSensor(SensorType     type,
 			break;
 
 		case Analog:
-
 			if (calibrate) {
 				analogCalibrate(port);
 			}
@@ -186,3 +211,7 @@ Sensor newAnalogHR(unsigned char port) {
 Sensor newGyro(unsigned char port, bool inverted, int calibration) {
 	return newSensor(Gyroscope, port, inverted, calibration);
 } /* newGyro */
+
+Sensor newIME(unsigned char num, bool inverted) {
+	return newSensor(IME, num, inverted, 0);
+} /* newIME */

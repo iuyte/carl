@@ -40,8 +40,8 @@ Auton autons[MAX_AUTON + 1] =
 { {
 		// index 0
 		.name       = "left 12",
-		.sensorName = "arm",
-		.sensor     = &arm.sensor,
+		.sensorName = "lift",
+		.sensor     = &lift.sensor,
 		.execute    = &autonLeft12,
 	},{
 		// index 1
@@ -52,8 +52,8 @@ Auton autons[MAX_AUTON + 1] =
 	},{
 		// index 2
 		.name       = "right 12",
-		.sensorName = "claw",
-		.sensor     = &claw.sensor,
+		.sensorName = "intake",
+		.sensor     = &intake.sensor,
 		.execute    = &autonRight12,
 	},{
 		// index 3
@@ -70,8 +70,8 @@ Auton autons[MAX_AUTON + 1] =
 	},{
 		// index 5
 		.name       = "none",
-		.sensorName = "arm",
-		.sensor     = &arm.sensor,
+		.sensorName = "lift",
+		.sensor     = &lift.sensor,
 		.execute    = &autonNone,
 	},{
 		// index 6
@@ -88,22 +88,22 @@ Auton autons[MAX_AUTON + 1] =
 	},{
 		// index 8
 		.name       = "drive and autostack",
-		.sensorName = "arm",
-		.sensor     = &arm.sensor,
+		.sensorName = "lift",
+		.sensor     = &lift.sensor,
 		.execute    = &autonStack,
 	}, };
 
-void armToPosition(float pos, unsigned long until) {
-	armSettings.target = pos;
+void liftToPosition(float pos, unsigned long until) {
+	liftSettings.target = pos;
 	until             += millis();
 
 	do {
-		PID(&armSettings);
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
+		PID(&liftSettings);
+		motorUpdate(&lift);
+		sensorRefresh(lift.sensor);
 		delay(10);
-	} while (!armSettings.isTargetReached && millis() < until);
-} /* armToPosition */
+	} while (!liftSettings.isTargetReached && millis() < until);
+} /* liftToPosition */
 
 void driveToPosition(int l, int r, unsigned long until) {
 	driveSettings[0].target = l;
@@ -114,8 +114,8 @@ void driveToPosition(int l, int r, unsigned long until) {
 		PID(&driveSettings[0]);
 		PID(&driveSettings[1]);
 
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
+		motorUpdate(&lift);
+		sensorRefresh(lift.sensor);
 		sensorRefresh(&gyro);
 
 		for (int i = 0; i < 2; i++) {
@@ -140,14 +140,14 @@ void driveToPositionAngle(int l, int r, int a, unsigned long until) {
 	until                  += millis();
 
 	do {
-		gError = (a - gyro.average) * 1.5;
+		gError = (a - gyro.averageVal) * 1.5;
 		PID(&driveSettings[0]);
 		PID(&driveSettings[1]);
 		drive[0].power += gError;
 		drive[1].power -= gError;
 
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
+		motorUpdate(&lift);
+		sensorRefresh(lift.sensor);
 		sensorRefresh(&gyro);
 
 		for (int i = 0; i < 2; i++) {
@@ -173,12 +173,12 @@ void mogoP(int p) {
 	int pow;
 
 	do {
-		pow = sgn(p - mogo.sensor->average);
+		pow = sgn(p - mogo.sensor->averageVal);
 		sensorRefresh(mogo.sensor);
 		mogo.power = (pow ? pow : 1) * 127;
 		motorUpdate(&mogo);
 		delay(10);
-	} while ((isAutonomous() || !isAuto) && abs(p - mogo.sensor->average) > 78);
+	} while ((isAutonomous() || !isAuto) && abs(p - mogo.sensor->averageVal) > 78);
 
 	mogo.power = 0;
 	motorUpdate(&mogo);
@@ -200,8 +200,8 @@ void gyroPID(int target, int precision) {
 	int derivative = 0;
 
 	do {
-		derivative = (target - gyro.average) - error;
-		error      = target - gyro.average;
+		derivative = (target - gyro.averageVal) - error;
+		error      = target - gyro.averageVal;
 		integral  += error / 10;
 
 		drive[0].power = -((error * gyroPIDC[0]) +
@@ -250,14 +250,14 @@ void turnTo(int angle, unsigned long until) {
 } /* turnTo */
 
 void getMogo() {
-	claw.power         = -25;
-	armSettings.target = ARM_QUARTER + 20;
-	arm.power = -70;
-	motorUpdate(&arm);
+	intake.power         = -25;
+	liftSettings.target = ARM_QUARTER + 20;
+	lift.power = -70;
+	motorUpdate(&lift);
 	delay(300);
 	driveSet(25, 25);
 
-	TaskHandle armHandle = GO(armPID, NULL);
+	TaskHandle liftHandle = GO(liftPID, NULL);
 	TaskHandle mogoHandle = GO(mogoPT, MOGO_DOWN + 10);
 	delay(600);
 
@@ -274,13 +274,13 @@ void getMogo() {
 
 	driveSet(18, 18);
 
-	while (mogo.sensor->average > MOGO_MID) {
+	while (mogo.sensor->averageVal > MOGO_MID) {
 		sensorRefresh(mogo.sensor);
 		delay(10);
 	}
 
-	if (taskGetState(armHandle))
-		taskDelete(armHandle);
+	if (taskGetState(liftHandle))
+		taskDelete(liftHandle);
 	driveSet(0, 0);
 	mogo.power = 6;
 	motorUpdate(&mogo);
@@ -304,16 +304,16 @@ Task backUp(void *time) {
 
 void placeCone() {
 	// Arm down
-	armToPosition(ARM_DOWN + 35, 400);
+	liftToPosition(ARM_DOWN + 35, 400);
 
 	// Drop cone
-	claw.power = 127; // Open claw
-	motorUpdate(&claw);
-	delay(475);       // Give claw time to open
-	claw.power = 0;   // Stop claw
-	armToPosition(ARM_QUARTER, 400);
-	arm.power = 10; // Keep arm up
-	motorUpdate(&arm);
+	intake.power = 127; // Open intake
+	motorUpdate(&intake);
+	delay(475);       // Give intake time to open
+	intake.power = 0;   // Stop intake
+	liftToPosition(ARM_QUARTER, 400);
+	lift.power = 10; // Keep lift up
+	motorUpdate(&lift);
 	#ifdef DEBUG_MODE
 		print("Cone placed!\n"); // Notify computer of cone state
 	#endif
@@ -355,7 +355,7 @@ void autonomous() {
 	reset();
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
-	sensorReset(arm.sensor);
+	sensorReset(lift.sensor);
 	sensorReset(mogo.sensor);
 	sensorReset(&gyro);
 
@@ -363,13 +363,13 @@ void autonomous() {
 	if (autons[selectedAuton].execute != NULL)
 		autons[selectedAuton].execute();
 
-	armSettings.target = arm.sensor->average; // Set target to current pos
+	liftSettings.target = lift.sensor->averageVal; // Set target to current pos
 
 	#ifdef DEBUG_MODE
 		printf("\n\n\rFinished autonomous in %ldms\n\n", millis() - startTime);
 	#endif
 	while (isAutonomous()) {
-		PID(&armSettings);                      // Hold the arm position
+		PID(&liftSettings);                      // Hold the lift position
 		update();
 		delay(10);
 	}
@@ -394,11 +394,11 @@ Task driveToPositionAngleT(void *triple) {
 	do {
 		PID(&driveSettings[0]);
 		PID(&driveSettings[1]);
-		drive[0].power += (t->c - gyro.average) * 2.3;
-		drive[1].power -= (t->c - gyro.average) * 2.3;
+		drive[0].power += (t->c - gyro.averageVal) * 2.3;
+		drive[1].power -= (t->c - gyro.averageVal) * 2.3;
 
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
+		motorUpdate(&lift);
+		sensorRefresh(lift.sensor);
 		sensorRefresh(&gyro);
 
 		for (int i = 0; i < 2; i++) {
@@ -416,37 +416,37 @@ Task driveToPositionAngleT(void *triple) {
 	taskDelete(NULL);
 } /* driveToPositionAngleT */
 
-Task armToPositionT(void *pos) {
+Task liftToPositionT(void *pos) {
 	int p = (int)pos;
 
-	armToPosition(p, p * 1.34);
+	liftToPosition(p, p * 1.34);
 	taskDelete(NULL);
-} /* armToPositionT */
+} /* liftToPositionT */
 
-Task clawToPositionT(void *pos) {
-	clawSettings.target = (int)pos;
+Task intakeToPositionT(void *pos) {
+	manipSettings.target = (int)pos;
 
 	do {
-		PID(&clawSettings);
-		motorUpdate(&claw);
-		sensorRefresh(claw.sensor);
+		PID(&manipSettings);
+		motorUpdate(&intake);
+		sensorRefresh(intake.sensor);
 		delay(10);
-	} while (!clawSettings.isTargetReached);
+	} while (!manipSettings.isTargetReached);
 
 	taskDelete(NULL);
-} /* clawToPositionT */
+} /* intakeToPositionT */
 
 Task die(void *none) {
 	taskDelete(NULL);
 }
 
-void moveTo(int leftV, int rightV, int armV, int mogoV, int clawV, int gyroV) {
-	TaskHandle driveHandle, armHandle, mogoHandle, clawHandle;
+void moveTo(int leftV, int rightV, int liftV, int mogoV, int intakeV, int gyroV) {
+	TaskHandle driveHandle, liftHandle, mogoHandle, intakeHandle;
 	update();
 
 	if ((abs(leftV - drive[0].sensor->value) > driveSettings[0].tolerance) ||
 	    (abs(rightV - drive[1].sensor->value) > driveSettings[1].tolerance) ||
-			(abs(gyroV - gyro.average) > gyroSettings[0].tolerance)) {
+			(abs(gyroV - gyro.averageVal) > gyroSettings[0].tolerance)) {
 		Triple *t = new(Triple);
 		t->a        = leftV;
 		t->b        = rightV;
@@ -454,35 +454,35 @@ void moveTo(int leftV, int rightV, int armV, int mogoV, int clawV, int gyroV) {
 		driveHandle = GO(driveToPositionAngleT, t);
 	}
 
-	if (abs(armV - arm.sensor->value) > armSettings.tolerance)
-		armHandle = GO(armToPositionT, armV);
+	if (abs(liftV - lift.sensor->value) > liftSettings.tolerance)
+		liftHandle = GO(liftToPositionT, liftV);
 
-	if (abs(mogoV - mogo.sensor->average) > 90)
+	if (abs(mogoV - mogo.sensor->averageVal) > 90)
 		mogoHandle = GO(mogoPT, mogoV);
 
-	if (abs(clawV - claw.sensor->value) > clawSettings.tolerance)
-		clawHandle = GO(clawToPositionT, clawV);
+	if (abs(intakeV - intake.sensor->value) > manipSettings.tolerance)
+		intakeHandle = GO(intakeToPositionT, intakeV);
 
 	if (driveHandle)
 		while (taskGetState(driveHandle))
 			delay(10);
 
-	if (armHandle)
-		while (taskGetState(armHandle))
+	if (liftHandle)
+		while (taskGetState(liftHandle))
 			delay(10);
 
 	if (mogoHandle)
 		while (taskGetState(mogoHandle))
 			delay(10);
 
-	if (clawHandle)
-		while (taskGetState(clawHandle))
+	if (intakeHandle)
+		while (taskGetState(intakeHandle))
 			delay(10);
 } /* moveTo */
 
-void armPID(void *none) {
+void liftPID(void *none) {
 	while (isEnabled()) {
-		PID(&armSettings);
+		PID(&liftSettings);
 		delay(10);
 	}
 }

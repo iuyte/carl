@@ -44,6 +44,9 @@ typedef enum {
 	/** Gyro Sensor */
 	Gyroscope,
 
+	/** Integrated Motor Encoder */
+	IME,
+
 	/** Placeholder for a late init Sensor */
 	Placeholder,
 } SensorType;
@@ -58,8 +61,14 @@ typedef struct Sensor {
 	/** Current Sensor value */
 	int value;
 
+	/** Current Sensor's velocity */
+	int velocity;
+
 	/** The average of the Sensor value and it's child's value */
-	int average;
+	int averageVal;
+
+	/** The average velocity if the Sensor's velocity and it's children's velocity */
+	int averageVel;
 
 	/** Recalculation function of the Sensor's value */
 	float (*recalc)(int);
@@ -77,6 +86,8 @@ typedef struct Sensor {
 	SensorType _type;
 	void      *_pros;
 	Mutex      _mutex;
+	unsigned long _lastUpdate;
+	int _lastValue;
 } Sensor;
 
 /**
@@ -176,5 +187,16 @@ Sensor newAnalogHR(unsigned char port);
 Sensor newGyro(unsigned char port,
                bool          inverted,
                int           calibration);
+
+/**
+ * Create a IME Sensor
+ *
+ * @param num         the number that the IME is on the daisy chain
+ * @param inverted    whether or not it's inverted
+ *
+ * @return the new IME Sensor object
+ */
+Sensor newIME(unsigned char num,
+              bool          inverted);
 
 #endif // CARL_SENSORS_H_

@@ -22,13 +22,15 @@
 TaskHandle LCDHandle;
 
 Task lcdTask(void *none) {
-	unsigned int lcdState = 0x000;
+	unsigned int lcdState    = 0x000;
 	unsigned int newLcdState = 0x000;
 
 	while (true) {
 		newLcdState = lcdReadButtons(uart1);
+
 		if (lcdState != newLcdState) {
 			lcdState = newLcdState;
+
 			if (lcdState == 4) {
 				if (selectedAuton < 1) {
 					selectedAuton = MAX_AUTON;
@@ -56,10 +58,10 @@ Task lcdTask(void *none) {
 		info();
 		lcdPrint(uart1, 1, "b:%u, a:%s",
 		         powerLevelMain(),
-						 autons[selectedAuton].name);
+		         autons[selectedAuton].name);
 		lcdPrint(uart1, 2, "%s: %d",
 		         autons[selectedAuton].sensorName,
-		         (*autons[selectedAuton].sensor)->average);
+		         (*autons[selectedAuton].sensor)->averageVal);
 		delay(25);
 	}
 } /* selectAuton */
