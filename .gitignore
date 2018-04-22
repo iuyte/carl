@@ -252,3 +252,4 @@ CMakeLists.txt
 bin
 compile_commands.json
 */__pycache__
+docs
