@@ -1,6 +1,19 @@
 [
     {
         "author": " iuyte <iuyte@iuyte.net>",
+        "commitkey": "47303917ad70de52937f2b2fcc23245baf59803c",
+        "date": "  Sun Apr 22 16:06:45 2018 -0400",
+        "description": "More equally distributed controls",
+        "filesAdded": [],
+        "filesDeleted": [],
+        "filesModified": [
+            "include/debug.h",
+            "src/opcontrol.c",
+            "tools/commit"
+        ]
+    },
+    {
+        "author": " iuyte <iuyte@iuyte.net>",
         "commitkey": "589321ffc76bebb7716877577c0f57fb528b4f59",
         "date": "  Sun Apr 22 15:43:10 2018 -0400",
         "description": "Changed position to place cones",
