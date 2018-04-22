@@ -148,7 +148,7 @@ def parseContent(content):
         assert False, "File is empty or does not exist"
     out = "<html>\n<head>\n" + style + "<title>Git Commit history</title>\n</head>\n<body style='background-color: #bfbfdf;' class='body'>"
     count = 0
-    commits = content.split("commit ")
+    commits = content.split("\ncommit ")
     out += "<div class='commit' id='top'>\n<h1 class='centered'>VEX Robotics Competition</h1>\n<h2 class='centered'>Team 709S Programming Log / Notebook<h2>\n</div>\n<br>\n"
     commit = 0
     lcom = ""

@@ -1,21 +1,35 @@
 #!/bin/bash
 
+# Build everything and then get rid of it so the user knows the state of stuff
 make all -j4
 make clean
+
+# Create pdfs and the website
 make pdfs website -j2
 
+# Add files
 git add .
 git add -u
 
+# Commit using the argument to the program if possible, otherwise open up the
+# default editor for it
 if [ $# -eq 1 ]
   then git commit -Sm "$1"
 else
   git commit -S
 fi
 
+# Generate the website
 make website
 
+# Go into the docs folder, aka the gh-pages branch, and generate a markdown
+# table from the json log
 cd docs
+cat log.json | md-table > table.md
+
+# Add files and commit with the message of the current time
 git add .
 git commit -m "`date`"
+
+# Push website changes
 git push
