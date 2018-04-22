@@ -14,5 +14,6 @@ else
 fi
 
 cd docs
+git add .
 git commit -m "`date`"
 git push
