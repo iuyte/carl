@@ -34,7 +34,6 @@ int digital(unsigned char joyNum,
 
 void moveDrive();
 void moveMogo();
-void skillsMogo();
 void moveIntake();
 void moveLift();
 void manipPID();
@@ -103,27 +102,18 @@ void moveDrive() {
 } /* moveDrive */
 
 void moveMogo() {
-	int power = 127 * digital(1, 6, JOY_UP, JOY_DOWN);
+	int power = 127 * digital(1, 5, JOY_UP, JOY_DOWN);
 
 	if (((mogo.power == 127) || (mogo.power == 9)) && !power)
 		power = 9; mogo.power = power;
 } /* moveMogo */
 
-void skillsMogo() {
-	if ((mogo.sensor->value <= MOGO_HOLD) &&
-	    !joystickGetDigital(1, 5, JOY_DOWN) &&
-	    !joystickGetDigital(2, 7, JOY_UP)) {
-		mogo.power = clipNum(mogo.power,
-		                     127,
-		                     (MOGO_HOLD - mogo.sensor->value) * .9 + 13);
-	}
-} /* skillsMogo */
-
 void moveLift() {
 	static unsigned long lastPress;
 
-	if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 150)) {
-		lift.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
+	if (digital(2, 6, JOY_DOWN, JOY_UP) + digital(1, 6, JOY_UP, JOY_DOWN) || (millis() - lastPress < 150)) {
+		lift.power = 127 * (digital(1, 6, JOY_UP, JOY_DOWN) +
+											  digital(2, 6, JOY_UP, JOY_DOWN));
 
 		if (lift.power) {
 			lastPress = millis();
@@ -151,14 +141,11 @@ void moveLift() {
 } /* moveLift */
 
 void moveManip() {
-	manip.power = 127 * digital(2, 5, JOY_UP, JOY_DOWN);
+	manip.power = 127 * digital(2, 8, JOY_UP, JOY_DOWN);
 }
 
 void moveIntake() {
-	intake.power = .75f * (float)(joystickGetAnalog(2, 1) +
-																joystickGetAnalog(2, 2) +
-																joystickGetAnalog(2, 3) +
-																joystickGetAnalog(2, 4));
+	intake.power = 127 * digital(2, 5, JOY_UP, JOY_DOWN);
 } /* moveIntake */
 
 void manipPID() {
@@ -172,7 +159,7 @@ void manipPID() {
 	else if (joystickGetDigital(2, 7, JOY_DOWN))
 		manipSettings.target = MANIP_INTAKE;
 
-	power = 127 * digital(2, 5, JOY_UP, JOY_DOWN);
+	power = 127 * digital(2, 8, JOY_UP, JOY_DOWN);
 
 	if (power) {
 		if (manip.sensor->value < MANIP_PLACE && power > 0) {

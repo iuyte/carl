@@ -25,6 +25,8 @@ make website
 # Go into the docs folder, aka the gh-pages branch, and generate a markdown
 # table from the json log
 cd docs
+cat log.json | python -m json.tool > tmp.json
+mv tmp.json log.json
 cat log.json | md-table > table.md
 
 # Add files and commit with the message of the current time
