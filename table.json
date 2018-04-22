@@ -1,20 +1,6 @@
 [
     {
         "author": " iuyte <iuyte@iuyte.net>",
-        "commitkey": "589321ffc76bebb7716877577c0f57fb528b4f59",
-        "date": "  Sun Apr 22 15:43:10 2018 -0400",
-        "description": "Changed position to place cones",
-        "filesAdded": [],
-        "filesDeleted": [],
-        "filesModified": [
-            "include/auto.h",
-            "tools/cleanuphelp.py",
-            "tools/commit",
-            "tools/pdfMaker.sh"
-        ]
-    },
-    {
-        "author": " iuyte <iuyte@iuyte.net>",
         "commitkey": "f95dbd0ce7338814e138b5ab386bad5ac2e526c4",
         "date": "  Sun Apr 22 14:03:03 2018 -0400",
         "description": "Moved pdfs to gh-pages branch",
