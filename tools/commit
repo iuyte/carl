@@ -34,7 +34,7 @@ cat log.json | md-table > table.md
 cd ..
 tools/formatTable.py
 
-# Go into docs (gh-pages ) and add files and commit with the message of the
+# Go into docs (gh-pages) and add files and commit with the message of the
 # current time
 cd docs
 git add .

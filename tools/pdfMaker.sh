@@ -34,7 +34,7 @@ then
 			echo "$latex" > tmp/include/$q.tex
 			pdflatex -shell-escape tmp/include/"$q".tex
 
-			echo " * [$q.h](/include/$q.pdf)" >> "docs/include/index.md"
+			echo " * [$q.h](/carl/include/$q.pdf)" >> "docs/include/index.md"
 		done
 
 		rm *.log
@@ -60,7 +60,7 @@ then
 			echo "$latex" > tmp/src/$q.tex
 			pdflatex -shell-escape tmp/src/"$q".tex
 
-			echo " * [$q.c](/src/$q.pdf)" >> "docs/src/index.md"
+			echo " * [$q.c](/carl/src/$q.pdf)" >> "docs/src/index.md"
 		done
 
 		rm *.log
