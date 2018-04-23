@@ -88,8 +88,8 @@ Auton autons[MAX_AUTON + 1] =
 	},{
 		// index 8
 		.name       = "drive and autostack",
-		.sensorName = "lift",
-		.sensor     = &lift.sensor,
+		.sensorName = "4bar",
+		.sensor     = &manip.sensor,
 		.execute    = &autonStack,
 	}, };
 
@@ -169,7 +169,6 @@ void mogoP(int p) {
 	mutexGive(mogo._mutex);
 	mutexGive(mogo.child->_mutex);
 	mutexGive(mogo.sensor->_mutex);
-	mutexGive(mogo.sensor->child->_mutex);
 	int pow;
 
 	do {

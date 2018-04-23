@@ -41,10 +41,10 @@ enum ARM_POS {
 };
 
 enum MANIP_POS {
-	MANIP_NORMAL = 50,
-	MANIP_PLACE  = 230,
-	MANIP_HOVER  = 940,
-	MANIP_INTAKE = 1350,
+	MANIP_NORMAL = 750,
+	MANIP_PLACE  = 500,
+	MANIP_HOVER  = 130,
+	MANIP_INTAKE = 90,
 };
 
 typedef struct Auton {

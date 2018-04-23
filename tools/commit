@@ -14,7 +14,7 @@ git add -u
 # Commit using the argument to the program if possible, otherwise open up the
 # default editor for it
 if [ $# -eq 1 ]
-  then git commit -Sm "$1"
+  then git commit -S -m "$1"
 else
   git commit -S
 fi

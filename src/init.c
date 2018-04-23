@@ -27,6 +27,11 @@ static inline float lineRecalc(int v) {
 	return (float)(v > 16);
 } /* lineRecalc */
 
+static inline float manipRecalc(int p) {
+	return (manip.sensor->value > 300) ? ((p > 0) ? (float)p * .4 : (float)p * .7)
+																		 : (float)p * 1.9;
+}
+
 void initializeIO() {
 	watchdogInit();
 } /* initializeIO */
@@ -61,13 +66,14 @@ void init() {
 	notice("gyroscopes, ");
 	Sensor *mogoAngle = new(Sensor);
 	*mogoAngle        = newAnalog(3, true);
-	mogoAngle->child  = new(Sensor);
-	*mogoAngle->child = newAnalog(4, true);
 	notice("mobile goal angle, ");
+	Sensor *manipS = new(Sensor);
+	*manipS = newAnalog(4, false);
+	manipS->zero = 0;
+	notice("4bar pot, ");
 	Sensor *liftPot = new(Sensor);
 	*liftPot = newAnalog(5, false);
-	sensorRefresh(liftPot);
-	liftPot->zero = liftPot->value;
+	liftPot->zero = 0;
 	notice("lift pot, ");
 
 	for (int i = 0; i < 3; i++) {
@@ -90,15 +96,6 @@ void init() {
 	*sonic = newSonic(6, 7);
 	notice("ultrasonic, ");
 
-	// The IMEs
-	if (imeInitializeAll() < 1) {
-		print("\n\nexiting program...\n\n");
-		exit(0);
-	}
-	Sensor *manipS = new(Sensor);
-	*manipS = newIME(0, true);
-	sensorReset(manipS);
-
 	// Initialize and set up all of the motors, servos, etc
 
 	// intake motor
@@ -107,8 +104,10 @@ void init() {
 
 	// intake manipulater motor
 	manip = motorCreate(4, true);
+	manip.recalc = &manipRecalc;
 	manip.child = new(Motor);
 	*manip.child = motorCreate(8, false);
+	manip.child->recalc = &manipRecalc;
 	manip.sensor = manipS;
 
 	// lift motors
@@ -147,6 +146,9 @@ void init() {
 	setTeamName("709S");
 	notice("done!");
 
+	delay(500);
 	// Start the LCD task
 	LCDHandle = GO(lcdTask, NULL);
+	print("\n\njofsd\n\n");
+	delay(500);
 } /* init */

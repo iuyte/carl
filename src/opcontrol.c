@@ -84,8 +84,8 @@ void operatorControl() {
 		moveDrive();
 		moveMogo();
 		moveIntake();
-		moveLift();
 		manipPID();
+		moveLift();
 		update();
 
 		delay(20);
@@ -111,11 +111,16 @@ void moveMogo() {
 void moveLift() {
 	static unsigned long lastPress;
 
-	if (digital(2, 6, JOY_DOWN, JOY_UP) + digital(1, 6, JOY_UP, JOY_DOWN) || (millis() - lastPress < 150)) {
+	if (digital(2, 6, JOY_DOWN, JOY_UP) + digital(1, 6, JOY_UP, JOY_DOWN) ||
+																			  		 (millis() - lastPress < 150)) {
 		lift.power = 127 * (digital(1, 6, JOY_UP, JOY_DOWN) +
 											  digital(2, 6, JOY_UP, JOY_DOWN));
 
-		if (lift.power) {
+		if (lift.power > 0 && manip.sensor->value <
+							(MANIP_INTAKE + MANIP_HOVER) / 2 - 20) {
+			lift.power = 0;
+			manipSettings.target = MANIP_HOVER;
+		} else if (lift.power) {
 			lastPress = millis();
 		}
 

@@ -79,7 +79,8 @@ extern Motor intake;
 /**
  * The manipulator,
  * 	left @ port 8,
- * 	right & port 4
+ * 	right & port 4,
+ * 	sensor is a pot @ analog 4
  */
 extern Motor manip;
 
@@ -106,7 +107,6 @@ extern Motor lift;
  *  left  motor  @ port   1
  *    sensor pot @ analog 3
  *  right motor  @ port   10
- *    sensor pot @ analog 4
  */
 extern Motor mogo;
 

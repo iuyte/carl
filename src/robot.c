@@ -48,9 +48,9 @@ PIDSettings liftSettings = {
 
 PIDSettings manipSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP        = -.4f,
-	.kI        = -.22f,
-	.kD        = .1f,
+	.kP        = .45f,
+	.kI        = .62f,
+	.kD        = .26f,
 	.root      = &manip,
 	.tolerance = 35,
 	.precision = 175,
@@ -98,7 +98,6 @@ void reset() {
 	  mutexGive(gyro._mutex);
 	  mutexGive(gyro.child->_mutex);
 	  mutexGive(lift.sensor->_mutex);
-	  mutexGive(mogo.sensor->child->_mutex);
 
 	  mutexGive(intake._mutex);
 	  mutexGive(lift._mutex);
@@ -116,7 +115,6 @@ void reset() {
 	sensorReset(&gyro);
 	sensorReset(drive[0].sensor);
 	sensorReset(drive[1].sensor);
-	sensorReset(manip.sensor);
 
 	// Reset PID times
 	liftSettings._time     = millis();
@@ -154,8 +152,6 @@ void info() {
 
 	static unsigned long time = 0;
 	const char *en                  = isEnabled() ? "\n" : "\r";
-	int v;
-	imeGet(0, &v);
 
 	if (millis() - time >= 20) {
 		printf(
@@ -167,11 +163,11 @@ void info() {
 		  drive[0].sensor->value,
 		  drive[1].sensor->value,
 		  lift.sensor->value,
-		  v,
+		  manip.sensor->value,
 		  drive[0].sensor->velocity,
 		  drive[1].sensor->velocity,
 		  lift.sensor->velocity,
-		  manip.sensor->value,
+		  manip.sensor->velocity,
 		  mogo.sensor->averageVal,
 		  gyro.averageVal,
 		  sonic->value,
