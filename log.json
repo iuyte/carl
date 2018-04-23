@@ -1,6 +1,18 @@
 [
     {
         "author": " iuyte <iuyte@iuyte.net>",
+        "commitkey": "ea742c0f2d21d2beaeedfd0e2182c11b4ee0ab47",
+        "date": "  Sun Apr 22 22:55:22 2018 -0400",
+        "description": "Fixed links",
+        "filesAdded": [],
+        "filesDeleted": [],
+        "filesModified": [
+            "tools/commit",
+            "tools/pdfMaker.sh"
+        ]
+    },
+    {
+        "author": " iuyte <iuyte@iuyte.net>",
         "commitkey": "b28adc2101914be613bfe1cb609744002197dd2b",
         "date": "  Sun Apr 22 22:51:24 2018 -0400",
         "description": "The PDF maker creates an index file for docs/src and docs/include",
