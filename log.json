@@ -1,6 +1,23 @@
 [
     {
         "author": " iuyte <iuyte@iuyte.net>",
+        "commitkey": "e3296f8497f7d40920a0ccdc56b47fca25c5488f",
+        "date": "  Sun Apr 22 21:05:14 2018 -0400",
+        "description": "Changed the 4bar sensor to a pot and accounted for it in positions and opcontrol code",
+        "filesAdded": [],
+        "filesDeleted": [],
+        "filesModified": [
+            "include/auto.h",
+            "include/robot.h",
+            "src/auto.c",
+            "src/init.c",
+            "src/opcontrol.c",
+            "src/robot.c",
+            "tools/commit"
+        ]
+    },
+    {
+        "author": " iuyte <iuyte@iuyte.net>",
         "commitkey": "a18e672f35928dbeb2dfcbe091dabc36a71e2385",
         "date": "  Sun Apr 22 16:41:56 2018 -0400",
         "description": "Added a formatter to [the table log](https://iuyte.github.io/carl/table)",
