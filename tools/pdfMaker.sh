@@ -16,6 +16,9 @@ then
 	mkdir -p "tmp/src"
 	mkdir -p "tmp/include"
 
+	echo "# Contents of include/" > "docs/include/index.md"
+	echo "# Contents of src/" > "docs/src/index.md"
+
 	#Make PDF's of .h files in the 'include' folder
 	if [ -d "include" ]
 	then
@@ -30,6 +33,8 @@ then
 \\end{document}"
 			echo "$latex" > tmp/include/$q.tex
 			pdflatex -shell-escape tmp/include/"$q".tex
+
+			echo " * [$q.h](/include/$q.pdf)" >> "docs/include/index.md"
 		done
 
 		rm *.log
@@ -54,6 +59,8 @@ then
 \\end{document}"
 			echo "$latex" > tmp/src/$q.tex
 			pdflatex -shell-escape tmp/src/"$q".tex
+
+			echo " * [$q.c](/src/$q.pdf)" >> "docs/src/index.md"
 		done
 
 		rm *.log
