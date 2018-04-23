@@ -33,6 +33,9 @@ cat log.json | md-table > table.md
 # becuase it will format better
 cd ..
 tools/formatTable.py
+grip docs/table.md --user-content --export docs/table.html
+tools/formatTableHTML.py
+rm docs/table.md
 
 # Go into docs (gh-pages) and add files and commit with the message of the
 # current time

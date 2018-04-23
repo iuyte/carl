@@ -5,7 +5,7 @@ import re
 c = ""
 
 with open("docs/table.md", mode="r") as f:
-    c = f.read()
+    c += f.read()
 
 def keepChar(matchObj):
     return ", " + matchObj.group(0)[-1]
