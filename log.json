@@ -1,6 +1,18 @@
 [
     {
         "author": " iuyte <iuyte@iuyte.net>",
+        "commitkey": "b28adc2101914be613bfe1cb609744002197dd2b",
+        "date": "  Sun Apr 22 22:51:24 2018 -0400",
+        "description": "The PDF maker creates an index file for docs/src and docs/include",
+        "filesAdded": [],
+        "filesDeleted": [],
+        "filesModified": [
+            "src/init.c",
+            "tools/pdfMaker.sh"
+        ]
+    },
+    {
+        "author": " iuyte <iuyte@iuyte.net>",
         "commitkey": "e3296f8497f7d40920a0ccdc56b47fca25c5488f",
         "date": "  Sun Apr 22 21:05:14 2018 -0400",
         "description": "Changed the 4bar sensor to a pot and accounted for it in positions and opcontrol code",
