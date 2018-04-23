@@ -33,7 +33,7 @@ cat log.json | md-table > table.md
 # becuase it will format better
 cd ..
 tools/formatTable.py
-grip docs/table.md --user-content --export docs/table.html
+grip docs/table.md --user-content --title="709S Programming Log" --export docs/table.html
 tools/formatTableHTML.py
 rm docs/table.md
 

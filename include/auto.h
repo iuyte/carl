@@ -32,20 +32,28 @@ enum MOGO_POS {
 	MOGO_DOWN = 2200,
 };
 
-enum ARM_POS {
-	ARM_DOWN      = 290,
-	ARM_QUARTER   = 1000,
-	ARM_HALF      = 1850,
-	ARM_3_QUARTER = 2350,
-	ARM_UP        = 3400,
+enum LIFT_POS {
+	LIFT_DOWN      = 290,
+	LIFT_QUARTER   = 1000,
+	LIFT_HALF      = 1850,
+	LIFT_3_QUARTER = 2350,
+	LIFT_UP        = 3400,
 };
 
 enum MANIP_POS {
-	MANIP_NORMAL = 750,
-	MANIP_PLACE  = 500,
-	MANIP_HOVER  = 130,
-	MANIP_INTAKE = 90,
+	MANIP_NORMAL = 340,
+	MANIP_PLACE  = 625,
+	MANIP_HOVER  = 2150,
+	MANIP_INTAKE = 3200,
 };
+/*
+enum MANIP_POS {
+	MANIP_NORMAL = 1000,
+	MANIP_PLACE  = 650,
+	MANIP_HOVER  = 450,
+	MANIP_INTAKE = 350,
+};
+*/
 
 typedef struct Auton {
 	const char *name;

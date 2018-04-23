@@ -40,7 +40,7 @@ Motor intake, lift, manip, mogo, drive[2];
 PIDSettings liftSettings = {
 	DEFAULT_PID_SETTINGS,
 	.kP     = .132f,
-	.kI     = .09f,
+	.kI     = .12f,
 	.kD     = .083f,
 	.root   = &lift,
 	.target = 10,
@@ -48,9 +48,9 @@ PIDSettings liftSettings = {
 
 PIDSettings manipSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP        = .45f,
-	.kI        = .62f,
-	.kD        = .26f,
+	.kP        = -.43f,
+	.kI        = -.14f,
+	.kD        = -.42f,
 	.root      = &manip,
 	.tolerance = 35,
 	.precision = 175,

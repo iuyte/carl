@@ -55,7 +55,7 @@ void operatorControl() {
 
 	/*
 	 *   if (liftLimit[0].value) {
-	 *        liftSettings.target = ARM_QUARTER;
+	 *        liftSettings.target = LIFT_QUARTER;
 	 *        PID(&liftSettings);
 	 *   }
 	 */
@@ -116,30 +116,16 @@ void moveLift() {
 		lift.power = 127 * (digital(1, 6, JOY_UP, JOY_DOWN) +
 											  digital(2, 6, JOY_UP, JOY_DOWN));
 
-		if (lift.power > 0 && manip.sensor->value <
-							(MANIP_INTAKE + MANIP_HOVER) / 2 - 20) {
+		if (lift.power > 0 && manip.sensor->value >
+							(MANIP_INTAKE + MANIP_HOVER) / 2) {
 			lift.power = 0;
 			manipSettings.target = MANIP_HOVER;
+		} else if (lift.power < 0 && manip.sensor->value < MANIP_PLACE + 75) {
+			intake.power = -85;
 		} else if (lift.power) {
 			lastPress = millis();
-		}
-
-		if (liftLimit[0].value) {
-			sensorReset(lift.sensor);
-			lift.power = clipNum(lift.power, 0, -127);
-		} else if (liftLimit[1].value) {
-			lift.sensor->zero = lift.sensor->value - 1000;
-			lift.power        = clipNum(lift.power, 127, 0);
-		}
+		 }
 		liftSettings.target = lift.sensor->value;
-	} else if (liftLimit[0].value) {
-		  sensorReset(lift.sensor);
-		liftSettings.target = 0;
-		lift.power          = 0;
-	} else if (liftLimit[1].value) {
-		lift.sensor->zero   = lift.sensor->value - 1000;
-		liftSettings.target = 1000;
-		lift.power          = 0;
 	} else {
 		PID(&liftSettings);
 	}
@@ -151,6 +137,8 @@ void moveManip() {
 
 void moveIntake() {
 	intake.power = 127 * digital(2, 5, JOY_UP, JOY_DOWN);
+	if (!intake.power)
+		intake.power = 25;
 } /* moveIntake */
 
 void manipPID() {
@@ -167,7 +155,7 @@ void manipPID() {
 	power = 127 * digital(2, 8, JOY_UP, JOY_DOWN);
 
 	if (power) {
-		if (manip.sensor->value < MANIP_PLACE - 50 && power > 0) {
+		if (manip.sensor->value < MANIP_PLACE && power > 0) {
 			manipSettings.target = MANIP_PLACE;
 			PID(&manipSettings);
 		} else {

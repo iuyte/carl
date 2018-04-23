@@ -28,13 +28,16 @@ static inline float lineRecalc(int v) {
 } /* lineRecalc */
 
 static inline float manipRecalc(int p) {
-	return (manip.sensor->value > 300) ? ((p > 0) ? (float)p * .25 : (float)p * .5)
-																		 : (float)p * 1.9;
+	return (manip.sensor->value < MANIP_PLACE) ? clipNum(p, 0, -60) :
+			  ((manip.sensor->value < MANIP_HOVER - 200) ? (float)p / 2.3f : p );
+	// return (manip.sensor->value > 600) ? ((p < 0) ? (float)p * .30 : (float)p * .6)
+	// 																	 : (p < 0) ? (float)p * 3.25 : (float)p * 2.1f;
 }
 
-static inline float manipPotRecalc(int p) {
-	return (manip.sensor->value > 300) ? ((p > 0) ? (float)p * .25 : (float)p * .5)
-																		 : (float)p * 1.9;
+static inline float manipPotRecalc(int v) {
+	return v;
+	// return (v <= 100) ? (v - 75) * 4 : v;
+	// return (v <= 200) ? v * 3 : ((v >= 600) ? (v - 600) / 2 + 600 : v) + 200;
 }
 
 void initializeIO() {
@@ -75,6 +78,7 @@ void init() {
 	Sensor *manipS = new(Sensor);
 	*manipS = newAnalog(4, false);
 	manipS->zero = 0;
+	manipS->recalc = &manipPotRecalc;
 	notice("4bar pot, ");
 	Sensor *liftPot = new(Sensor);
 	*liftPot = newAnalog(5, false);

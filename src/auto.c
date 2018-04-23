@@ -105,6 +105,18 @@ void liftToPosition(float pos, unsigned long until) {
 	} while (!liftSettings.isTargetReached && millis() < until);
 } /* liftToPosition */
 
+void manipToPosition(float pos, unsigned long until) {
+	manipSettings.target = pos;
+	until             += millis();
+
+	do {
+		PID(&manipSettings);
+		motorUpdate(&manip);
+		sensorRefresh(manip.sensor);
+		delay(10);
+	} while (!liftSettings.isTargetReached && millis() < until);
+} /* liftToPosition */
+
 void driveToPosition(int l, int r, unsigned long until) {
 	driveSettings[0].target = l;
 	driveSettings[1].target = r;
@@ -249,9 +261,9 @@ void turnTo(int angle, unsigned long until) {
 } /* turnTo */
 
 void getMogo() {
-	intake.power         = -25;
-	liftSettings.target = ARM_QUARTER + 20;
-	lift.power = -70;
+	intake.power         = 25;
+	liftSettings.target = LIFT_QUARTER + 20;
+	lift.power = 127;
 	motorUpdate(&lift);
 	delay(300);
 	driveSet(25, 25);
@@ -303,16 +315,14 @@ Task backUp(void *time) {
 
 void placeCone() {
 	// Arm down
-	liftToPosition(ARM_DOWN + 35, 400);
+	liftToPosition(LIFT_DOWN + 35, 400);
 
 	// Drop cone
-	intake.power = 127; // Open intake
+	intake.power = -127; // Open intake
 	motorUpdate(&intake);
 	delay(475);       // Give intake time to open
 	intake.power = 0;   // Stop intake
-	liftToPosition(ARM_QUARTER, 400);
-	lift.power = 10; // Keep lift up
-	motorUpdate(&lift);
+	manipToPosition(MANIP_PLACE, 500);
 	#ifdef DEBUG_MODE
 		print("Cone placed!\n"); // Notify computer of cone state
 	#endif

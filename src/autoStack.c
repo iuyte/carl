@@ -61,13 +61,13 @@ void autonStack() {
 
 	intake.power = 50;
 	motorUpdate(&intake);
-	liftSettings.target = ARM_3_QUARTER;
+	liftSettings.target = LIFT_3_QUARTER;
 	TaskHandle delet = GO(liftPID, NULL);
 
 	driveToPositionAngle(drivePos(0) + 350, drivePos(1) + 350, 90, 1600);
 
 	taskDelete(delet);
-	liftToPosition(ARM_3_QUARTER, 750);
+	liftToPosition(LIFT_3_QUARTER, 750);
 
 	#ifdef DEBUG_MODE
 		print("\n\n\rready to stack\n\n");
@@ -79,12 +79,12 @@ void autonStack() {
 		delay(500);
 		intake.power = -30;
 		update();
-		liftToPosition(ARM_QUARTER / 2 + (ARM_QUARTER * .25 * i), 3000);
+		liftToPosition(LIFT_QUARTER / 2 + (LIFT_QUARTER * .25 * i), 3000);
 		intake.power = 127;
 		update();
 		delay(400);
 		intake.power = 10;
 		update();
-		liftToPosition(ARM_3_QUARTER, 3000);
+		liftToPosition(LIFT_3_QUARTER, 3000);
 	}
 } /* autonLeftRed12 */
