@@ -1,6 +1,20 @@
 [
     {
         "author": " iuyte <iuyte@iuyte.net>",
+        "commitkey": "a18e672f35928dbeb2dfcbe091dabc36a71e2385",
+        "date": "  Sun Apr 22 16:41:56 2018 -0400",
+        "description": "Added a formatter to [the table log](https://iuyte.github.io/carl/table)",
+        "filesAdded": [
+            "tools/formatTable.py"
+        ],
+        "filesDeleted": [],
+        "filesModified": [
+            "src/opcontrol.c",
+            "tools/commit"
+        ]
+    },
+    {
+        "author": " iuyte <iuyte@iuyte.net>",
         "commitkey": "47303917ad70de52937f2b2fcc23245baf59803c",
         "date": "  Sun Apr 22 16:06:45 2018 -0400",
         "description": "More equally distributed controls",
