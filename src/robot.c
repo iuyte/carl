@@ -48,9 +48,9 @@ PIDSettings liftSettings = {
 
 PIDSettings manipSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP        = -.43f,
-	.kI        = -.14f,
-	.kD        = -.42f,
+	.kP        = -.41f,
+	.kI        = -.13f,
+	.kD        = -.43f,
 	.root      = &manip,
 	.tolerance = 35,
 	.precision = 175,

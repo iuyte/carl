@@ -25,14 +25,14 @@ void autonTest() {
 
 	turnTo(-6, 700);
 	driveToPosition(1450, 1750, 1600);
-	turnTo(-65, 1300);
+	turnTo(-73, 1300);
 	driveToPosition(drivePos(0) - 600, drivePos(1) - 200, 1200);
 	liftToPosition(LIFT_QUARTER, 750);
 
-	for (size_t i = 1; i < 13; i++) {
+	for (size_t i = 1; i < 11; i++) {
 		// 4bar out
 		manipToPosition(MANIP_HOVER, 1200);
-		manip.power = 14;
+		manip.power = 10;
 
 		// set intake to in
 		intake.power = 127;
@@ -42,27 +42,30 @@ void autonTest() {
 		liftToPosition(LIFT_LOAD, 300 + 50 * i);
 		
 		// wait to pick up the cone, then set to a hold power
-		delay(250);
+		delay(400);
 		intake.power = 25;
 		update();
 
 		// Bring the lift up to the stacking height
-		liftToPosition(LIFT_DOWN + i * LIFT_CONE, 350 + i * 375);
+		liftToPosition(LIFT_DOWN + i * LIFT_CONE, i * 325);
 
 		// 4bar to stacking position
-		manipToPosition(MANIP_PLACE, 1200);
+		manipToPosition(MANIP_PLACE - i * 7, 1200 + i * 30);
 		update();
 
 		delay(300);
+		manip.power = -10;
+		update();
+		delay(150);
 
 		// outtake
 		intake.power = -127;
-		manip.power = -5;
 		update();
 		delay(500);
 
 		// lift back up a bit
-		liftToPosition(LIFT_DOWN + 250 + i * LIFT_CONE, 250);
+		liftToPosition(LIFT_DOWN + 260 + i * LIFT_CONE, 250);
+		delay(350);
 	}
 
 	intake.power = 0;

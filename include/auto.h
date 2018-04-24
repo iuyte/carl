@@ -33,9 +33,9 @@ enum MOGO_POS {
 };
 
 enum LIFT_POS {
-	LIFT_CONE      = 203,
+	LIFT_CONE      = 211,
 	LIFT_DOWN      = 290,
-	LIFT_LOAD      = 625,
+	LIFT_LOAD      = 400,
 	LIFT_QUARTER   = 1000,
 	LIFT_HALF      = 1850,
 	LIFT_3_QUARTER = 2350,
@@ -44,7 +44,7 @@ enum LIFT_POS {
 
 enum MANIP_POS {
 	MANIP_NORMAL = 340,
-	MANIP_PLACE  = 600,
+	MANIP_PLACE  = 535,
 	MANIP_HOVER  = 2150,
 	MANIP_INTAKE = 3200,
 };

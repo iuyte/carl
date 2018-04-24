@@ -35,7 +35,7 @@ void testMotors();
 
 void autonRehuh();
 
-int   selectedAuton         = 6;
+int   selectedAuton         = 8;
 Auton autons[MAX_AUTON + 1] =
 { {
 		// index 0
@@ -87,7 +87,7 @@ Auton autons[MAX_AUTON + 1] =
 		.execute    = &testMotors,
 	},{
 		// index 8
-		.name       = "drive and autostack",
+		.name       = "stack",
 		.sensorName = "4bar",
 		.sensor     = &manip.sensor,
 		.execute    = &autonStack,
@@ -284,8 +284,9 @@ void getMogo() {
 	delay(260);
 
 	driveSet(45, 45);
+	unsigned long m = millis();
 
-	while (mogo.sensor->averageVal > MOGO_PART) {
+	while (mogo.sensor->averageVal > MOGO_PART && millis() - m > 3250) {
 		sensorRefresh(mogo.sensor);
 		delay(10);
 	}
@@ -318,10 +319,10 @@ void placeCone() {
 	liftToPosition(LIFT_DOWN, 750);
 
 	// 4bar out a bit
-	manip.power = -60;
-	motorUpdate(&manip);
+	manipSettings.target = MANIP_PLACE - 75;
+	unsigned long m = millis();
 	// Wait for the 4bar to pass 
-	while (manip.sensor->value < MANIP_PLACE - 200) {
+	while (manip.sensor->value < MANIP_PLACE - 225 && millis() - m < 1300) {
 		sensorRefresh(manip.sensor);
 		delay(10);
 	}
@@ -511,6 +512,12 @@ void moveTo(int leftV, int rightV, int liftV, int mogoV, int intakeV, int gyroV)
 void liftPID(void *none) {
 	while (isEnabled()) {
 		PID(&liftSettings);
+		PID(&manipSettings);
+
+		motorUpdate(&lift);
+		motorUpdate(&manip);
+		sensorRefresh(lift.sensor);
+		sensorRefresh(manip.sensor);
 		delay(10);
 	}
 }
