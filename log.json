@@ -1,5 +1,18 @@
 [
     {
+        "a_timestamp": "  Tue Apr 24 05:36:33 2018 -0400",
+        "b_author": "Ethan",
+        "c_description": "automated stacking from the match loads proven",
+        "d_changes": [
+            "Modified: include/auto.h",
+            "Modified: src/auto.c",
+            "Modified: src/autoLeft.c",
+            "Modified: src/autoTest.c",
+            "Modified: src/init.c",
+            "Modified: src/robot.c"
+        ]
+    },
+    {
         "a_timestamp": "  Mon Apr 23 18:43:58 2018 -0400",
         "b_author": "Ethan",
         "c_description": "Flipped around the potentiometer and power-scaled the manipulator",
