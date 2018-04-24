@@ -28,8 +28,8 @@ static inline float lineRecalc(int v) {
 } /* lineRecalc */
 
 static inline float manipRecalc(int p) {
-	return (manip.sensor->value < MANIP_PLACE) ? clipNum(p, 0, -60) :
-			  ((manip.sensor->value < MANIP_HOVER - 200) ? (float)p / 2.3f : p );
+	return (manip.sensor->value < MANIP_PLACE) ? clipNum(p, 0, -48) :
+			  ((manip.sensor->value < MANIP_HOVER - 200) ? (float)p / 2.3f : p);
 	// return (manip.sensor->value > 600) ? ((p < 0) ? (float)p * .30 : (float)p * .6)
 	// 																	 : (p < 0) ? (float)p * 3.25 : (float)p * 2.1f;
 }

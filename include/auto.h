@@ -29,11 +29,13 @@ enum MOGO_POS {
 	MOGO_UP   = 75,
 	MOGO_PART = 550,
 	MOGO_MID  = 1350,
-	MOGO_DOWN = 2200,
+	MOGO_DOWN = 2050,
 };
 
 enum LIFT_POS {
+	LIFT_CONE      = 203,
 	LIFT_DOWN      = 290,
+	LIFT_LOAD      = 625,
 	LIFT_QUARTER   = 1000,
 	LIFT_HALF      = 1850,
 	LIFT_3_QUARTER = 2350,
@@ -42,10 +44,11 @@ enum LIFT_POS {
 
 enum MANIP_POS {
 	MANIP_NORMAL = 340,
-	MANIP_PLACE  = 625,
+	MANIP_PLACE  = 600,
 	MANIP_HOVER  = 2150,
 	MANIP_INTAKE = 3200,
 };
+
 /*
 enum MANIP_POS {
 	MANIP_NORMAL = 1000,
@@ -94,6 +97,8 @@ extern int   selectedAuton;
  */
 void liftToPosition(float         pos,
                    unsigned long until);
+
+void manipToPosition(float pos, unsigned long until);
 
 /**
  * @brief Bring the drive to a specific position

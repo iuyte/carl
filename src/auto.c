@@ -114,7 +114,7 @@ void manipToPosition(float pos, unsigned long until) {
 		motorUpdate(&manip);
 		sensorRefresh(manip.sensor);
 		delay(10);
-	} while (!liftSettings.isTargetReached && millis() < until);
+	} while (!manipSettings.isTargetReached && millis() < until);
 } /* liftToPosition */
 
 void driveToPosition(int l, int r, unsigned long until) {
@@ -261,7 +261,7 @@ void turnTo(int angle, unsigned long until) {
 } /* turnTo */
 
 void getMogo() {
-	intake.power         = 25;
+	intake.power        = 25;
 	liftSettings.target = LIFT_QUARTER + 20;
 	lift.power = 127;
 	motorUpdate(&lift);
@@ -272,7 +272,7 @@ void getMogo() {
 	TaskHandle mogoHandle = GO(mogoPT, MOGO_DOWN + 10);
 	delay(600);
 
-	driveToPosition(2075, 2075, 2300);
+	driveToPositionAngle(2275, 2275, 0, 2600);
 	driveSet(15, 15);
 
 	while (taskGetState(mogoHandle))
@@ -283,9 +283,9 @@ void getMogo() {
 	driveSet(127, 127);
 	delay(260);
 
-	driveSet(18, 18);
+	driveSet(45, 45);
 
-	while (mogo.sensor->averageVal > MOGO_MID) {
+	while (mogo.sensor->averageVal > MOGO_PART) {
 		sensorRefresh(mogo.sensor);
 		delay(10);
 	}
@@ -315,17 +315,33 @@ Task backUp(void *time) {
 
 void placeCone() {
 	// Arm down
-	liftToPosition(LIFT_DOWN + 35, 400);
+	liftToPosition(LIFT_DOWN, 750);
+
+	// 4bar out a bit
+	manip.power = -60;
+	motorUpdate(&manip);
+	// Wait for the 4bar to pass 
+	while (manip.sensor->value < MANIP_PLACE - 200) {
+		sensorRefresh(manip.sensor);
+		delay(10);
+	}
+
+	manip.power = 32;
 
 	// Drop cone
-	intake.power = -127; // Open intake
+	intake.power = -127;  // Open intake
 	motorUpdate(&intake);
-	delay(475);       // Give intake time to open
-	intake.power = 0;   // Stop intake
-	manipToPosition(MANIP_PLACE, 500);
+	motorUpdate(&manip);
+
+	delay(475);           // Give cone time to drop
+	intake.power = 0;     // Stop intake
+	manip.power = 0;
 	#ifdef DEBUG_MODE
 		print("Cone placed!\n"); // Notify computer of cone state
 	#endif
+	liftSettings.target = LIFT_QUARTER;
+	PID(&liftSettings);
+	update();
 	delay(150);
 } /* placeCone */
 
@@ -359,6 +375,7 @@ TaskHandle dropMogo20(TaskHandle mogoHandle) {
 } /* dropMogo */
 
 void autonomous() {
+	delay(2000);
 	unsigned long startTime = millis();
 	isAuto = true;
 	reset();
@@ -368,11 +385,13 @@ void autonomous() {
 	sensorReset(mogo.sensor);
 	sensorReset(&gyro);
 
+	TaskHandle liftHandle = GO(liftPID, NULL);
 	selectedAuton = clipNum(selectedAuton, MAX_AUTON, 0);
 	if (autons[selectedAuton].execute != NULL)
 		autons[selectedAuton].execute();
 
 	liftSettings.target = lift.sensor->averageVal; // Set target to current pos
+	taskDelete(liftHandle);
 
 	#ifdef DEBUG_MODE
 		printf("\n\n\rFinished autonomous in %ldms\n\n", millis() - startTime);

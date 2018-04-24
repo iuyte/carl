@@ -25,9 +25,11 @@ void autonLeft12() {
 	turnTo(-6, 500);                 // Align to a left tilt
 	driveSettings[1].max -= 40;      // Limit right side speed
 	GO(placeConeT, NULL);
-	driveToPosition(220, 650, 2400); // Back up
+	driveToPosition(1500, 1500, 2400); // Back up
+	turnTo(-14, 750);
+	driveToPosition(-80, 500, 2400); // Back up again
 	driveSettings[1].max += 40;      // Correct speed
-	turnTo(-165, 2000);              // Turn around
+	turnTo(-145, 2000);              // Turn around
 	delay(400);
 
 	// Reset drive encoders & gyro
@@ -43,7 +45,6 @@ void autonLeft12() {
 	mogoP(MOGO_DOWN - 300);                    // Bring the mobile goal up a bit
 	delay(250);
 	driveSet(0, 0);                            // Stop the drive
-
 } /* autonLeft12 */
 
 void autonLeft22() {
@@ -59,7 +60,7 @@ void autonLeft22() {
 	driveToPosition(-850, -850, 5500);    // Back up
 	// driveSettings[1].max += 40;        // Correct speed
 	GO(liftPID, NULL);
-	turnTo(-144, 2500); // Turn around
+	turnTo(-144, 2100); // Turn around
 
 	// Reset drive encoders & gyro
 	sensorReset(drive[0].sensor);
@@ -81,7 +82,7 @@ void autonLeft22() {
 	motorUpdate(&mogo);
 	// TaskHandle mogoHandle = GO(mogoPT, MOGO_MID + 125);
 	// driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
-	driveToPositionAngle(1525, 1425, 13, 1675); // Drive arc 13 degrees clockwise
+	driveToPositionAngle(1325, 1225, 13, 1400); // Drive arc 13 degrees clockwise
 
 	// if (taskGetState(mogoHandle))
 	// 	taskDelete(mogoHandle);
