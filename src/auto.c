@@ -23,6 +23,7 @@ bool isAuto = true;
 
 void autonLeft12();
 void autonLeft22();
+void autonLeft28();
 void autonRight12();
 void autonRight22();
 void autonSkills();
@@ -51,42 +52,48 @@ Auton autons[MAX_AUTON + 1] =
 		.execute    = &autonLeft22,
 	},{
 		// index 2
+		.name       = "left 28",
+		.sensorName = "gyr2",
+		.sensor     = &gyro.child,
+		.execute    = &autonLeft28,
+	},{
+		// index 3
 		.name       = "right 12",
 		.sensorName = "claw",
 		.sensor     = &claw.sensor,
 		.execute    = &autonRight12,
 	},{
-		// index 3
+		// index 4
 		.name       = "right 22",
 		.sensorName = "mgo",
 		.sensor     = &mogo.sensor,
 		.execute    = &autonRight22,
 	},{
-		// index 4
+		// index 5
 		.name       = "skills",
 		.sensorName = "snc",
 		.sensor     = &sonic,
 		.execute    = &autonSkills,
 	},{
-		// index 5
+		// index 6
 		.name       = "none",
 		.sensorName = "arm",
 		.sensor     = &arm.sensor,
 		.execute    = &autonNone,
 	},{
-		// index 6
+		// index 7
 		.name       = "test",
 		.sensorName = "lef",
 		.sensor     = &drive[0].sensor,
 		.execute    = &autonTest,
 	},{
-		// index 7
+		// index 8
 		.name       = "test motors",
 		.sensorName = "rit",
 		.sensor     = &drive[1].sensor,
 		.execute    = &testMotors,
 	},{
-		// index 8
+		// index 9
 		.name       = "stack",
 		.sensorName = "claw",
 		.sensor     = &claw.sensor,

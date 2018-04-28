@@ -56,7 +56,7 @@ Task lcdTask(void *none) {
 		}
 
 		info();
-		lcdPrint(uart1, 1, "b:%u, a:%s",
+		lcdPrint(uart1, 1, "b:%u,a:%s",
 		         powerLevelMain(),
 		         autons[selectedAuton].name);
 		lcdPrint(uart1, 2, "%s: %d",

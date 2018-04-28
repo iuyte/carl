@@ -49,15 +49,16 @@ void autonLeft12() {
 	taskDelete(armPIDHandle);
 } /* autonLeft12 */
 
-void autonLeft22() {
+void left22(bool cones) {
 	getMogo(); // Get the mobile goal
+	GO(placeConeT, NULL); // Place cone
 
 	turnTo(-1, 550);
 	driveToPosition(1650, 1650, 3500);
+	delay(1500);
 	turnTo(-17, 1850); // Align to a left tilt of 12 degrees
 
 	// driveSettings[1].max -= 40;        // Limit right side speed
-	GO(placeConeT, NULL); // Place cone
 	// driveToPosition(-485, -210, 5500); // Back up
 	driveToPosition(-850, -850, 5500);    // Back up
 	// driveSettings[1].max += 40;        // Correct speed
@@ -142,4 +143,12 @@ void autonLeft22() {
 
 	armSettings.target = arm.sensor->averageVal; // Reset the arm position to it's
 	                                          // current position
-} /* autonLeft22 */
+} /* left22 */
+
+void autonLeft22() {
+	left22(false);
+}
+
+void autonLeft28() {
+	left22(true);
+}

@@ -23,7 +23,7 @@
 
 #include "../include/robot.h"
 
-#define MAX_AUTON 8
+#define MAX_AUTON 9
 
 enum MOGO_POS {
 	MOGO_UP   = 75,
@@ -44,7 +44,7 @@ enum ARM_POS {
 
 enum CLAW_POS {
 	CLAW_OPEN   = 1875,
-	CLAW_CLOSED = 1090,
+	CLAW_CLOSED = 1050,
 };
 
 typedef struct Auton {
