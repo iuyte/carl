@@ -1,5 +1,17 @@
 [
     {
+        "a_timestamp": "  Tue Apr 24 17:01:12 2018 -0400",
+        "b_author": "Ethan",
+        "c_description": "last-minute modifications to autostacking before leaving for Worlds",
+        "d_changes": [
+            "Modified: include/auto.h",
+            "Modified: src/auto.c",
+            "Modified: src/autoStack.c",
+            "Modified: src/autoTest.c",
+            "Modified: src/robot.c"
+        ]
+    },
+    {
         "a_timestamp": "  Tue Apr 24 05:36:33 2018 -0400",
         "b_author": "Ethan",
         "c_description": "automated stacking from the match loads proven",
