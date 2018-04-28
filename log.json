@@ -1,5 +1,25 @@
 [
     {
+        "a_timestamp": "  Sat Apr 28 08:29:23 2018 -0400",
+        "b_author": "Ethan",
+        "c_description": "switch back to chain bar",
+        "d_changes": [
+            "Modified: include/API.h",
+            "Modified: include/auto.h",
+            "Modified: include/pid.h",
+            "Modified: include/robot.h",
+            "Modified: src/auto.c",
+            "Modified: src/autoLeft.c",
+            "Modified: src/autoRight.c",
+            "Modified: src/autoSkills.c",
+            "Modified: src/autoStack.c",
+            "Modified: src/autoTest.c",
+            "Modified: src/init.c",
+            "Modified: src/opcontrol.c",
+            "Modified: src/robot.c"
+        ]
+    },
+    {
         "a_timestamp": "  Tue Apr 24 17:01:12 2018 -0400",
         "b_author": "Ethan",
         "c_description": "last-minute modifications to autostacking before leaving for Worlds",
