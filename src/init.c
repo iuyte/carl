@@ -25,34 +25,28 @@ static inline float lMogoRecalc(int p) {
 
 static inline float lineRecalc(int v) {
 	return (float)(v > 16);
-} /* lineRecalc */
-
-static inline float manipRecalc(int p) {
-	return (manip.sensor->value < MANIP_PLACE) ? clipNum(p, 0, -48) :
-			  ((manip.sensor->value < MANIP_HOVER - 200) ? (float)p / 2.3f : p);
-	// return (manip.sensor->value > 600) ? ((p < 0) ? (float)p * .30 : (float)p * .6)
-	// 																	 : (p < 0) ? (float)p * 3.25 : (float)p * 2.1f;
 }
 
-static inline float manipPotRecalc(int v) {
-	return v;
-	// return (v <= 100) ? (v - 75) * 4 : v;
-	// return (v <= 200) ? v * 3 : ((v >= 600) ? (v - 600) / 2 + 600 : v) + 200;
+float clawPotRecalc(int v) {
+	static int l = 0;
+	float a = (l + v) / 2;
+	l = v;
+	return a;
 }
 
-void initializeIO() {
+void  initializeIO() {
 	watchdogInit();
-} /* initializeIO */
+}
 
 /**
  * Notify both through the terminal and an lcd
  *
  * @param buffer the text to display
  */
-void notice(const char *buffer) {
+void  notice(const char *buffer) {
 	#ifdef DEBUG_MODE
 		print(buffer);
-	#endif /* ifdef DEBUG_MODE */
+	#endif
 	lcdSetText(uart1, 2, buffer);
 	delay(5);
 } /* notice */
@@ -64,7 +58,7 @@ void init() {
 
 	#ifdef DEBUG_MODE
 		print("\nInitializing... ");
-	#endif /* ifdef DEBUG_MODE */
+	#endif
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
@@ -75,89 +69,74 @@ void init() {
 	Sensor *mogoAngle = new(Sensor);
 	*mogoAngle        = newAnalog(3, true);
 	notice("mobile goal angle, ");
-	Sensor *manipS = new(Sensor);
-	*manipS = newAnalog(4, false);
-	manipS->zero = 0;
-	manipS->recalc = &manipPotRecalc;
-	notice("4bar pot, ");
-	Sensor *liftPot = new(Sensor);
-	*liftPot = newAnalog(5, false);
-	liftPot->zero = 0;
-	notice("lift pot, ");
-
+	Sensor *clawAngle = new(Sensor);
+	*clawAngle          = newAnalog(5, false);
+	clawAngle->zero = 0;
+	clawAngle->recalc = &clawPotRecalc;
+	notice("claw angle, ");
 	for (int i = 0; i < 3; i++) {
-		line[i]          = newAnalog(i + 6, false);
+		line[i] = newAnalog(i + 6, false);
 		line[i].inverted = true;
-		line[i].recalc   = &lineRecalc;
+		line[i].recalc = &lineRecalc;
 	}
 	notice("line sensors");
 
 	// Set up the digital sensors
+	Sensor *armCoder = new(Sensor);
+	*armCoder = newQuad(1, 2, false);
+	notice("arm quad, ");
 	Sensor *driveCoder[2] = { new(Sensor), new(Sensor) };
 	*driveCoder[0] = newQuad(4, 5, true);
 	notice("left drive quad, ");
 	*driveCoder[1] = newQuad(8, 9, true);
 	notice("right drive quad, ");
-	liftLimit[0] = newDigital(12, true);
-	liftLimit[1] = newDigital(11, true);
-	notice("lift limit switches, ");
-	sonic  = new(Sensor);
-	*sonic = newSonic(6, 7);
+	armLimit[0] = newDigital(11, true);
+	armLimit[1] = newDigital(12, true);
+	notice("arm limit switches, ");
+	sonic = new(Sensor);
+	*sonic = newSonic(6,7);
 	notice("ultrasonic, ");
 
 	// Initialize and set up all of the motors, servos, etc
+	claw        = motorCreate(3, false);
+	claw.sensor = clawAngle;
+	notice("claw motor, ");
 
-	// intake motor
-	intake = motorCreate(3, true);
-	notice("intake motor, ");
+	arm               = motorCreate(5,  false);
+	arm.child         = new(Motor);
+	*arm.child        = motorCreate(6, true);
+	arm.child->child  = new(Motor);
+	*arm.child->child = motorCreate(8, false);
+	arm.sensor        = armCoder;
+	notice("arm motors, ");
 
-	// intake manipulater motor
-	manip = motorCreate(4, true);
-	manip.recalc = &manipRecalc;
-	manip.child = new(Motor);
-	*manip.child = motorCreate(8, false);
-	manip.child->recalc = &manipRecalc;
-	manip.sensor = manipS;
-
-	// lift motors
-	lift                      = motorCreate(5,  true); // bottom left
-	lift.child                = new(Motor);
-	*lift.child               = motorCreate(6, false); // top left
-	lift.child->child         = new(Motor);
-	*lift.child->child        = motorCreate(7, false); // bottom right
-	lift.sensor               = liftPot;
-	notice("lift motors, ");
-
-	// mobile goal intake motors
-	mogo                 = motorCreate(1, false); // left
+	mogo                 = motorCreate(1, false);
 	mogo.recalc          = &lMogoRecalc;
 	mogo.deadband        = 6;
 	mogo.child           = new(Motor);
-	*mogo.child          = motorCreate(10, true); // right
 	mogo.child->deadband = 6;
+	*mogo.child          = motorCreate(10, true);
 	mogo.sensor          = mogoAngle;
 	notice("mobile goal motors, ");
 
-
-	// left drive motors
 	drive[0]        = motorCreate(2, true);
+	drive[0].child  = new(Motor);
+	*drive[0].child = motorCreate(4, true);
 	drive[0].sensor = driveCoder[0];
 
-	// right drive motors
 	drive[1]        = motorCreate(9, false);
+	drive[1].child  = new(Motor);
+	*drive[1].child = motorCreate(7, false);
 	drive[1].sensor = driveCoder[1];
 	notice("drive motors, ");
 
 	lcdSetText(uart1, 1, "Ready!");
 	#ifdef DEBUG_MODE
 		print("\n\n");
-	#endif /* ifdef DEBUG_MODE */
+	#endif
 	setTeamName("709S");
 	notice("done!");
 
-	delay(500);
 	// Start the LCD task
 	LCDHandle = GO(lcdTask, NULL);
-	print("\n\njofsd\n\n");
-	delay(500);
 } /* init */

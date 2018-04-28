@@ -29,34 +29,23 @@ enum MOGO_POS {
 	MOGO_UP   = 75,
 	MOGO_PART = 550,
 	MOGO_MID  = 1350,
-	MOGO_DOWN = 2050,
+	MOGO_DOWN = 2200,
 };
 
-enum LIFT_POS {
-	LIFT_CONE      = 211,
-	LIFT_DOWN      = 290,
-	LIFT_LOAD      = 400,
-	LIFT_QUARTER   = 1000,
-	LIFT_HALF      = 1850,
-	LIFT_3_QUARTER = 2350,
-	LIFT_UP        = 3400,
+enum ARM_POS {
+	ARM_DOWN        = 10,
+	ARM_QUARTER     = 275,
+	ARM_HALF        = 360,
+	ARM_3_QUARTER   = 540,
+	ARM_3_5_QUARTER = 650,
+	ARM_LOAD        = 720,
+	ARM_CONE        = 850,
 };
 
-enum MANIP_POS {
-	MANIP_NORMAL = 340,
-	MANIP_PLACE  = 535,
-	MANIP_HOVER  = 2150,
-	MANIP_INTAKE = 3200,
+enum CLAW_POS {
+	CLAW_OPEN   = 1875,
+	CLAW_CLOSED = 1090,
 };
-
-/*
-enum MANIP_POS {
-	MANIP_NORMAL = 1000,
-	MANIP_PLACE  = 650,
-	MANIP_HOVER  = 450,
-	MANIP_INTAKE = 350,
-};
-*/
 
 typedef struct Auton {
 	const char *name;
@@ -90,15 +79,13 @@ extern Auton autons[MAX_AUTON + 1];
 extern int   selectedAuton;
 
 /*
- * @breif Bring the lift to the specified position
+ * @breif Bring the arm to the specified position
  *
- * @param pos the position to bring the lift to
+ * @param pos the position to bring the arm to
  * @param until the maximum amount of time this can take in ms
  */
-void liftToPosition(float         pos,
+void armToPosition(float         pos,
                    unsigned long until);
-
-void manipToPosition(float pos, unsigned long until);
 
 /**
  * @brief Bring the drive to a specific position
@@ -174,18 +161,18 @@ Task mogoPT(void *p);
 Task placeConeT(void *none);
 
 /**
- * @brief Task for liftToPosition
+ * @brief Task for armToPosition
  */
-Task liftPID(void *none);
+Task armPID(void *none);
 
 /**
  * @brief don't use, it doesn't work
  */
 void moveTo(int leftV,
             int rightV,
-            int liftV,
+            int armV,
             int mogoV,
-            int intakeV,
+            int clawV,
             int gyroV);
 
 #endif // AUTO_ROBOT_H_

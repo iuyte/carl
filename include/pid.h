@@ -28,17 +28,17 @@
  */
 typedef struct PIDSettings {
 	/**
-	 * p value
+	 * p multiplier for the proportion of the error
 	 */
 	float kP;
 
 	/**
-	 * i value
+	 * i multiplier for the compound of the error
 	 */
 	float kI;
 
 	/**
-	 * d value
+	 * d multiplier for the change in error
 	 */
 	float kD;
 
@@ -80,7 +80,7 @@ typedef struct PIDSettings {
 
 	/**
 	 * Whether or not the instance has remained at it's target, within the range
-	 *******of tolerance, longer than precision
+	 ****of tolerance, longer than precision
 	 */
 	bool isTargetReached;
 

@@ -31,27 +31,27 @@ double inch =
   (1 / (M_PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
 
 // Sensors
-Sensor gyro, *sonic, liftLimit[2], line[3];
+Sensor gyro, *sonic, armLimit[2], line[3];
 
 // Motors and servos
-Motor intake, lift, manip, mogo, drive[2];
+Motor claw, arm, mogo, drive[2];
 
 // PID settings
-PIDSettings liftSettings = {
+PIDSettings armSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP     = .132f,
-	.kI     = .12f,
-	.kD     = .083f,
-	.root   = &lift,
+	.kP     = -.7f,
+	.kI     = -.22f,
+	.kD     = -.08f,
+	.root   = &arm,
 	.target = 10,
 };
 
-PIDSettings manipSettings = {
+PIDSettings clawSettings = {
 	DEFAULT_PID_SETTINGS,
-	.kP        = -.41f,
-	.kI        = -.13f,
-	.kD        = -.43f,
-	.root      = &manip,
+	.kP        = .22f,
+	.kI        = .0f,
+	.kD        = 2.3f,
+	.root      = &claw,
 	.tolerance = 35,
 	.precision = 175,
 };
@@ -72,9 +72,9 @@ PIDSettings driveSettings[2] = {
 
 #define _GYRO_SETTINGS_(index, m) \
   DEFAULT_PID_SETTINGS,           \
-  .kP        = m * 3.3625f,       \
-  .kI        = m * 0.7877f,       \
-  .kD        = m * 2.5363f,       \
+  .kP        = m * 2.8625f,       \
+  .kI        = m * 0.5877f,       \
+  .kD        = m * 2.3363f,       \
   .tolerance = 2,                 \
   .precision = 425,               \
   .root      = &drive[index],     \
@@ -97,18 +97,18 @@ void reset() {
 	// free mutexes
 	  mutexGive(gyro._mutex);
 	  mutexGive(gyro.child->_mutex);
-	  mutexGive(lift.sensor->_mutex);
+	  mutexGive(arm.sensor->_mutex);
 
-	  mutexGive(intake._mutex);
-	  mutexGive(lift._mutex);
-	  mutexGive(lift.child->_mutex);
+	  mutexGive(claw._mutex);
+	  mutexGive(arm._mutex);
+	  mutexGive(arm.child->_mutex);
 	  mutexGive(mogo.child->_mutex);
 
 	for (int i = 0; i < 2; i++) {
 		mutexGive(drive[i]._mutex);
 
 		mutexGive(drive[i].sensor->_mutex);
-		mutexGive(liftLimit[i]._mutex);
+		mutexGive(armLimit[i]._mutex);
 	}
 
 	// Reset sensors
@@ -117,21 +117,19 @@ void reset() {
 	sensorReset(drive[1].sensor);
 
 	// Reset PID times
-	liftSettings._time     = millis();
+	armSettings._time      = millis();
 	driveSettings[0]._time = millis();
 	driveSettings[1]._time = millis();
 } /* reset */
 
 void update() {
-	motorUpdate(&intake);
+	motorUpdate(&claw);
 	motorUpdate(&mogo);
-	motorUpdate(&lift);
-	motorUpdate(&manip);
+	motorUpdate(&arm);
 
-	sensorRefresh(lift.sensor);
-	sensorRefresh(intake.sensor);
+	sensorRefresh(arm.sensor);
+	sensorRefresh(claw.sensor);
 	sensorRefresh(mogo.sensor);
-	sensorRefresh(manip.sensor);
 
 	sensorRefresh(&gyro);
 	sensorRefresh(sonic);
@@ -140,7 +138,7 @@ void update() {
 	for (size_t i = 0; i < 2; i++) {
 		motorUpdate(&drive[i]);
 		sensorRefresh(drive[i].sensor);
-		sensorRefresh(&liftLimit[i]);
+		sensorRefresh(&armLimit[i]);
 		sensorRefresh(&line[i]);
 	}
 } /* update */
@@ -151,7 +149,7 @@ void info() {
 	#endif
 
 	static unsigned long time = 0;
-	const char *en                  = isEnabled() ? "\n" : "\r";
+	char *en                  = isEnabled() ? "\n" : "\r";
 
 	if (millis() - time >= 20) {
 		printf(
@@ -162,12 +160,12 @@ void info() {
 		  RESET "%s",
 		  drive[0].sensor->value,
 		  drive[1].sensor->value,
-		  lift.sensor->value,
-		  manip.sensor->value,
+		  arm.sensor->value,
+		  claw.sensor->value,
 		  drive[0].sensor->velocity,
 		  drive[1].sensor->velocity,
-		  lift.sensor->velocity,
-		  manip.sensor->velocity,
+		  arm.sensor->velocity,
+		  claw.sensor->velocity,
 		  mogo.sensor->averageVal,
 		  gyro.averageVal,
 		  sonic->value,
