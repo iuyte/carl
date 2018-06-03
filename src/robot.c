@@ -27,43 +27,31 @@
 #define CYAN    "\x1b[36m"
 #define RESET   "\x1b[0m"
 
-double inch =
-  (1 / (M_PI * (DRIVE_WHEEL_DIAMETER / 360) * (1 / DRIVE_ENCODER_RATIO)));
-
-// Sensors
-Sensor gyro, *sonic, armLimit[2], line[3];
-
-// Motors and servos
-Motor claw, arm, mogo, drive[2];
+// Sensors and motors
+Sensor gyro, line[3];
+Motor drive[2], lift, intake[2];
 
 // PID settings
-PIDSettings armSettings = {
-	DEFAULT_PID_SETTINGS,
-	.kP     = -.7f,
-	.kI     = -.22f,
-	.kD     = -.08f,
-	.root   = &arm,
-	.target = 10,
-};
+#define _INTAKE_SETTINGS_(index) \
+	DEFAULT_PID_SETTINGS,          \
+	.kP     = -.7f,                \
+	.kI     = -.22f,               \
+	.kD     = -.08f,               \
+	.root   = &intake[index],      \
 
-PIDSettings clawSettings = {
-	DEFAULT_PID_SETTINGS,
-	.kP        = .245f,
-	.kI        = .0f,
-	.kD        = 2.3f,
-	.root      = &claw,
-	.tolerance = 35,
-	.precision = 175,
+PIDSettings intakeSettings[2] = {
+	{ _INTAKE_SETTINGS_(0) },
+	{ _INTAKE_SETTINGS_(1) },
 };
 
 #define _DRIVE_SETTINGS_(index) \
-  DEFAULT_PID_SETTINGS,         \
-  .kP        = .170f,           \
-  .kI        = .043f,           \
-  .kD        = .253f,           \
-  .tolerance = 200,             \
-  .precision = 275,             \
-  .root      = &drive[index]
+	DEFAULT_PID_SETTINGS,         \
+	.kP        = .170f,           \
+	.kI        = .043f,           \
+	.kD        = .253f,           \
+	.tolerance = 200,             \
+	.precision = 275,             \
+	.root      = &drive[index]
 
 PIDSettings driveSettings[2] = {
 	{ _DRIVE_SETTINGS_(0) },
@@ -71,14 +59,14 @@ PIDSettings driveSettings[2] = {
 };
 
 #define _GYRO_SETTINGS_(index, m) \
-  DEFAULT_PID_SETTINGS,           \
-  .kP        = m * 2.8625f,       \
-  .kI        = m * 0.5877f,       \
-  .kD        = m * 2.3363f,       \
-  .tolerance = 2,                 \
-  .precision = 425,               \
-  .root      = &drive[index],     \
-  .sensor    = &gyro
+	DEFAULT_PID_SETTINGS,           \
+	.kP        = m * 2.8625f,       \
+	.kI        = m * 0.5877f,       \
+	.kD        = m * 2.3363f,       \
+	.tolerance = 2,                 \
+	.precision = 425,               \
+	.root      = &drive[index],     \
+	.sensor    = &gyro
 
 PIDSettings gyroSettings[2] = {
 	{ _GYRO_SETTINGS_(0,  1) },
@@ -88,28 +76,26 @@ PIDSettings gyroSettings[2] = {
 void altRefresh(Sensor *s) {
 	mutexTake(s->_mutex, 5);
 	s->value = analogReadCalibrated(s->port);
-	  mutexGive(s->_mutex);
+		mutexGive(s->_mutex);
 } /* altRefresh */
 
 void init();
 
 void reset() {
-	// free mutexes
-	  mutexGive(gyro._mutex);
-	  mutexGive(gyro.child->_mutex);
-	  mutexGive(arm.sensor->_mutex);
+	/* free mutexes
+	mutexGive(gyro._mutex);
+	mutexGive(gyro.child->_mutex);
 
-	  mutexGive(claw._mutex);
-	  mutexGive(arm._mutex);
-	  mutexGive(arm.child->_mutex);
-	  mutexGive(mogo.child->_mutex);
+	mutexGive(lift._mutex);
+	mutexGive(lift.child->_mutex);
 
 	for (int i = 0; i < 2; i++) {
 		mutexGive(drive[i]._mutex);
+		mutexGive(intake[i]._mutex);
 
 		mutexGive(drive[i].sensor->_mutex);
-		mutexGive(armLimit[i]._mutex);
 	}
+	*/
 
 	// Reset sensors
 	sensorReset(&gyro);
@@ -117,29 +103,25 @@ void reset() {
 	sensorReset(drive[1].sensor);
 
 	// Reset PID times
-	armSettings._time      = millis();
-	driveSettings[0]._time = millis();
-	driveSettings[1]._time = millis();
+	for (int i = 0; i < 2; i++) {
+		intakeSettings[i]._time = millis();
+		driveSettings[i]._time  = millis();
+		gyroSettings[i]._time   = millis();
+	}
 } /* reset */
 
 void update() {
-	motorUpdate(&claw);
-	motorUpdate(&mogo);
-	motorUpdate(&arm);
-
-	sensorRefresh(arm.sensor);
-	sensorRefresh(claw.sensor);
-	sensorRefresh(mogo.sensor);
+	motorUpdate(&lift);
 
 	sensorRefresh(&gyro);
-	sensorRefresh(sonic);
 	sensorRefresh(&line[2]);
 
 	for (size_t i = 0; i < 2; i++) {
 		motorUpdate(&drive[i]);
-		sensorRefresh(drive[i].sensor);
-		sensorRefresh(&armLimit[i]);
+		motorUpdate(&intake[i]);
 		sensorRefresh(&line[i]);
+		sensorRefresh(drive[i].sensor);
+		intake[i].sensor->value = encoderGet(intake[i].sensor->_pros);
 	}
 } /* update */
 
@@ -153,27 +135,26 @@ void info() {
 
 	if (millis() - time >= 20) {
 		printf(
-		  RESET "\r"                                             \
-		  RED "%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
-		  RED "%d, " GREEN "%d, " YELLOW "%d, " BLUE "%d, " CYAN \
-		  "%d, " RED "%d, " GREEN "%d, " YELLOW "%d, %d, %d" BLUE " // %u mv"
-		  RESET "%s",
-		  drive[0].sensor->value,
-		  drive[1].sensor->value,
-		  arm.sensor->value,
-		  claw.sensor->value,
-		  drive[0].sensor->velocity,
-		  drive[1].sensor->velocity,
-		  arm.sensor->velocity,
-		  claw.sensor->velocity,
-		  mogo.sensor->averageVal,
-		  gyro.averageVal,
-		  sonic->value,
-		  line[0].value,
-		  line[1].value,
-		  line[2].value,
-		  powerLevelMain(),
-		  en);
+			RESET "\r"                                             \
+			RED "%d, " GREEN "%d, " YELLOW "%d, " CYAN "%d, " \
+			RED "%d, " GREEN "%d, " YELLOW "%d, " CYAN "%d, " \
+			"%d, " RED "%d, " YELLOW "%d, %d, %d" BLUE " // %u mv"
+			RESET "%s",
+			drive[0].sensor->value,
+			drive[1].sensor->value,
+			intake[0].sensor->value,
+			intake[1].sensor->value,
+			drive[0].sensor->velocity,
+			drive[1].sensor->velocity,
+			intake[0].sensor->velocity,
+			intake[1].sensor->velocity,
+			0,
+			gyro.averageVal,
+			line[0].value,
+			line[1].value,
+			line[2].value,
+			powerLevelMain(),
+			en);
 		lcdPrint(uart1, 2, "%u mV", powerLevelMain());
 		time = millis();
 	}
@@ -192,8 +173,8 @@ bool takeDrive(unsigned long blockTime) {
 } /* takeDrive */
 
 void giveDrive() {
-	  mutexGive(drive[0]._mutex);
-	  mutexGive(drive[1]._mutex);
+		mutexGive(drive[0]._mutex);
+		mutexGive(drive[1]._mutex);
 } /* giveDrive */
 
 void driveSet(int l, int r) {
@@ -209,6 +190,18 @@ void driveSet(int l, int r) {
 		motorUpdate(&drive[i]);
 	}
 } /* driveSet */
+
+void intakeSet(int p) {
+	if (p) {
+		intake[0].power = p;
+		intake[1].power = p;
+	} else {
+		for (int i = 0; i < 2; i++) {
+			intakeSettings[i].target = intake[i].sensor->value;
+			PID(&intakeSettings[i]);
+		}
+	}
+}
 
 bool initialized = false;
 

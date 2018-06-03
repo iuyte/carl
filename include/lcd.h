@@ -17,8 +17,7 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_LCD_H_
-#define CARL_LCD_H_
+#pragma once
 
 #include "sensors.h"
 #include "motors.h"
@@ -34,5 +33,3 @@ Task lcdTask(void *none);
  * The LCD task
  */
 extern TaskHandle LCDHandle;
-
-#endif // CARL_LCD_H_

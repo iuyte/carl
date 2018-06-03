@@ -17,8 +17,8 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_MOTORS_H_
-#define CARL_MOTORS_H_
+#pragma once
+
 #include "API.h"
 #include "sensors.h"
 #include "debug.h"
@@ -84,5 +84,3 @@ Motor motorCreate(unsigned char port,
  * @param m the Motor to update
  */
 void motorUpdate(Motor *m);
-
-#endif // CARL_MOTORS_H_

@@ -17,8 +17,7 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_LINE_H_
-#define CARL_LINE_H_
+#pragma once
 
 #include "robot.h"
 
@@ -83,5 +82,3 @@ int getAngleFP(int p[4], Side o);
 Mutex angleFromUpcomingLine(int          *store,
                             Mutex         mutex,
                             unsigned long maxTime);
-
-#endif // ifndef CARL_LINE_H_

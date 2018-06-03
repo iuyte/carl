@@ -21,96 +21,46 @@
 
 bool isAuto = true;
 
-void autonLeft12();
-void autonLeft22();
-void autonLeft28();
-void autonRight12();
-void autonRight22();
-void autonSkills();
-void autonTest();
-void autonStack();
-
 void autonNone() {}
+void autoHerbLeft();
+void autoHerbRight();
+void autoMeatLeft();
+void autoMeatRight();
 
-void testMotors();
-
-void autonRehuh();
-
-int   selectedAuton         = 1;
+int   selectedAuton         = 4;
 Auton autons[MAX_AUTON + 1] =
 { {
 		// index 0
-		.name       = "left 12",
-		.sensorName = "arm",
-		.sensor     = &arm.sensor,
-		.execute    = &autonLeft12,
-	},{
-		// index 1
-		.name       = "left 22",
-		.sensorName = "gyr2",
-		.sensor     = &gyro.child,
-		.execute    = &autonLeft22,
-	},{
-		// index 2
-		.name       = "left 28",
-		.sensorName = "gyr2",
-		.sensor     = &gyro.child,
-		.execute    = &autonLeft28,
-	},{
-		// index 3
-		.name       = "right 12",
-		.sensorName = "claw",
-		.sensor     = &claw.sensor,
-		.execute    = &autonRight12,
-	},{
-		// index 4
-		.name       = "right 22",
-		.sensorName = "mgo",
-		.sensor     = &mogo.sensor,
-		.execute    = &autonRight22,
-	},{
-		// index 5
-		.name       = "skills",
-		.sensorName = "snc",
-		.sensor     = &sonic,
-		.execute    = &autonSkills,
-	},{
-		// index 6
 		.name       = "none",
-		.sensorName = "arm",
-		.sensor     = &arm.sensor,
+		.sensorName = "lDrv",
+		.sensor     = &drive[0].sensor,
 		.execute    = &autonNone,
 	},{
-		// index 7
-		.name       = "test",
-		.sensorName = "lef",
-		.sensor     = &drive[0].sensor,
-		.execute    = &autonTest,
-	},{
-		// index 8
-		.name       = "test motors",
-		.sensorName = "rit",
+		// index 1
+		.name       = "herb l",
+		.sensorName = "rDrv",
 		.sensor     = &drive[1].sensor,
-		.execute    = &testMotors,
+		.execute    = &autoHerbLeft,
 	},{
-		// index 9
-		.name       = "stack",
-		.sensorName = "claw",
-		.sensor     = &claw.sensor,
-		.execute    = &autonStack,
-	}, };
-
-void armToPosition(float pos, unsigned long until) {
-	armSettings.target = pos;
-	until             += millis();
-
-	do {
-		PID(&armSettings);
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
-		delay(10);
-	} while (!armSettings.isTargetReached && millis() < until);
-} /* armToPosition */
+		// index 2
+		.name       = "herb r",
+		.sensorName = "lIntake",
+		.sensor     = &intake[0].sensor,
+		.execute    = &autoHerbRight,
+	},{
+		// index 3
+		.name       = "meat l",
+		.sensorName = "rIntake",
+		.sensor     = &intake[1].sensor,
+		.execute    = &autoMeatLeft,
+	},{
+		// index 4
+		.name       = "meat r",
+		.sensorName = "gyroC",
+		.sensor     = &gyro.child,
+		.execute    = &autoMeatRight,
+	},
+};
 
 void driveToPosition(int l, int r, unsigned long until) {
 	driveSettings[0].target = l;
@@ -121,8 +71,8 @@ void driveToPosition(int l, int r, unsigned long until) {
 		PID(&driveSettings[0]);
 		PID(&driveSettings[1]);
 
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
+		motorUpdate(&lift);
+		sensorRefresh(lift.sensor);
 		sensorRefresh(&gyro);
 
 		for (int i = 0; i < 2; i++) {
@@ -153,8 +103,8 @@ void driveToPositionAngle(int l, int r, int a, unsigned long until) {
 		drive[0].power += gError;
 		drive[1].power -= gError;
 
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
+		motorUpdate(&lift);
+		sensorRefresh(lift.sensor);
 		sensorRefresh(&gyro);
 
 		for (int i = 0; i < 2; i++) {
@@ -172,69 +122,6 @@ void driveToPositionAngle(int l, int r, int a, unsigned long until) {
 	update();
 } /* driveToPosition */
 
-void mogoP(int p) {
-	mutexGive(mogo._mutex);
-	mutexGive(mogo.child->_mutex);
-	mutexGive(mogo.sensor->_mutex);
-	int pow;
-
-	do {
-		pow = sgn(p - mogo.sensor->averageVal);
-		sensorRefresh(mogo.sensor);
-		mogo.power = (pow ? pow : 1) * 127;
-		motorUpdate(&mogo);
-		delay(10);
-	} while ((isAutonomous() || !isAuto) && abs(p - mogo.sensor->averageVal) > 78);
-
-	mogo.power = 0;
-	motorUpdate(&mogo);
-} /* mogoP */
-
-Task mogoPT(void *p) {
-	mogoP((int)p);
-} /* mogoPT */
-
-float gyroPIDC[3] = {
-	5.279,
-	0.0,
-	1.953,
-};
-
-void gyroPID(int target, int precision) {
-	int error      = 0;
-	int integral   = 0;
-	int derivative = 0;
-
-	do {
-		derivative = (target - gyro.averageVal) - error;
-		error      = target - gyro.averageVal;
-		integral  += error / 10;
-
-		drive[0].power = -((error * gyroPIDC[0]) +
-		                   (integral * gyroPIDC[1]) +
-		                   (derivative * gyroPIDC[2]));
-		drive[1].power = ((error * gyroPIDC[0]) +
-		                  (integral * gyroPIDC[1]) +
-		                  (derivative * gyroPIDC[2]));
-
-		if (lcdReadButtons(uart1)) {
-			gyroPIDC[0] += 0.005;
-			delay(100);
-		}
-		info();
-		#ifdef DEBUG_MODE
-			printf("%f\n", gyroPIDC[0]);
-		#endif
-		lcdPrint(uart1, 1, "%f", ((float)(powerLevelMain())) / 1000.0);
-		lcdPrint(uart1, 2, "%f", gyroPIDC[0]);
-		update();
-		delay(10);
-	} while (true || abs(error) > precision ||
-	         integral > 10);
-
-	drive[0].power = 0;
-	drive[1].power = 0;
-} /* gyroPID */
 
 void turnTo(int angle, unsigned long until) {
 	until += millis();
@@ -255,141 +142,23 @@ void turnTo(int angle, unsigned long until) {
 	driveSet(0, 0);
 } /* turnTo */
 
-void getMogo() {
-	claw.power         = -10;
-	armSettings.target = ARM_QUARTER + 20;
-	delay(210);
-	driveSet(25, 25);
-
-	TaskHandle armHandle = GO(armPID, NULL);
-	TaskHandle mogoHandle = GO(mogoPT, MOGO_DOWN + 10);
-	delay(450);
-
-	driveToPosition(2075, 2075, 2300);
-	driveSet(15, 15);
-
-	while (taskGetState(mogoHandle))
-		delay(10);
-
-	mogoHandle = GO(mogoPT, MOGO_UP);
-
-	driveSet(127, 127);
-	delay(260);
-
-	driveSet(18, 18);
-
-	while (mogo.sensor->averageVal > MOGO_MID) {
-		sensorRefresh(mogo.sensor);
-		delay(10);
-	}
-
-	if (taskGetState(armHandle))
-		taskDelete(armHandle);
-	driveSet(0, 0);
-	mogo.power = 6;
-	motorUpdate(&mogo);
-} /* getMogo */
-
-Task backUp(void *time) {
-	unsigned long t = (unsigned long)time;
-
-	while (millis() - t < 14250) {
-		delay(10);
-	}
-
-	t = millis();
-
-	while (isAutonomous() && millis() - t < 500) {
-		driveSet(-127, -127);
-		update();
-		delay(10);
-	}
-} /* backUp */
-
-void placeCone() {
-	// Arm down
-	armToPosition(ARM_DOWN + 35, 400);
-
-	// Drop cone
-	clawSettings.target = CLAW_OPEN;
-	motorUpdate(&claw);
-	delay(475);       // Give claw time to open
-	claw.power = 0;   // Stop claw
-	armToPosition(ARM_QUARTER, 400);
-	arm.power = 10; // Keep arm up
-	motorUpdate(&arm);
-	#ifdef DEBUG_MODE
-		print("Cone placed!\n"); // Notify computer of cone state
-	#endif
-	delay(150);
-} /* placeCone */
-
-Task placeConeT(void *none) {
-	placeCone();
-} /* placeCone */
-
-TaskHandle dropMogo20(TaskHandle mogoHandle) {
-	int p[2] = { drive[0].sensor->value, drive[1].sensor->value };
-
-	// Start the mogo claw down
-	if (!mogoHandle && taskGetState(mogoHandle))
-		mogoHandle = GO(mogoPT, MOGO_MID + 125);
-	driveToPosition(p[0] + 250, p[1] + 250, 600);
-	driveSet(30, 30);
-
-	// Wait until the mogo claw is up
-	while (taskGetState(mogoHandle)) {
-		delay(10);
-	}
-
-	// Wait a bit for the mobile goal to settle
-	mogo.power = 127;
-	motorUpdate(&mogo);
-	driveSet(-64, -64);
-	delay(315);
-	mogo.power = 30;
-
-	driveToPosition(p[0] - 400, p[1] - 400, 3000);
-	return GO(mogoPT, MOGO_UP);
-} /* dropMogo */
-
 void autonomous() {
 	unsigned long startTime = millis();
 	isAuto = true;
 	reset();
-	sensorReset(drive[0].sensor);
-	sensorReset(drive[1].sensor);
-	sensorReset(arm.sensor);
-	sensorReset(mogo.sensor);
-	sensorReset(&gyro);
 
-	TaskHandle armHandle = GO(armPID, NULL);
 	selectedAuton = clipNum(selectedAuton, MAX_AUTON, 0);
 	if (autons[selectedAuton].execute != NULL)
 		autons[selectedAuton].execute();
-
-	armSettings.target = arm.sensor->averageVal; // Set target to current pos
-	taskDelete(armHandle);
 
 	#ifdef DEBUG_MODE
 		printf("\n\n\rFinished autonomous in %ldms\n\n", millis() - startTime);
 	#endif
 	while (isAutonomous()) {
-		PID(&armSettings);                      // Hold the arm position
 		update();
 		delay(10);
 	}
 } /* autonomous */
-
-void testMotors() {
-	while (isAutonomous()) {
-		for (int i = 1; i <= 10; i++) {
-			motorSet(i, 127);
-			delay(250);
-			motorStopAll();
-		}
-	}
-} /* testMotors */
 
 Task driveToPositionAngleT(void *triple) {
 	Triple *t = (Triple *)triple;
@@ -403,8 +172,8 @@ Task driveToPositionAngleT(void *triple) {
 		drive[0].power += (t->c - gyro.averageVal) * 2.3;
 		drive[1].power -= (t->c - gyro.averageVal) * 2.3;
 
-		motorUpdate(&arm);
-		sensorRefresh(arm.sensor);
+		motorUpdate(&lift);
+		sensorRefresh(lift.sensor);
 		sensorRefresh(&gyro);
 
 		for (int i = 0; i < 2; i++) {
@@ -421,80 +190,3 @@ Task driveToPositionAngleT(void *triple) {
 	delete(triple);
 	taskDelete(NULL);
 } /* driveToPositionAngleT */
-
-Task armToPositionT(void *pos) {
-	int p = (int)pos;
-
-	armToPosition(p, p * 1.34);
-	taskDelete(NULL);
-} /* armToPositionT */
-
-Task clawToPositionT(void *pos) {
-	clawSettings.target = (int)pos;
-
-	do {
-		PID(&clawSettings);
-		motorUpdate(&claw);
-		sensorRefresh(claw.sensor);
-		delay(10);
-	} while (!clawSettings.isTargetReached);
-
-	taskDelete(NULL);
-} /* clawToPositionT */
-
-Task die(void *none) {
-	taskDelete(NULL);
-}
-
-void moveTo(int leftV, int rightV, int armV, int mogoV, int clawV, int gyroV) {
-	TaskHandle driveHandle, armHandle, mogoHandle, clawHandle;
-	update();
-
-	if ((abs(leftV - drive[0].sensor->value) > driveSettings[0].tolerance) ||
-	    (abs(rightV - drive[1].sensor->value) > driveSettings[1].tolerance) ||
-			(abs(gyroV - gyro.averageVal) > gyroSettings[0].tolerance)) {
-		Triple *t = new(Triple);
-		t->a        = leftV;
-		t->b        = rightV;
-		t->c        = gyroV;
-		driveHandle = GO(driveToPositionAngleT, t);
-	}
-
-	if (abs(armV - arm.sensor->value) > armSettings.tolerance)
-		armHandle = GO(armToPositionT, armV);
-
-	if (abs(mogoV - mogo.sensor->averageVal) > 90)
-		mogoHandle = GO(mogoPT, mogoV);
-
-	if (abs(clawV - claw.sensor->value) > clawSettings.tolerance)
-		clawHandle = GO(clawToPositionT, clawV);
-
-	if (driveHandle)
-		while (taskGetState(driveHandle))
-			delay(10);
-
-	if (armHandle)
-		while (taskGetState(armHandle))
-			delay(10);
-
-	if (mogoHandle)
-		while (taskGetState(mogoHandle))
-			delay(10);
-
-	if (clawHandle)
-		while (taskGetState(clawHandle))
-			delay(10);
-} /* moveTo */
-
-void armPID(void *none) {
-	while (isEnabled()) {
-		PID(&armSettings);
-		PID(&clawSettings);
-
-		motorUpdate(&arm);
-		motorUpdate(&claw);
-		sensorRefresh(arm.sensor);
-		sensorRefresh(claw.sensor);
-		delay(10);
-	}
-}

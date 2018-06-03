@@ -17,8 +17,7 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_ROBOT_H_
-#define CARL_ROBOT_H_
+#pragma once
 
 #include <math.h>
 
@@ -39,8 +38,6 @@
              (void *)(arg),           \
              TASK_PRIORITY_DEFAULT)
 
-extern double inch;
-
 // Sensors and the like
 
 /**
@@ -51,31 +48,11 @@ extern double inch;
 extern Sensor gyro;
 
 /**
- * The limit switch on the arm
- *  in  @ digital 12
- *  out @ digital 11
- */
-extern Sensor armLimit[2];
-
-/**
- * Ultrasonic sensor
- *  orange @ port 6,
- *	yellow @ port 7
- */
-extern Sensor *sonic;
-
-/**
  * The three line sensors, from left->right, in ports 6, 7, and 8
  */
 extern Sensor line[3];
 
 // Motors and servos
-
-/**
- * The claw, a motor @ port 3
- *  sensor pot       @ analog 5
- */
-extern Motor claw;
 
 /**
  * The two sides of the drive:
@@ -89,27 +66,25 @@ extern Motor claw;
 extern Motor drive[2];
 
 /**
- * The arm, containing:
+ * The lift, containing:
  *  left motor            @ port 5
  *    child right motor   @ port 6
- *      child upper motor @ port 8
- *    sensor quad         @ digital 1, 2
  */
-extern Motor arm;
+extern Motor lift;
 
 /**
- * The mogo manipulator, consisting of:
- *  left  motor  @ port 1
- *    sensor pot @ analog 3
- *  right motor  @ port 10
- *    sensor pot @ analog 4
+ * The intake, consisting of:
+ *  left  motor  @ port 3
+ *    quad @ digital 7, 6
+ *  right motor  @ port 8
+ *    quad @ digital 2, 1
  */
-extern Motor mogo;
+extern Motor intake[2];
 
 /**
- * PID settings for the arm
+ * PID settings for the intake
  */
-extern PIDSettings armSettings;
+extern PIDSettings intakeSettings[2];
 
 /**
  * PID settings for the drive
@@ -124,11 +99,6 @@ extern PIDSettings driveSettings[2];
  *  right @ index 1
  */
 extern PIDSettings gyroSettings[2];
-
-/**
- * PID settings for the claw
- */
-extern PIDSettings clawSettings;
 
 /**
  * Prints information and sets the LCD line 2 to display battery voltage
@@ -154,6 +124,9 @@ void update();
  */
 void resetDrive();
 
-bool waitForDriveStall(unsigned long blockTime);
-
-#endif // CARL_ROBOT_H_
+/**
+ * @brief set the intake to a given power
+ *
+ * @param p the power to set it to, or 0 to hold in place
+ */
+void intakeSet(int p);

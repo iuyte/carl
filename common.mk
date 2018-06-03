@@ -20,7 +20,7 @@ MCULFLAGS=-nostartfiles -Wl,-static -Bfirmware -Wl,-u,VectorTable -Wl,-T -Xlinke
 AFLAGS:=$(MCUAFLAGS)
 ARFLAGS:=$(MCUCFLAGS)
 CCFLAGS:=-Wall $(MCUCFLAGS) -Os -ffunction-sections -fsigned-char -fomit-frame-pointer -fsingle-precision-constant -Wno-maybe-uninitialized
-CFLAGS:=$(CCFLAGS) -std=gnu11 -Werror=implicit-function-declaration
+CFLAGS:=$(CCFLAGS) -std=gnu99 -Werror=implicit-function-declaration
 CXXFLAGS:=$(CCFLAGS) -fno-exceptions -fno-rtti -felide-constructors
 LDFLAGS:=-Wall $(MCUCFLAGS) $(MCULFLAGS) -Wl,--gc-sections
 SIZEFLAGS=-d --common

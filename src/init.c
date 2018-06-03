@@ -19,23 +19,16 @@
 
 #include "../include/robot.h"
 
-static inline float lMogoRecalc(int p) {
-	return p * 1.1;
-} /* lMogoRecalc */
-
-static inline float lineRecalc(int v) {
-	return (float)(v > 16);
-}
-
-float clawPotRecalc(int v) {
-	static int l = 0;
-	float a = (l + v) / 2;
-	l = v;
-	return a;
-}
-
-void  initializeIO() {
+void initializeIO() {
 	watchdogInit();
+}
+
+float zeroRecalc(int x) {
+	return 0;
+}
+
+float intakeRecalc(int x) {
+	return .63f * (float)x;
 }
 
 /**
@@ -43,7 +36,7 @@ void  initializeIO() {
  *
  * @param buffer the text to display
  */
-void  notice(const char *buffer) {
+void notice(const char *buffer) {
 	#ifdef DEBUG_MODE
 		print(buffer);
 	#endif
@@ -64,59 +57,38 @@ void init() {
 	// Set up the analog sensors
 	gyro        = newGyro(1, true, 200);
 	gyro.child  = new(Sensor);
-	*gyro.child = newGyro(2, true, 195);
+	*gyro.child = newGyro(2, true, 198);
 	notice("gyroscopes, ");
-	Sensor *mogoAngle = new(Sensor);
-	*mogoAngle        = newAnalog(3, true);
-	notice("mobile goal angle, ");
-	Sensor *clawAngle = new(Sensor);
-	*clawAngle          = newAnalog(5, false);
-	clawAngle->zero = 0;
-	clawAngle->recalc = &clawPotRecalc;
-	notice("claw angle, ");
 	for (int i = 0; i < 3; i++) {
 		line[i] = newAnalog(i + 6, false);
 		line[i].inverted = true;
-		line[i].recalc = &lineRecalc;
 	}
 	notice("line sensors");
 
 	// Set up the digital sensors
-	Sensor *armCoder = new(Sensor);
-	*armCoder = newQuad(1, 2, false);
-	notice("arm quad, ");
-	Sensor *driveCoder[2] = { new(Sensor), new(Sensor) };
-	*driveCoder[0] = newQuad(4, 5, true);
+	Sensor *intakeCoder[2] = { new(Sensor), new(Sensor) };
+	*intakeCoder[0]        = newQuad(7, 6, false);
+	intakeCoder[0]->recalc = &zeroRecalc;
+	*intakeCoder[1]        = newQuad(2, 1, true);
+	intakeCoder[1]->recalc = &zeroRecalc;;
+	Sensor *driveCoder[2]  = { new(Sensor), new(Sensor) };
+	*driveCoder[0]         = newQuad(4, 5, true);
 	notice("left drive quad, ");
-	*driveCoder[1] = newQuad(8, 9, true);
+	*driveCoder[1]         = newQuad(8, 9, true);
 	notice("right drive quad, ");
-	armLimit[0] = newDigital(11, true);
-	armLimit[1] = newDigital(12, true);
-	notice("arm limit switches, ");
-	sonic = new(Sensor);
-	*sonic = newSonic(6,7);
-	notice("ultrasonic, ");
 
 	// Initialize and set up all of the motors, servos, etc
-	claw        = motorCreate(3, false);
-	claw.sensor = clawAngle;
-	notice("claw motor, ");
+	lift         = motorCreate(5,  true);
+	lift.child   = new(Motor);
+	*lift.child  = motorCreate(6, false);
+	notice("lift motors, ");
 
-	arm               = motorCreate(5,  false);
-	arm.child         = new(Motor);
-	*arm.child        = motorCreate(6, true);
-	arm.child->child  = new(Motor);
-	*arm.child->child = motorCreate(8, false);
-	arm.sensor        = armCoder;
-	notice("arm motors, ");
-
-	mogo                 = motorCreate(1, false);
-	mogo.recalc          = &lMogoRecalc;
-	mogo.deadband        = 6;
-	mogo.child           = new(Motor);
-	mogo.child->deadband = 6;
-	*mogo.child          = motorCreate(10, true);
-	mogo.sensor          = mogoAngle;
+	intake[0]        = motorCreate(3, true);
+	intake[0].recalc = &intakeRecalc;
+	intake[0].sensor = intakeCoder[0];
+	intake[1]        = motorCreate(8, false);
+	intake[1].recalc = &intakeRecalc;
+	intake[1].sensor = intakeCoder[1];
 	notice("mobile goal motors, ");
 
 	drive[0]        = motorCreate(2, true);

@@ -18,34 +18,11 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_AUTO_H_
-#define CARL_AUTO_H_
+#pragma once
 
 #include "../include/robot.h"
 
-#define MAX_AUTON 9
-
-enum MOGO_POS {
-	MOGO_UP   = 75,
-	MOGO_PART = 550,
-	MOGO_MID  = 1350,
-	MOGO_DOWN = 2200,
-};
-
-enum ARM_POS {
-	ARM_DOWN        = 10,
-	ARM_QUARTER     = 275,
-	ARM_HALF        = 360,
-	ARM_3_QUARTER   = 540,
-	ARM_3_5_QUARTER = 650,
-	ARM_LOAD        = 720,
-	ARM_CONE        = 850,
-};
-
-enum CLAW_POS {
-	CLAW_OPEN   = 1875,
-	CLAW_CLOSED = 1050,
-};
+#define MAX_AUTON 4
 
 typedef struct Auton {
 	const char *name;
@@ -55,11 +32,11 @@ typedef struct Auton {
 } Auton;
 
 typedef enum Direction {
-	dUp,
-	dDown,
-	dLeft,
-	dRight,
-	dIn,
+	dUp    = -3,
+	dDown  = -2,
+	dLeft  =  1,
+	dRight = -1,
+	dIn    =  2,
 	dOut,
 } Direction;
 
@@ -77,15 +54,6 @@ extern Auton autons[MAX_AUTON + 1];
  * The autonomous, as selected by the LCD menu, to run
  */
 extern int   selectedAuton;
-
-/*
- * @breif Bring the arm to the specified position
- *
- * @param pos the position to bring the arm to
- * @param until the maximum amount of time this can take in ms
- */
-void armToPosition(float         pos,
-                   unsigned long until);
 
 /**
  * @brief Bring the drive to a specific position
@@ -111,12 +79,7 @@ void driveToPositionAngle(int           l,
                           int           a,
                           unsigned long until);
 
-/**
- * @brief Bring the mobile goal intake to a position
- *
- * @param p the position to go to
- */
-void mogoP(int p);
+void driveToPositionAngleT(void *triple);
 
 /**
  * Use PID to turn to a specific angle
@@ -126,53 +89,3 @@ void mogoP(int p);
  */
 void turnTo(int           angle,
             unsigned long until);
-
-/**
- * @breif Go forward and get the mobile goal! (the beginning of nearly any
- * autonomous here)
- */
-void getMogo();
-
-/**
- * @brief Place the cone on dat goal!
- */
-void placeCone();
-
-/**
- * Drop mobile goal into the 20 point zone
- *
- * @return a TaskHandle of the task bringing the intake back into the robot
- */
-TaskHandle dropMogo20(TaskHandle mogoHandle);
-
-/**
- * @brief Back up at a certain time for about half a second
- */
-Task backUp(void *time);
-
-/**
- * @brief bring the mobile goal intake to a position in a task
- */
-Task mogoPT(void *p);
-
-/**
- * @brief task for placing a cone
- */
-Task placeConeT(void *none);
-
-/**
- * @brief Task for armToPosition
- */
-Task armPID(void *none);
-
-/**
- * @brief don't use, it doesn't work
- */
-void moveTo(int leftV,
-            int rightV,
-            int armV,
-            int mogoV,
-            int clawV,
-            int gyroV);
-
-#endif // AUTO_ROBOT_H_

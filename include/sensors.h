@@ -17,8 +17,7 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_SENSORS_H_
-#define CARL_SENSORS_H_
+#pragma once
 
 #include "API.h"
 
@@ -198,5 +197,3 @@ Sensor newGyro(unsigned char port,
  */
 Sensor newIME(unsigned char num,
               bool          inverted);
-
-#endif // CARL_SENSORS_H_

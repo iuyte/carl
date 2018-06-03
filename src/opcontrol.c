@@ -17,10 +17,9 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#include <string.h>
 #include "../include/robot.h"
 
-#define MOGO_HOLD 300
+#define INTAKE_HOLD 300
 
 extern bool isAuto;
 
@@ -33,60 +32,24 @@ int digital(unsigned char joyNum,
 } /* digital */
 
 void moveDrive();
-void moveMogo();
-void skillsMogo();
-void moveArm();
-void moveClaw();
-void realClawPID();
-void limitArmMogo();
-
-void autonLeft22();
-void autonLeft22T();
+void moveIntake();
+void moveLift();
 
 void operatorControl() {
 	#ifdef DEBUG_MODE
 		printf("Starting Driver Control...\n");
-	#endif
+	#endif /* ifdef DEBUG_MODE */
 	reset();
 	update();
 	isAuto = false;
 
-	clawSettings.target = claw.sensor->value;
-	armSettings.target  = arm.sensor->value;
-
-	/*
-	if (armLimit[0].value) {
-		armSettings.target = ARM_QUARTER;
-		PID(&armSettings);
-	}
-	*/
-
-	bool isSkills = strstr(autons[selectedAuton].name, "skills");
+	// liftSettings.target  = lift.sensor->value;
 
 	while (true) {
-		if (joystickGetDigital(1, 7, JOY_LEFT) &&
-		    joystickGetDigital(2, 7, JOY_LEFT)) {
-			exit(0);
-		}
-
 		moveDrive();
-		moveMogo();
+		moveIntake();
 
-		if (isSkills) {
-			// skillsMogo();
-			if (joystickGetDigital(2, 7, JOY_DOWN)) {
-				reset();
-				sensorReset(drive[0].sensor);
-				sensorReset(drive[1].sensor);
-				sensorReset(arm.sensor);
-				sensorReset(mogo.sensor);
-				sensorReset(&gyro);
-				autonLeft22();
-			}
-		}
-		moveArm();
-		moveClaw();
-		limitArmMogo();
+		moveLift();
 		update();
 
 		delay(20);
@@ -102,129 +65,11 @@ void moveDrive() {
 	                 127 * digital(1, 8, JOY_LEFT, JOY_RIGHT);
 } /* moveDrive */
 
-void moveMogo() {
-	int power = 127 * digital(1, 6, JOY_UP, JOY_DOWN) +
-	             127 * digital(2, 5, JOY_UP, JOY_DOWN);
-	if ((mogo.power == 127 || mogo.power == 9) && !power)
-		power = 9;
-	mogo.power = power;
-} /* moveMogo */
+void moveIntake() {
+	intake[0].power = 127 * digital(1, 5, JOY_UP, JOY_DOWN);
+	intake[1].power = 127 * digital(1, 5, JOY_UP, JOY_DOWN);
+} /* moveIntake */
 
-void skillsMogo() {
-	if ((mogo.sensor->value <= MOGO_HOLD) &&
-	    !joystickGetDigital(1, 5, JOY_DOWN) &&
-	    !joystickGetDigital(2, 7, JOY_UP)) {
-		mogo.power = clipNum(mogo.power,
-		                     127,
-		                     (MOGO_HOLD - mogo.sensor->value) * .9 + 13);
-	}
-} /* skillsMogo */
-
-void moveArm() {
-	static unsigned long lastPress, lastDPress;
-
-	if (digital(2, 6, JOY_DOWN, JOY_UP) || (millis() - lastPress < 90)) {
-		arm.power = 127 * digital(2, 6, JOY_UP, JOY_DOWN);
-
-		if (arm.power) {
-			lastDPress = false;
-			lastPress = millis();
-		}
-
-		if (armLimit[0].value) {
-			sensorReset(arm.sensor);
-			arm.power = clipNum(arm.power, 0, -127);
-		} else if (armLimit[1].value) {
-			arm.sensor->zero = arm.sensor->value - ARM_CONE;
-			arm.power        = clipNum(arm.power, 127, 0);
-		}
-
-		if (joystickGetDigital(2, 8, JOY_UP)) {
-			lastDPress = true;
-			armSettings.target = ARM_LOAD;
-			PID(&armSettings);
-		} else if (!lastDPress)
-			armSettings.target = arm.sensor->value;
-	} else if (armLimit[0].value) {
-		sensorReset(arm.sensor);
-		armSettings.target = 0;
-		arm.power          = 0;
-	} else if (armLimit[1].value) {
-		arm.sensor->zero   = arm.sensor->value - ARM_CONE;
-		armSettings.target = ARM_CONE;
-		arm.power          = 0;
-	} else {
-		PID(&armSettings);
-	}
-} /* moveArm */
-
-void limitArmMogo() {
-	if (joystickGetDigital(2, 8, JOY_DOWN))
-		return;
-
-	if (mogo.sensor->value > MOGO_PART &&
-			arm.sensor->value > ARM_HALF - 50 &&
-			arm.sensor->value < ARM_3_5_QUARTER && arm.power < -25) {
-		armSettings.target = ARM_HALF - 150;
-		PID(&armSettings);
-	} else if (mogo.sensor->value > MOGO_PART &&
-			arm.sensor->value >= ARM_3_5_QUARTER && arm.power > 28) {
-		armSettings.target = ARM_CONE;
-		PID(&armSettings);
-	}
-
-
-	if (arm.sensor->value > ARM_3_QUARTER &&
-			arm.sensor->value < ARM_CONE - 80 && mogo.power > 25)
-		mogo.power = 0;
-}
-
-void moveClaw() {
-	if (deadBand(joystickGetAnalog(2, 4), 10)) {
-		claw.power = -joystickGetAnalog(2, 4);
-		clawSettings.target = claw.sensor->value + (50 * sgn(claw.sensor->velocity));
-	} else {
-		realClawPID();
-	}
-} /* moveClaw */
-
-void clawPID() {
-	static unsigned long lastPress;
-	static bool lastDir;
-	static int power;
-
-	power = -joystickGetAnalog(2, 4);
-
-	if (power) {
-		lastDir             = power > 0;
-		claw.power          = -power;
-		clawSettings.target = claw.sensor->value;
-		lastPress           = millis();
-	} else if (millis() - lastPress < 275) {
-		clawSettings.target = claw.sensor->value + 50;
-	} else if (lastDir) {
-		claw.power = 0;
-	} else {
-		PID(&clawSettings);
-	}
-} /* clawPID */
-
-void realClawPID() {
-	switch (digital(2, 8, JOY_LEFT, JOY_RIGHT)) {
-		case 1:
-			clawSettings.target = CLAW_CLOSED;
-			break;
-		case -1:
-			clawSettings.target = CLAW_OPEN;
-			break;
-		default:
-			break;
-	}
-
-	PID(&clawSettings);
-}
-
-void autonLeft22T(void *none) {
-	autonLeft22();
-	taskDelete(NULL);
-}
+void moveLift() {
+	lift.power = 127 * digital(1, 6, JOY_UP, JOY_DOWN);
+} /* moveLift */

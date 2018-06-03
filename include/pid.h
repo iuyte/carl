@@ -17,8 +17,7 @@
  * with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-#ifndef CARL_PID_H_
-#define CARL_PID_H_
+#pragma once
 
 #include "motors.h"
 #include "sensors.h"
@@ -137,5 +136,3 @@ typedef struct PIDSettings {
  * @param settings a pointer to the settings to be used
  */
 void PID(PIDSettings *settings);
-
-#endif // CARL_PID_H_
