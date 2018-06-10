@@ -55,9 +55,9 @@ void init() {
 	lcdSetText(uart1, 1, "Initializing...");
 
 	// Set up the analog sensors
-	gyro        = newGyro(1, true, 200);
+	gyro        = newGyro(1, true, 198);
 	gyro.child  = new(Sensor);
-	*gyro.child = newGyro(2, true, 198);
+	*gyro.child = newGyro(2, true, 197);
 	notice("gyroscopes, ");
 	for (int i = 0; i < 3; i++) {
 		line[i] = newAnalog(i + 6, false);

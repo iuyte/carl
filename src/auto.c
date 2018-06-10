@@ -27,7 +27,7 @@ void autoHerbRight();
 void autoMeatLeft();
 void autoMeatRight();
 
-int   selectedAuton         = 4;
+int   selectedAuton         = 1;
 Auton autons[MAX_AUTON + 1] =
 { {
 		// index 0

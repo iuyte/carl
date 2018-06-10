@@ -39,12 +39,21 @@ void autoMeat(Direction d) {
 	resetDrive();
 	
 	driveToPosition(-1500, -1500, 3500);
-	turnTo(0, 1500);
+	turnTo(-1, 1500);
 	resetDrive();
 
-	driveToPosition(-2500, -2500, 6750);
+	driveToPosition(-2625, -2625, 7950);
 
-	turnTo(-86 * d, 2300);
+	for (int i = drive[0].power, j = drive[1].power; i < 0 && j < 0; ++i + j++) {
+		driveSet(i, j);
+		update();
+		delay(75);
+	}
+
+	driveSet(-20 * d, 20 * d);
+	delay(300);
+
+	turnTo(-90 * d, 2300);
 	resetDrive();
 
 	for (size_t i = 0; i < 2; i++) {
@@ -54,5 +63,5 @@ void autoMeat(Direction d) {
 
 	driveSet(-127, -127);
 	delay(275);
-	driveToPosition(-300, -300, 1250);
+	driveToPosition(-520, -520, 1850);
 }
