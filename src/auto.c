@@ -163,7 +163,7 @@ void autonomous() {
 
 		intakeSet(127);
 
-		driveToPosition(800, 800, 1500);
+		driveToPosition(1050, 1050, 2000);
 	}
 
 	while (isAutonomous()) {

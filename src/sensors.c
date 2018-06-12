@@ -98,8 +98,8 @@ void sensorRefresh(Sensor *s) {
 	if (s->_type == IME && imeGetVelocity(s->port, &s->velocity))
 		s->_lastUpdate = millis();
 	else if (s->_type != IME) {
-		s->velocity    = (int)((float)(val - s->_lastValue) * 1000.f /
-										 (float)(millis() - s->_lastUpdate));
+		s->velocity    = (int)((float)(val - s->_lastValue) /
+										 ((float)(millis() - s->_lastUpdate)));
 		s->_lastValue  = val;
 		s->_lastUpdate = millis();
 	} else
