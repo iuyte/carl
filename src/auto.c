@@ -27,7 +27,7 @@ void autoHerbRight();
 void autoMeatLeft();
 void autoMeatRight();
 
-int   selectedAuton         = 1;
+int   selectedAuton         = 3;
 Auton autons[MAX_AUTON + 1] =
 { {
 		// index 0
@@ -154,6 +154,18 @@ void autonomous() {
 	#ifdef DEBUG_MODE
 		printf("\n\n\rFinished autonomous in %ldms\n\n", millis() - startTime);
 	#endif
+
+	if (selectedAuton) {
+		for (size_t i = 0; i < 2; i++) {
+			driveSettings[i].min = -(driveSettings[i].max = 127);
+			gyroSettings[i].min  = -(gyroSettings[i].max  = 127);
+		}
+
+		intakeSet(127);
+
+		driveToPosition(800, 800, 1500);
+	}
+
 	while (isAutonomous()) {
 		update();
 		delay(10);

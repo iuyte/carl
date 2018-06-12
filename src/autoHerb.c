@@ -38,9 +38,9 @@ void autoHerb(Direction d) {
 	turnTo(20 * d, 1500);
 	resetDrive();
 	
-	driveToPosition(-1500, -1500, 3500);
+	driveToPosition(-1400, -1400, 3500);
 
-	turnTo(-89 * d, 2300);
+	turnTo(-90 * d, 2300);
 	resetDrive();
 
 	for (size_t i = 0; i < 2; i++) {
@@ -50,5 +50,5 @@ void autoHerb(Direction d) {
 
 	driveSet(-127, -127);
 	delay(275);
-	driveToPosition(-475, -475, 1250);
+	driveToPosition(-600, -600, 1850);
 }

@@ -93,17 +93,17 @@ void sensorRefresh(Sensor *s) {
 	s->value   = val;
 	s->averageVal = s->child ? ((s->value + s->child->averageVal) / 2) : s->value;
 
-	// int lastVel = s->velocity;
+	int lastVel = s->velocity;
 
 	if (s->_type == IME && imeGetVelocity(s->port, &s->velocity))
 		s->_lastUpdate = millis();
 	else if (s->_type != IME) {
-		s->velocity    = ((float)(val - s->_lastValue) /
-											(float)(millis() - s->_lastUpdate)) * 1000.f;
+		s->velocity    = (int)((float)(val - s->_lastValue) * 1000.f /
+										 (float)(millis() - s->_lastUpdate));
 		s->_lastValue  = val;
 		s->_lastUpdate = millis();
 	} else
-		s->velocity = 0;
+		s->velocity = lastVel;
 
 	s->averageVel = s->child ? ((s->velocity + s->child->averageVel) / 2)
 		                         : s->velocity;

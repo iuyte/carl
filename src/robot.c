@@ -46,7 +46,7 @@ PIDSettings intakeSettings[2] = {
 
 #define _DRIVE_SETTINGS_(index) \
 	DEFAULT_PID_SETTINGS,         \
-	.kP        = .170f,           \
+	.kP        = .151f,           \
 	.kI        = .043f,           \
 	.kD        = .253f,           \
 	.tolerance = 200,             \
@@ -160,13 +160,13 @@ void info() {
 	}
 } /* info */
 
-bool takeDrive(unsigned long blockTime) {
+bool takeTwo(unsigned long blockTime, Mutex mutex1, Mutex mutex2) {
 	blockTime /= 2;
 
-	if (!mutexTake(drive[0]._mutex, blockTime)) {
+	if (!mutexTake(mutex1, blockTime)) {
 		return false;
-	} else if (!mutexTake(drive[1]._mutex, blockTime)) {
-		mutexGive(drive[0]._mutex);
+	} else if (!mutexTake(mutex2, blockTime)) {
+		mutexGive(mutex2);
 		return false;
 	}
 	return true;
@@ -178,7 +178,7 @@ void giveDrive() {
 } /* giveDrive */
 
 void driveSet(int l, int r) {
-	if (!takeDrive(10)) {
+	if (!takeTwo(10, drive[0]._mutex, drive[1]._mutex)) {
 		return;
 	}
 
@@ -192,6 +192,10 @@ void driveSet(int l, int r) {
 } /* driveSet */
 
 void intakeSet(int p) {
+	if (!takeTwo(10, intake[0]._mutex, intake[1]._mutex)) {
+		return;
+	}
+
 	if (p) {
 		intake[0].power = p;
 		intake[1].power = p;
@@ -200,6 +204,11 @@ void intakeSet(int p) {
 			intakeSettings[i].target = intake[i].sensor->value;
 			PID(&intakeSettings[i]);
 		}
+	}
+
+	for (int i = 0; i < 2; i++) {
+		mutexGive(intake[i]._mutex);
+		motorUpdate(&intake[i]);
 	}
 }
 
